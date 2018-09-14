@@ -9,16 +9,39 @@ class Text extends Component
         super(props);
 
         this.state = {
-            text: props.fragment.currentValue()
+            text: props.fragment.value()
         }
     }
 
+    onChange(event) {
+        this.props.fragment.event({
+            transaction: "update",
+            value: event.target.value
+        });
+    }
+
+    modelChanged() {
+        this.setState({
+            text: this.props.fragment.value()
+        });
+    }
+
+    render() {
+        return (
+            <div class="element">
+                <textarea
+                    onChange={(event) => this.onChange(event)}
+                    value={this.state.text} />
+            </div>
+        );
+    }
+
     componentDidMount() {
-        props.fragment.connectVisual(this);
+        this.props.fragment.connect(this);
     }
 
     componentWillUnmount() {
-        props.fragment.disconnectVisual();
+        this.props.fragment.disconnect();
     }
 }
 
@@ -28,40 +51,50 @@ class Fragment
     // but should connect the visual to the model where the data actually is.
 
     constructor(model) {
-        this.key = model.key;
-        this.value = model.value;
-        this.meta = model.meta;
-        this.type = model.type;
+        this.immKey = model.key;
+        this.immType = model.type;
+        this.mutValue = model.value;
+        this.mutMeta = model.meta;
+        this.visual = null;
     }
 
-    getKey() {
-        return this.key;
+    key() {
+        return this.immKey;
     }
 
-    getValue() {
-        return this.value;
+    type() {
+        return this.immType;
     }
 
-    getMeta() {
-        return this.meta;
+    value() {
+        return this.mutValue;
+    }
+
+    meta() {
+        return this.mutMeta;
     }
 
     event(event) {
-
+        // Notify store of transaction.
+        // But for now just modify in place
+        if(event.transaction == "update") {
+            this.mutValue = event.value;
+            this.changed();
+        }
     }
 
     changed() {
         if(this.visual != null) {
-            // Notify visual of change
+            this.visual.modelChanged();
         }
     }
 
-    connectVisual(visual) {
-
+    connect(visual) {
+        this.visual = visual;
     }
 
-    disconnectVisual() {
-
+    disconnect() {
+        this.visual = null;
     }
 }
 
@@ -140,17 +173,17 @@ function getFragment(model) {
 
 function elementList(fragments) {
     return fragments.map(fragment => {
-        switch(fragment.type) {
+        switch(fragment.type()) {
             case "page":
-                return <p key={fragment.key} fragment={fragment}>Page</p>;
+                return <p key={fragment.key()} fragment={fragment}>Page</p>;
             case "text":
-                return <p key={fragment.key} fragment={fragment}>Text</p>;
+                return <Text key={fragment.key()} fragment={fragment} />;
             case "columns":
-                return <p key={fragment.key} fragment={fragment}>Columns</p>;
+                return <p key={fragment.key()} fragment={fragment}>Columns</p>;
             case "image":
-                return <p key={fragment.key} fragment={fragment}>Image</p>;
+                return <p key={fragment.key()} fragment={fragment}>Image</p>;
             default:
-                return <p key={fragment.key} fragment={fragment}>Undefined element</p>;
+                return <p key={fragment.key()} fragment={fragment}>Undefined element</p>;
         }
     });
 }
