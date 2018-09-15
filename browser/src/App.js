@@ -22,7 +22,7 @@ export default class App
     documentKeyUp(event) {
         event = event || window.event;
         if(event.keyCode === 27)
-            this.deselected();
+            this.selected(null, false);
     }
 
     selected(fragment, ctrlDown) {
@@ -32,23 +32,18 @@ export default class App
                 // Ctrl is down and we clicked on an already-selected
                 // element, so de-select it.
                 this.selection.splice(index, 1);
-                console.log("Deselected: ");
-                console.log(fragment);
             }
             else {
                 // Ctrl is down and we clicked on a non-selected element,
                 // so add it to the list of selections.
                 this.selection.push(fragment);
-                console.log("Added selection: ");
-                console.log(fragment);
             }
         }
         else {
-            // Ctrl is not down, so we are singularly selecting the
-            // specified fragment.
-            this.selection = [fragment];
-            console.log("Set selection to: ");
-            console.log(fragment);
+            if(fragment != null)
+                this.selection = [fragment];
+            else
+                this.selection = null;
         }
 
         this.root.setSelection(this.selection);

@@ -16,6 +16,39 @@ html, body, #root, #scene {
 	border-right: 1px solid #BBB;
 }
 
+#inspector {
+    height: 100%;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+	pointer-events: none;
+	position: fixed;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	width: 300px;
+}
+
+.inspector-hidden {
+	right: -300px; /* 0 width - change this with JavaScript */
+}
+
+.inspector-visible {
+	transition: 0.2s;
+	right: 0
+}
+
+.inspector-content {
+	pointer-events: all;
+	max-height: 80%;
+	max-width: 278px;
+	background-color: #FCFCFC;
+	border: 1px solid #BBB;
+	margin-right: 10px;
+	padding: 10px;
+	overflow: hidden;
+}
+
 #top-spacer {
 	min-height: 10px;
 }
@@ -31,5 +64,5 @@ html, body, #root, #scene {
 }
 
 .selected-element {
-	background-color: red;
+	background-color: green;
 }

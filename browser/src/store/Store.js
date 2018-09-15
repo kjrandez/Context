@@ -13,7 +13,7 @@ export default class Store
     }
 
     setModel(model) {
-        this.topLevel = model.value.map(elementModel => {
+        this.topLevel = model.value.content.map(elementModel => {
             this.load(elementModel);
             return this.fragmentDict[elementModel.key];
         });
@@ -25,29 +25,23 @@ export default class Store
             this.modelDict[model.key] = model;
 
             if(model.type === "page")
-                model.value.forEach(elementModel => this.load(elementModel));
+                model.value.content.forEach(elementModel => this.load(elementModel));
         }
+    }
+
+    fragment(key) {
+        return this.fragmentDict[key];
     }
 
     event(fragment, desc) {
         if(fragment.type() === "text" && desc.transaction === "update") {
             var model = this.modelDict[fragment.key()];
-            model.value = desc.value;
+            model.value.content = desc.value;
             fragment.changed();
         }
     }
 
     value(key) {
-        var model = this.modelDict[key];
-        switch(model.type) {
-            case "page":
-                return model.value.map(elementModel => this.fragmentDict[elementModel.key]);
-            default:
-                return model.value;
-        }
-    }
-
-    meta(key) {
-        return this.modelDict[key].meta;
+        return this.modelDict[key].value;
     }
 }

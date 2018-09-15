@@ -7,14 +7,22 @@ export default class Page extends Component
     constructor(props) {
         super(props);
 
+        var value = this.props.fragment.value();
+
         this.state = {
-            content: props.fragment.value()
+            content: value.content.map((entry) => {
+                return this.props.app.store.fragment(entry.key);
+            })
         }
     }
 
     modelChanged() {
+        var value = this.props.fragment.value();
+
         this.setState({
-            content: this.props.fragment.value()
+            content: value.content.map((entry) => {
+                return this.props.app.store.fragment(entry.key);
+            })
         });
     }
 

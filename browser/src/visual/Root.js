@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {elementList} from './shared.js';
+import Inspector from './Inspector';
 
 export default class App extends Component {
     constructor(props) {
@@ -38,6 +39,7 @@ export default class App extends Component {
             <div
                 id="scene"
                 onMouseDown={(event) => this.onMouseDown(event)}>
+                <Inspector app={this.props.app} selection={this.state.selection} />
                 <div id="page">
                     <div id="top-spacer"></div>
                     {elementList(this.state.contents, this.state.selection, this.props.app)}

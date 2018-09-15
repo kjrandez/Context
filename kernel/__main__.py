@@ -9,35 +9,43 @@ def nextKey():
     key = key + 1
     return "itm" + str(key)
 
-def default(type, value):
+def columnPage(content):
     return {
         "key" : nextKey(),
-        "meta" : {},
-        "type" : type,
-        "value" : value
-    }
-
-def columnPage(value):
-    return {
-        "key" : nextKey(),
-        "meta" : {"column": True},
         "type" : "page",
-        "value" : value
+        "value" : {
+            "content" : content,
+            "column" : True
+        }
     }
 
-def image(value, description):
+def image(src, description):
     return {
         "key" : nextKey(),
-        "meta" : {"alt" : description},
         "type" : "image",
-        "value" : value
+        "value" : {
+            "src" : src,
+            "alt" : description
+        }
     }
 
-def page(value):
-    return default('page', value)
+def page(content):
+    return {
+        "key" : nextKey(),
+        "type" : "page",
+        "value" : {
+            "content" : content
+        }
+    }
 
-def text(value):
-    return default('text', value)
+def text(content):
+    return {
+        "key" : nextKey(),
+        "type" : "text",
+        "value": {
+            "content" : content
+        }
+    }
 
 lorem1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vestibulum at erat eget suscipit. Nulla rhoncus libero sapien, id molestie nibh luctus in. Pellentesque tristique nulla sit amet eros sodales, quis luctus enim congue. Integer placerat viverra sollicitudin. In libero ligula, interdum nec pellentesque non, elementum vel dolor. Aenean ut nisl vulputate, interdum urna eget, placerat enim. Vestibulum felis turpis, elementum ac malesuada id, lacinia at justo. In laoreet mauris et nibh ullamcorper convallis. Maecenas faucibus ipsum at congue scelerisque. Aliquam sem purus, pharetra suscipit condimentum quis, imperdiet at ex. Vestibulum maximus mattis odio, sed elementum dolor feugiat eget. Aliquam consectetur, neque vitae porta dictum, ante dui posuere libero, id euismod nisi dolor at ipsum.'
 lorem2 = 'Maecenas vitae eros non lacus tincidunt ultrices sit amet id massa. Praesent pretium ante sit amet sapien suscipit eleifend. In hac habitasse platea dictumst. Nulla erat nisi, elementum vitae tempor ut, vehicula sit amet nibh. Vestibulum cursus fermentum enim, vel mollis augue sodales ut. Suspendisse in mattis justo. In eget ipsum blandit dolor ultricies euismod. Mauris sit amet massa maximus, placerat nisi nec, dignissim ipsum. Donec sodales id lectus sit amet pulvinar. Pellentesque sodales felis fringilla ultrices tincidunt. Phasellus vehicula lorem sed felis pulvinar, id porta mi commodo.'

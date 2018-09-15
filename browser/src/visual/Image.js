@@ -6,15 +6,20 @@ export default class Image extends Component
     constructor(props) {
         super(props);
 
+        var value = this.props.fragment.value();
+
         this.state = {
-            src: props.fragment.value()
+            src: value.src,
+            alt: value.alt
         }
     }
 
     modelChanged() {
+        var value = this.props.fragment.value();
+
         this.setState({
-            src: this.props.fragment.value(),
-            alt: this.props.fragment.meta().alt
+            src: value.src,
+            alt: value.alt
         });
     }
 

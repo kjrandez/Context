@@ -6,8 +6,10 @@ export default class Text extends Component
     constructor(props) {
         super(props);
 
+        var value = this.props.fragment.value();
+
         this.state = {
-            text: props.fragment.value()
+            content: value.content
         }
     }
 
@@ -19,8 +21,10 @@ export default class Text extends Component
     }
 
     modelChanged() {
+        var value = this.props.fragment.value();
+
         this.setState({
-            text: this.props.fragment.value()
+            content: value.content
         });
     }
 
@@ -32,7 +36,7 @@ export default class Text extends Component
                 app={this.props.app}>
                 <textarea
                     onChange={(event) => this.onChange(event)}
-                    value={this.state.text} />
+                    value={this.state.content} />
             </Element>
         );
     }

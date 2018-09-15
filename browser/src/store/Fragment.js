@@ -22,10 +22,6 @@ export default class Fragment
         return this.store.value(this.immKey);
     }
 
-    meta() {
-        return this.store.meta(this.immKey);
-    }
-
     event(desc) {
         this.store.event(this, desc);
     }
