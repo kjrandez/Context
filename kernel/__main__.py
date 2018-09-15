@@ -17,11 +17,21 @@ def default(type, value):
         "value" : value
     }
 
-def columns(value):
-    return default('columns', value)
+def columnPage(value):
+    return {
+        "key" : nextKey(),
+        "meta" : {"column": True},
+        "type" : "page",
+        "value" : value
+    }
 
-def image(value):
-    return default('image', value)
+def image(value, description):
+    return {
+        "key" : nextKey(),
+        "meta" : {"alt" : description},
+        "type" : "image",
+        "value" : value
+    }
 
 def page(value):
     return default('page', value)
@@ -38,26 +48,24 @@ def defaultPage():
         text('### Hello world'),
         text('How are you doing today?'),
         text("I'm doing just fine thank you very much."),
-        columns([
+        columnPage([
             page([
-                page([
-                    text('Introduction'),
-                    text(lorem1)
-                ]),
-                page([
-                    text('Mas informacion'),
-                    text(lorem2)
-                ]),
-                page([
-                    text('[Scope_0]'),
-                    image('lol2.png')
-                ])
+                text('Introduction'),
+                text(lorem1)
             ]),
             page([
-                text(lorem3)
+                text('Mas informacion'),
+                text(lorem2)
+            ]),
+            page([
+                text('[Scope_0]'),
+                image('lol2.png', "Funny joke")
             ])
         ]),
-        image('sw.png'),
+        columnPage([
+            text(lorem3)
+        ]),
+        image('sw.png', "Switching characteristics"),
         page([
             text("This is pretty funy if you actually think about it for a second."),
             text("I really can't agree with that statement")
