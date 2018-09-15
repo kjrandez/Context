@@ -1,1 +1,21 @@
 kernel/__pycache__/
+
+# dependencies
+browser/node_modules
+
+# testing
+browser/coverage
+
+# production
+browser/build
+
+# misc
+browser/.DS_Store
+browser/.env.local
+browser/.env.development.local
+browser/.env.test.local
+browser/.env.production.local
+
+browser/npm-debug.log*
+browser/yarn-debug.log*
+browser/yarn-error.log*

@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Element from './Element.js';
 
 export default class Image extends Component
 {
@@ -19,9 +20,12 @@ export default class Image extends Component
 
     render() {
         return (
-            <div className="element">
+            <Element
+                fragment={this.props.fragment}
+                selection={this.props.selection}
+                app={this.props.app}>
                 <img src={this.state.src} alt={this.state.alt} />
-            </div>
+            </Element>
         );
     }
 

@@ -30,8 +30,8 @@ export default class Store
     }
 
     event(fragment, desc) {
-        if(fragment.type === "text" && desc.transaction === "update") {
-            var model = this.modelDict[fragment.key];
+        if(fragment.type() === "text" && desc.transaction === "update") {
+            var model = this.modelDict[fragment.key()];
             model.value = desc.value;
             fragment.changed();
         }

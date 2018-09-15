@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Element from './Element.js';
 
 export default class Text extends Component
 {
@@ -25,11 +26,14 @@ export default class Text extends Component
 
     render() {
         return (
-            <div className="element">
+            <Element
+                fragment={this.props.fragment}
+                selection={this.props.selection}
+                app={this.props.app}>
                 <textarea
                     onChange={(event) => this.onChange(event)}
                     value={this.state.text} />
-            </div>
+            </Element>
         );
     }
 

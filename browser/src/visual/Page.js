@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Element from './Element.js';
 import {elementList} from './shared.js';
 
 export default class Page extends Component
@@ -19,9 +20,12 @@ export default class Page extends Component
 
     render() {
         return (
-            <div className="element">
-                {elementList(this.state.content)}
-            </div>
+            <Element
+                fragment={this.props.fragment}
+                selection={this.props.selection}
+                app={this.props.app}>
+                {elementList(this.state.content, this.props.selection, this.props.app)}
+            </Element>
         );
     }
 
