@@ -19,3 +19,5 @@ browser/.env.production.local
 browser/npm-debug.log*
 browser/yarn-debug.log*
 browser/yarn-error.log*
+kernel/elements/__pycache__/
+.vscode/

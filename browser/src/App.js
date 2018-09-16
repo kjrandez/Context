@@ -73,7 +73,6 @@ export default class App
         switch(message.selector) {
             case 'renderPage:':
                 this.store.setModel(message.arguments[0]);
-                console.log(this.store.topLevelContent());
                 this.root.setModel(this.store.topLevelContent());
                 break;
             default:

@@ -1,146 +1,64 @@
 import asyncio
 import websockets
 import json
+import model
+from aioconsole import ainput
 
-key = 0
+topPage = model.default()
 
-def nextKey():
-    global key
-    key = key + 1
-    return "itm" + str(key)
-
-def columnPage(content):
-    return {
-        "key" : nextKey(),
-        "type" : "page",
-        "value" : {
-            "content" : content,
-            "column" : True
-        }
-    }
-
-def image(src, description):
-    return {
-        "key" : nextKey(),
-        "type" : "image",
-        "value" : {
-            "src" : src,
-            "alt" : description
-        }
-    }
-
-def page(content):
-    return {
-        "key" : nextKey(),
-        "type" : "page",
-        "value" : {
-            "content" : content
-        }
-    }
-
-def text(content):
-    return {
-        "key" : nextKey(),
-        "type" : "text",
-        "value": {
-            "content" : content
-        }
-    }
-
-lorem1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vestibulum at erat eget suscipit. Nulla rhoncus libero sapien, id molestie nibh luctus in. Pellentesque tristique nulla sit amet eros sodales, quis luctus enim congue. Integer placerat viverra sollicitudin. In libero ligula, interdum nec pellentesque non, elementum vel dolor. Aenean ut nisl vulputate, interdum urna eget, placerat enim. Vestibulum felis turpis, elementum ac malesuada id, lacinia at justo. In laoreet mauris et nibh ullamcorper convallis. Maecenas faucibus ipsum at congue scelerisque. Aliquam sem purus, pharetra suscipit condimentum quis, imperdiet at ex. Vestibulum maximus mattis odio, sed elementum dolor feugiat eget. Aliquam consectetur, neque vitae porta dictum, ante dui posuere libero, id euismod nisi dolor at ipsum.'
-lorem2 = 'Maecenas vitae eros non lacus tincidunt ultrices sit amet id massa. Praesent pretium ante sit amet sapien suscipit eleifend. In hac habitasse platea dictumst. Nulla erat nisi, elementum vitae tempor ut, vehicula sit amet nibh. Vestibulum cursus fermentum enim, vel mollis augue sodales ut. Suspendisse in mattis justo. In eget ipsum blandit dolor ultricies euismod. Mauris sit amet massa maximus, placerat nisi nec, dignissim ipsum. Donec sodales id lectus sit amet pulvinar. Pellentesque sodales felis fringilla ultrices tincidunt. Phasellus vehicula lorem sed felis pulvinar, id porta mi commodo.'
-lorem3 = 'Donec imperdiet id lectus eu hendrerit. Curabitur sodales libero sit amet eros venenatis, nec venenatis lacus bibendum. Ut aliquam convallis diam vitae interdum. Maecenas laoreet tempus pretium. Suspendisse ac dui tortor. Nulla rutrum fermentum dui ut gravida. Curabitur egestas erat ut ligula fermentum convallis. Nulla maximus, eros non semper mollis, lacus nulla ullamcorper risus, eu condimentum risus tellus eu est. In ut urna pulvinar, aliquet ligula pharetra, interdum nunc. Praesent dignissim vehicula arcu, et semper dolor porta vel. Maecenas semper porta gravida. Proin tortor augue, mattis ut luctus in, semper vitae nisi. Vivamus egestas, mi mollis elementum egestas, nibh sapien euismod justo, ac cursus metus risus id ante. Nam placerat velit ac orci ullamcorper, id dapibus odio bibendum.'
-
-def defaultPage():
-    return page([
-        text('### Hello world'),
-        text('How are you doing today?'),
-        text("I'm doing just fine thank you very much."),
-        columnPage([
-            page([
-                text('Introduction'),
-                text(lorem1)
-            ]),
-            page([
-                text('Mas informacion'),
-                text(lorem2)
-            ]),
-            page([
-                text('[Scope_0]'),
-                image('lol2.png', "Funny joke")
-            ])
-        ]),
-        columnPage([
-            text(lorem3)
-        ]),
-        image('sw.png', "Switching characteristics"),
-        page([
-            text("This is pretty funy if you actually think about it for a second."),
-            text("I really can't agree with that statement")
-        ]),
-        text('Just to finish it off right here.'),
-        text("Actually I'll go ahead and add a bit more to be sure...")
-    ])
-
-async def consumer(msg):
+async def remoteDispatch(msg):
     if(msg["selector"] == "requestTopPage"):
-        print("Request top page called.")
-        topPage2 = {
-            "key" : "1",
-            "meta" : {},
-            "type" : "page",
-            "value" : [
-                {
-                    "key" : "2",
-                    "meta" : {},
-                    "type" : "text",
-                    "value" : "Hello, world!"
-                }
-            ]
-        }
+        print("Request top page called")
         return json.dumps({
             "selector" : "renderPage:",
-            "arguments" : [defaultPage()]
+            "arguments" : [topPage.model()]
         })
-    
-    return None
+    else:
+        return None
 
-async def hello(websocket, path):
+async def localDispatch(command):
+    print(command)
+
+async def connection(websocket, path):
     print("Connection at path: " + path)
-    while True:
-        # While loop broken when recv() throws ConnectionClosed
-        message = await websocket.recv()
-
-        print("Message: " + message)
-        
-        result = await consumer(json.loads(message))
-        if result != None:
-            await websocket.send(result)
-
-async def test():
-    input('awef')
-
-async def wakeup():
-    while True:
-        await asyncio.sleep(1)
-
-class Kernel:
-    def __init__(self):
-        pass
-
-    def run(self):
-        print("Running!")
-
-if __name__ == "__main__":
-    k = Kernel()
-    k.run()
-
-    start_server = websockets.serve(hello, 'localhost', 8085)
-
-    asyncio.get_event_loop().create_task(wakeup())
-    asyncio.get_event_loop().run_until_complete(start_server)
 
     try:
-        asyncio.get_event_loop().run_forever()
+        while True:
+            message = json.loads(await websocket.recv())
+
+            print("Received: ")
+            print(json.dumps(message, indent=4))
+
+            result = await remoteDispatch(message)
+            if result != None:
+                await websocket.send(result)
+    except websockets.exceptions.ConnectionClosed:
+        print("Connection closed")
+
+async def console():
+    print("Console started")
+    
+    while True:
+        command = await ainput("")
+        if(command == "exit"):
+            asyncio.get_event_loop().stop()
+            break
+        await localDispatch(command)
+
+async def periodic():
+    while True:
+        await asyncio.sleep(0.2)
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    start_server = websockets.serve(connection, 'localhost', 8085)
+
+    loop.create_task(console())
+    loop.create_task(periodic())
+    loop.run_until_complete(start_server)
+
+    try:
+        loop.run_forever()
     except KeyboardInterrupt as ex:
         print("Keyboard interrupt")
+
