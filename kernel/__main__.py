@@ -1,23 +1,9 @@
 import asyncio
 import websockets
 import json
-import model
 from aioconsole import ainput
-
-topPage = model.default()
-
-async def remoteDispatch(msg):
-    if(msg["selector"] == "requestTopPage"):
-        print("Request top page called")
-        return json.dumps({
-            "selector" : "renderPage:",
-            "arguments" : [topPage.model()]
-        })
-    else:
-        return None
-
-async def localDispatch(command):
-    print(command)
+import local
+import remote
 
 async def connection(websocket, path):
     print("Connection at path: " + path)
@@ -29,7 +15,7 @@ async def connection(websocket, path):
             print("Received: ")
             print(json.dumps(message, indent=4))
 
-            result = await remoteDispatch(message)
+            result = await remote.dispatch(message)
             if result != None:
                 await websocket.send(result)
     except websockets.exceptions.ConnectionClosed:
@@ -43,7 +29,7 @@ async def console():
         if(command == "exit"):
             asyncio.get_event_loop().stop()
             break
-        await localDispatch(command)
+        await local.dispatch(command)
 
 async def periodic():
     while True:
@@ -61,4 +47,3 @@ if __name__ == "__main__":
         loop.run_forever()
     except KeyboardInterrupt as ex:
         print("Keyboard interrupt")
-

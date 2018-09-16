@@ -11,4 +11,7 @@ class Page(Element):
             "content" : [x.model() for x in self.content],
             "column" : self.column
         }
+
+    def localExec(self, code):
+        exec(code, globals(), locals())
     
