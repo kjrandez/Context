@@ -1,9 +1,10 @@
 class Element:
     nextKey = 0
 
-    def __init__(self, type):
+    def __init__(self, type, observer):
         self.key = Element.nextKey
         self.type = type
+        self.observer = observer
 
         Element.nextKey = Element.nextKey + 1
 
@@ -16,3 +17,7 @@ class Element:
             "type" : self.type,
             "value" : self.value()
         }
+
+    def notify(self):
+        if self.observer != None:
+            self.observer.mutation(self)

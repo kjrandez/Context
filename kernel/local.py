@@ -1,7 +1,9 @@
 from aioconsole import ainput
 from model import topPage
+from elements import Text, Page, Image
 
 context = topPage
+clipboard = None
 
 async def dispatch(message):
     global commands
@@ -60,9 +62,67 @@ async def commandExec(args):
     
     context.localExec(code)
 
+async def commandInsert(args):
+    if not (args in classList):
+        print("Error")
+        return
+    
+    instClass = classList[args]
+    constructorArgs = []
+    while True:
+        line = await ainput(" + ")
+        if line == "GO":
+            break
+        else:
+            constructorArgs.append(line)
+
+    inst = instClass(*constructorArgs)
+    print(inst)
+    context.append(inst)
+
+async def commandRemove(args):
+    index = int(args)
+    inst = context.content[index]
+    context.removeAt(index)
+    print(inst)
+
+async def commandCopy(args):
+    global clipboard
+    
+    index = int(args)
+    inst = context.content[index]
+    clipboard = inst
+    print(inst)
+
+async def commandPaste(args):
+    global clipboard
+    
+    if clipboard == None:
+        print("Error")
+        return
+    
+    inst = clipboard
+    print(inst)
+    context.append(inst)
+
+async def commandClip(args):
+    global clipboard
+    print(clipboard)
+
 commands = {
     "list" : commandList,
     "enter" : commandEnter,
     "root" : commandRoot,
-    "exec" : commandExec
+    "exec" : commandExec,
+    "insert" : commandInsert,
+    "remove" : commandRemove,
+    "paste" : commandPaste,
+    "copy" : commandCopy,
+    "clip" : commandClip
+}
+
+classList = {
+    "text" : Text,
+    "image" : Image,
+    "page" : Page
 }

@@ -5,9 +5,14 @@ from aioconsole import ainput
 import local
 import remote
 
+
+
 async def connection(websocket, path):
     print("Connection at path: " + path)
+    if not path == "broadcast":
+        return
 
+    handler = remote.Remote(websocket)
     try:
         while True:
             message = json.loads(await websocket.recv())
@@ -15,7 +20,7 @@ async def connection(websocket, path):
             print("Received: ")
             print(json.dumps(message, indent=4))
 
-            result = await remote.dispatch(message)
+            result = await handler.dispatch(message)
             if result != None:
                 await websocket.send(result)
     except websockets.exceptions.ConnectionClosed:
