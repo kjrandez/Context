@@ -71,7 +71,7 @@ export default class App
         console.log(message);
         
         switch(message.selector) {
-            case 'renderPage:':
+            case 'renderPage':
                 this.store.setModel(message.arguments[0]);
                 this.root.setModel(this.store.topLevelContent());
                 break;

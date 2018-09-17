@@ -1,8 +1,8 @@
 from .element import Element
 
 class Image(Element):
-    def __init__(self, src, alt):
-        super().__init__("image")
+    def __init__(self, observer, src, alt):
+        super().__init__(observer, "image")
         self.src = src
         self.alt = alt
 

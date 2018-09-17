@@ -1,26 +1,29 @@
 import json
-from model import topPage
 
 class Remote:
-    def __init__(self):
-        self.root = topPage
+    def __init__(self, root, observer, websocket):
+        self.root = root
         self.sensitivity = sensitivityList(self.root)
-
+        self.observer = observer
+        self.websocket = websocket
+        
         self.commands = {
             "requestTopPage" : self.commandRequestTopPage
         }
 
-    async def dispatch(self, msg):
+    def mutation(self, element):
+        print("Mutation observed for: " + str(element.key))
+
+    def dispatch(self, msg):
         if msg["selector"] in self.commands:
-            print("Client called " + msg["selector"])
-            return self.commands[msg["selector"]](self, msg)
+            return self.commands[msg["selector"]](msg)
         else:
             return None
 
-    async def commandRequestTopPage(self, msg):
+    def commandRequestTopPage(self, msg):
         return json.dumps({
             "selector" : "renderPage",
-            "arguments" : [topPage.model()]
+            "arguments" : [self.root.model()]
         })
 
 def sensitivityList(element):

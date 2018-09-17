@@ -1,128 +1,113 @@
 from aioconsole import ainput
-from model import topPage
 from elements import Text, Page, Image
 
-context = topPage
-clipboard = None
+class Local:
+    def __init__(self, root, observer):
+        self.root = root
+        self.observer = observer
+        self.context = root
+        self.clipboard = None
 
-async def dispatch(message):
-    global commands
-    
-    parts = message.split()
-    if len(parts) == 0:
-        return
-    
-    command = parts[0]
-    args = " ".join(parts[1:])
+        self.commands = {
+            "list" : self.commandList,
+            "enter" : self.commandEnter,
+            "root" : self.commandRoot,
+            "exec" : self.commandExec,
+            "insert" : self.commandInsert,
+            "remove" : self.commandRemove,
+            "paste" : self.commandPaste,
+            "copy" : self.commandCopy,
+            "clip" : self.commandClip
+        }
+        self.classList = {
+            "text" : Text,
+            "image" : Image,
+            "page" : Page
+        }
 
-    if parts[0] in commands:
-        await commands[command](args)
-    else:
-        print("Error")
+    async def dispatch(self, message):
+        parts = message.split()
+        if len(parts) == 0:
+            return
+        
+        command = parts[0]
+        args = " ".join(parts[1:])
 
-async def commandList(args):
-    global context
-
-    i = 0
-    for entry in context.content:
-        print(str(i) + ") " + entry.type + "_" + str(entry.key))
-        i = i + 1
-
-async def commandEnter(args):
-    global context
-    global prevContext
-
-    entryIndex = int(args)
-    newContext = context.content[entryIndex]
-    if newContext != None and newContext.type == "page":
-        prevContext = context
-        context = newContext
-        print("Entered " + context.type + "_" + str(context.key))
-    else:
-        print("Error")
-
-async def commandRoot(args):
-    global context
-    global topPage
-
-    context = topPage
-    print("Entered " + context.type + "_" + str(context.key))
-
-async def commandExec(args):
-    global context
-
-    code = ""
-    while True:
-        line = await ainput(" | ")
-        if line == "GO":
-            break
+        if parts[0] in self.commands:
+            await self.commands[command](args)
         else:
-            line = line +  "\n"
-            code = code + line
-    
-    context.localExec(code)
+            print("Error")
 
-async def commandInsert(args):
-    if not (args in classList):
-        print("Error")
-        return
-    
-    instClass = classList[args]
-    constructorArgs = []
-    while True:
-        line = await ainput(" + ")
-        if line == "GO":
-            break
+    async def commandList(self, args):
+        i = 0
+        for entry in self.context.content:
+            print(str(i) + ") " + entry.type + "_" + str(entry.key))
+            i = i + 1
+
+    async def commandEnter(self, args):
+        entryIndex = int(args)
+        newContext = self.context.content[entryIndex]
+        if newContext != None and newContext.type == "page":
+            self.context = newContext
+            print("Entered " + self.context.type + "_" + str(self.context.key))
         else:
-            constructorArgs.append(line)
+            print("Error")
 
-    inst = instClass(*constructorArgs)
-    print(inst)
-    context.append(inst)
+    async def commandRoot(self, args):
+        self.context = self.root
+        print("Entered " + self.context.type + "_" + str(self.context.key))
 
-async def commandRemove(args):
-    index = int(args)
-    inst = context.content[index]
-    context.removeAt(index)
-    print(inst)
+    async def commandExec(self, args):
+        code = ""
+        while True:
+            line = await ainput(" | ")
+            if line == "GO":
+                break
+            else:
+                line = line +  "\n"
+                code = code + line
+        
+        self.context.localExec(code)
 
-async def commandCopy(args):
-    global clipboard
+    async def commandInsert(self, args):
+        if not (args in self.classList):
+            print("Error")
+            return
+        
+        instClass = self.classList[args]
+        constructorArgs = [self.observer]
+        while True:
+            line = await ainput(" + ")
+            if line == "GO":
+                break
+            else:
+                constructorArgs.append(line)
+
+        inst = instClass(*constructorArgs)
+        print(inst)
+        self.context.append(inst)
+
+    async def commandRemove(self, args):
+        index = int(args)
+        inst = self.context.content[index]
+        self.context.removeAt(index)
+        print(inst)
+
+    async def commandCopy(self, args):
+        index = int(args)
+        inst = self.context.content[index]
+        self.clipboard = inst
+        print(inst)
+
+    async def commandPaste(self, args):
+        if self.clipboard == None:
+            print("Error")
+            return
+        
+        inst = self.clipboard
     
-    index = int(args)
-    inst = context.content[index]
-    clipboard = inst
-    print(inst)
+        print(inst)
+        self.context.append(inst)
 
-async def commandPaste(args):
-    global clipboard
-    
-    if clipboard == None:
-        print("Error")
-        return
-    
-    inst = clipboard
-    print(inst)
-    context.append(inst)
-
-async def commandClip(args):
-    global clipboard
-    print(clipboard)
-
-commands = {
-    "list" : commandList,
-    "enter" : commandEnter,
-    "root" : commandRoot,
-    "exec" : commandExec,
-    "insert" : commandInsert,
-    "remove" : commandRemove,
-    "paste" : commandPaste,
-    "copy" : commandCopy,
-    "clip" : commandClip
-}
-
-classList = {
-    "text" : Text,
-    "image" : Image,
-    "page" : Page
-}
+    async def commandClip(self, args):
+        print(self.clipboard)
