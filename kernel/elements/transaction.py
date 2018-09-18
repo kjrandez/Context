@@ -2,14 +2,19 @@ class Transaction:
     nextIndex = 0
 
     def __init__(self, observer, element, ttype, reverse):
-        self.index = Transaction.nextIndex
         self.element = element
+        self.others = []
         self.ttype = ttype
         self.reverse = reverse
         self.observer = observer
         self.detail = {}
 
+        self.observer.begin(self)
+        self.index = Transaction.nextIndex
         Transaction.nextIndex = Transaction.nextIndex + 1
+
+    def reference(self, element):
+        self.others.append(element)
 
     def model(self):
         return {
@@ -19,5 +24,9 @@ class Transaction:
             "detail" : self.detail
         }
 
+    def cancel(self):
+        self.observer.cancel(self)
+
     def complete(self):
-        self.observer(self)
+        self.observer.complete(self)
+        return self.index

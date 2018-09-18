@@ -27,6 +27,9 @@ class Remote:
             "arguments" : [self.root.model()]
         })
 
+# WARNING: Update this function to work with recursive pages
+# and remember to update sensitivity list after relevant mutations
+
 def sensitivityList(element):
     list = [element.key]
 

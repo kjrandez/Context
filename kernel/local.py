@@ -41,21 +41,21 @@ class Local:
     async def commandList(self, args):
         i = 0
         for entry in self.context.content:
-            print(str(i) + ") " + entry.type + "_" + str(entry.key))
+            print(str(i) + ") " + entry.etype + "_" + str(entry.key))
             i = i + 1
 
     async def commandEnter(self, args):
         entryIndex = int(args)
         newContext = self.context.content[entryIndex]
-        if newContext != None and newContext.type == "page":
+        if isinstance(newContext, Page):
             self.context = newContext
-            print("Entered " + self.context.type + "_" + str(self.context.key))
+            print("Entered " + self.context.etype + "_" + str(self.context.key))
         else:
             print("Error")
 
     async def commandRoot(self, args):
         self.context = self.root
-        print("Entered " + self.context.type + "_" + str(self.context.key))
+        print("Entered " + self.context.etype + "_" + str(self.context.key))
 
     async def commandExec(self, args):
         code = ""

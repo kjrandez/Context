@@ -18,6 +18,7 @@ class Page(Element):
     def append(self, inst, reverse = None):
         trans = self.transaction("append", reverse)
         trans.detail["inst"] = inst.key
+        trans.reference(inst)
 
         self.content.append(inst)
 
@@ -29,7 +30,8 @@ class Page(Element):
         trans = self.transaction("insertAt", reverse)
         trans.detail["inst"] = inst.key
         trans.detail["index"] = index
-
+        trans.reference(inst)
+        
         self.content.insert(inst, index)
 
         trans.reverseOp = self.removeAt
@@ -40,21 +42,27 @@ class Page(Element):
         trans = self.transaction("remove", reverse)
         trans.detail["inst"] = inst.key
 
-        # Throws ValueError
-        index = self.content.index(inst)
-        self.content.remove(inst) 
+        try:
+            index = self.content.index(inst)
+            self.content.remove(inst) 
 
-        trans.reverseOp = self.insertAt
-        trans.reverseArgs = [inst, index]
-        return trans.complete()
+            trans.reverseOp = self.insertAt
+            trans.reverseArgs = [inst, index]
+            return trans.complete()
+        except ValueError:
+            trans.cancel()
+            raise
     
     def removeAt(self, index, reverse = None):
         trans = self.transaction("removeAt", reverse)
         trans.detail["index"] = index
 
-        # Throws IndexError
-        inst = self.content.pop(index)
+        try:
+            inst = self.content.pop(index)
 
-        trans.reverseOp = self.insertAt
-        trans.reverseArgs = [inst, index]
-        return trans.complete()
+            trans.reverseOp = self.insertAt
+            trans.reverseArgs = [inst, index]
+            return trans.complete()
+        except IndexError:
+            trans.cancel()
+            raise

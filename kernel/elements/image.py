@@ -12,7 +12,7 @@ class Image(Element):
             "alt" : self.alt
         }
     
-    def update(self, srcValue, altValue, reverse=None):
+    def update(self, srcValue, altValue, reverse = None):
         trans = self.transaction("update", reverse)
         trans.detail["src"] = srcValue
         trans.detail["alt"] = altValue

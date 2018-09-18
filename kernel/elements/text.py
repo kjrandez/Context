@@ -10,49 +10,55 @@ class Text(Element):
             "content" : self.content
         }
 
-    def update(self, value, undo = False):
-        trans = self.transaction("update", undo)
+    def update(self, value, reverse = None):
+        trans = self.transaction("update", reverse)
         trans.detail["value"] = value
 
         prev = self.content
         self.content = value
 
-        trans.undo = self.update
-        trans.undoArgs = [prev]
+        trans.reverseOp = self.update
+        trans.reverseArgs = [prev]
         return trans.complete()
 
-    def insert(self, value, start, undo = False):
-        trans = self.transaction("insert", undo)
+    def insert(self, value, start, reverse = None):
+        trans = self.transaction("insert", reverse)
         trans.detail["value"] = value
         
-        # Throws IndexError
-        if (start < 0) or (start > len(self.content)):
-            raise IndexError("Insertion starts out of range")
+        try:
+            if (start < 0) or (start > len(self.content)):
+                raise IndexError("Insertion starts out of range")
 
-        prev = self.content
-        self.content = prev[:start] + value + prev[start:]
+            prev = self.content
+            self.content = prev[:start] + value + prev[start:]
 
-        trans.undo = self.remove
-        trans.undoArgs = [start, start + len(value)]
-        return trans.complete()
+            trans.reverseOp = self.remove
+            trans.reverseArgs = [start, start + len(value)]
+            return trans.complete()
+        except IndexError:
+            trans.cancel()
+            raise
 
-    def remove(self, start, stop, undo = False):
-        trans = self.transaction("insert", undo)
+    def remove(self, start, stop, reverse = None):
+        trans = self.transaction("insert", reverse)
         trans.detail["start"] = start
         trans.detail["stop"] = stop
 
-        # Throws IndexError
-        if (start < 0) or (start > len(self.content)):
-            raise IndexError("Removal starts out of range")
-        if (stop < 0) or (stop > len(self.content)):
-            raise IndexError("Removal stops out of range")
-        if start > stop:
-            raise IndexError("Removal start and stop are reversed")
-        
-        prev = self.content
-        self.content = prev[:start] + prev[stop:]
+        try:
+            if (start < 0) or (start > len(self.content)):
+                raise IndexError("Removal starts out of range")
+            if (stop < 0) or (stop > len(self.content)):
+                raise IndexError("Removal stops out of range")
+            if start > stop:
+                raise IndexError("Removal start and stop are reversed")
+            
+            prev = self.content
+            self.content = prev[:start] + prev[stop:]
 
-        removed = prev[start:stop]
-        trans.undo = self.insert
-        trans.undoArgs = [removed, start]
-        return trans.complete()
+            removed = prev[start:stop]
+            trans.reverseOp = self.insert
+            trans.reverseArgs = [removed, start]
+            return trans.complete()
+        except IndexError:
+            trans.cancel()
+            raise
