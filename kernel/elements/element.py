@@ -21,5 +21,5 @@ class Element:
             "value" : self.value()
         }
 
-    def transaction(self, ttype):
-        return Transaction(self.observer, self, ttype)
+    def transaction(self, ttype, reverse):
+        return Transaction(self.observer, self, ttype, reverse)

@@ -15,35 +15,46 @@ class Page(Element):
     def localExec(self, code):
         exec(code, globals(), locals())
     
-    def append(self, inst):
-        trans = self.transaction("append")
+    def append(self, inst, reverse = None):
+        trans = self.transaction("append", reverse)
         trans.detail["inst"] = inst.key
 
         self.content.append(inst)
 
-        trans.complete()
+        trans.reverseOp = self.removeAt
+        trans.reverseArgs = [len(self.content) - 1]
+        return trans.complete()
     
-    def insertAt(self, inst, index):
-        trans = self.transaction("insertAt")
+    def insertAt(self, inst, index, reverse = None):
+        trans = self.transaction("insertAt", reverse)
         trans.detail["inst"] = inst.key
         trans.detail["index"] = index
 
         self.content.insert(inst, index)
 
-        trans.complete()
+        trans.reverseOp = self.removeAt
+        trans.reverseArgs = [index]
+        return trans.complete()
     
-    def remove(self, inst):
-        trans = self.transaction("remove")
+    def remove(self, inst, reverse = None):
+        trans = self.transaction("remove", reverse)
         trans.detail["inst"] = inst.key
 
-        self.content.remove(inst)
+        # Throws ValueError
+        index = self.content.index(inst)
+        self.content.remove(inst) 
 
-        trans.complete()
+        trans.reverseOp = self.insertAt
+        trans.reverseArgs = [inst, index]
+        return trans.complete()
     
-    def removeAt(self, index):
-        trans = self.transaction("removeAt")
+    def removeAt(self, index, reverse = None):
+        trans = self.transaction("removeAt", reverse)
         trans.detail["index"] = index
 
-        self.content.pop(index)
+        # Throws IndexError
+        inst = self.content.pop(index)
 
-        trans.complete()
+        trans.reverseOp = self.insertAt
+        trans.reverseArgs = [inst, index]
+        return trans.complete()

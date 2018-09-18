@@ -44,11 +44,13 @@ async def console():
         await handler.dispatch(command)
 
 async def persistence():
-    global remotes
     global muts
-    
+    global ledger
+    global remotes
+
     while True:
         transaction = await muts.async_q.get()
+        ledger.append(transaction)
         for remote in remotes:
             await remote.mutation(transaction)
 
@@ -58,9 +60,6 @@ async def periodic():
 
 def observer(transaction):
     global muts
-    global ledger
-
-    ledger.append(transaction)
     muts.sync_q.put(transaction)
 
 remotes = []

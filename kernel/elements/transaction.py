@@ -1,10 +1,11 @@
 class Transaction:
     nextIndex = 0
 
-    def __init__(self, observer, element, ttype):
+    def __init__(self, observer, element, ttype, reverse):
         self.index = Transaction.nextIndex
         self.element = element
         self.ttype = ttype
+        self.reverse = reverse
         self.observer = observer
         self.detail = {}
 
