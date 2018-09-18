@@ -16,17 +16,34 @@ class Page(Element):
         exec(code, globals(), locals())
     
     def append(self, inst):
+        trans = self.transaction("append")
+        trans.detail["inst"] = inst.key
+
         self.content.append(inst)
-        self.notify()
+
+        trans.complete()
     
     def insertAt(self, inst, index):
+        trans = self.transaction("insertAt")
+        trans.detail["inst"] = inst.key
+        trans.detail["index"] = index
+
         self.content.insert(inst, index)
-        self.notify()
+
+        trans.complete()
     
     def remove(self, inst):
+        trans = self.transaction("remove")
+        trans.detail["inst"] = inst.key
+
         self.content.remove(inst)
-        self.notify()
+
+        trans.complete()
     
     def removeAt(self, index):
+        trans = self.transaction("removeAt")
+        trans.detail["index"] = index
+
         self.content.pop(index)
-        self.notify()
+
+        trans.complete()

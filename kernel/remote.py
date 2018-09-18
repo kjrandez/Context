@@ -1,4 +1,5 @@
 import json
+from elements import Page
 
 class Remote:
     def __init__(self, root, observer, websocket):
@@ -11,8 +12,8 @@ class Remote:
             "requestTopPage" : self.commandRequestTopPage
         }
 
-    def mutation(self, element):
-        print("Mutation observed for: " + str(element.key))
+    async def mutation(self, transaction):
+        print("Transaction #" + str(transaction.index) + " " + json.dumps(transaction.model()))
 
     def dispatch(self, msg):
         if msg["selector"] in self.commands:
@@ -29,7 +30,7 @@ class Remote:
 def sensitivityList(element):
     list = [element.key]
 
-    if element.type == "page":
+    if isinstance(element, Page):
         for child in element.content:
             list = list + sensitivityList(child)
 

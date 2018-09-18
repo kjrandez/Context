@@ -2,6 +2,8 @@ import asyncio
 import websockets
 import json
 from aioconsole import ainput
+import janus
+
 from local import Local
 from remote import Remote
 import model
@@ -41,25 +43,39 @@ async def console():
             break
         await handler.dispatch(command)
 
+async def persistence():
+    global remotes
+    global muts
+    
+    while True:
+        transaction = await muts.async_q.get()
+        for remote in remotes:
+            await remote.mutation(transaction)
+
 async def periodic():
     while True:
         await asyncio.sleep(0.2)
 
-def observer(element):
-    global remotes
+def observer(transaction):
+    global muts
+    global ledger
 
-    for handler in remotes:
-        handler.mutation(element)
+    ledger.append(transaction)
+    muts.sync_q.put(transaction)
 
 remotes = []
 root = model.default(observer)
+muts = None
+ledger = []
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
+    muts = janus.Queue(loop=loop)
     start_server = websockets.serve(connection, 'localhost', 8085)
 
     loop.create_task(console())
     loop.create_task(periodic())
+    loop.create_task(persistence())
     loop.run_until_complete(start_server)
 
     try:

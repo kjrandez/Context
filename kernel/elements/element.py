@@ -1,9 +1,12 @@
+from .transaction import Transaction
+
 class Element:
     nextKey = 0
+    nextTrans = 0
 
-    def __init__(self, observer, type):
+    def __init__(self, observer, etype):
         self.key = Element.nextKey
-        self.type = type
+        self.etype = etype
         self.observer = observer
 
         Element.nextKey = Element.nextKey + 1
@@ -14,10 +17,9 @@ class Element:
     def model(self):
         return {
             "key" : self.key,
-            "type" : self.type,
+            "type" : self.etype,
             "value" : self.value()
         }
 
-    def notify(self):
-        if self.observer != None:
-            self.observer(self)
+    def transaction(self, ttype):
+        return Transaction(self.observer, self, ttype)

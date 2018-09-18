@@ -11,6 +11,3 @@ class Image(Element):
             "src" : self.src,
             "alt" : self.alt
         }
-
-    
-    
