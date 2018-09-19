@@ -8,13 +8,19 @@ class Page(Element):
     
     def value(self):
         return {
-            "content" : [x.model() for x in self.content],
+            "content" : [x.key for x in self.content],
             "column" : self.column
         }
 
     def localExec(self, code):
         exec(code, globals(), locals())
-    
+
+    def traverse(self, entries):
+        if not (self.key in entries):
+            entries[self.key] = self.model()
+            for entry in self.content:
+                entry.traverse(entries)
+
     def append(self, inst, reverse = None):
         trans = self.transaction("append", reverse)
         trans.detail["inst"] = inst.key

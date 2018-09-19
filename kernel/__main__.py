@@ -31,12 +31,8 @@ class Kernel:
         try:
             while True:
                 message = json.loads(await websocket.recv())
-
                 print("Received: " + json.dumps(message, indent=4))
-
-                result = handler.dispatch(message)
-                if result != None:
-                    await websocket.send(result)
+                await handler.dispatch(message)
         except websockets.exceptions.ConnectionClosed:
             print("Connection closed")
             self.remotes.remove(handler)
