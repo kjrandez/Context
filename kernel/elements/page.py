@@ -15,17 +15,18 @@ class Page(Element):
     def localExec(self, code):
         exec(code, globals(), locals())
 
-    # THIS IS WRONG
+    def flattened(self):
+        entries = {self.key : self.model()}
+        self.traverse(entries)
+        return entries
+
     def traverse(self, entries = {}):
-        if self.key in entries:
-            return entries
-        
-        entries[self.key] = self.model()
         for entry in self.content:
-            entries[self.key] = entry
+            if entry.key in entries:
+                continue
+            entries[entry.key] = entry.model()
             if isinstance(entry, Page):
                 entry.traverse(entries)
-        return entries
 
     def append(self, inst, reverse = None):
         trans = self.transaction("append", reverse)

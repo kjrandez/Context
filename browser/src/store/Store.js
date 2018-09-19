@@ -16,7 +16,6 @@ export default class Store
         this.load(elements)
         var root = this.modelDict[rootKey];
         this.topLevel = root.value.content.map(key => this.fragmentDict[key])
-        console.log(this.topLevel)
     }
 
     load(modelList) {

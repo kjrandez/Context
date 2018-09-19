@@ -14,7 +14,7 @@ class Remote:
 
     def setRoot(self, root):
         self.root = root
-        self.flattened = self.root.traverse()
+        self.flattened = self.root.flattened()
         self.senseKeys = self.flattened.keys()
 
     async def mutation(self, transaction):

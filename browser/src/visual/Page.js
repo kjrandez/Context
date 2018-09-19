@@ -10,8 +10,8 @@ export default class Page extends Component
         var value = this.props.fragment.value();
 
         this.state = {
-            content: value.content.map((entry) => {
-                return this.props.app.store.fragment(entry.key);
+            content: value.content.map((entryKey) => {
+                return this.props.app.store.fragment(entryKey);
             })
         }
     }
@@ -20,8 +20,8 @@ export default class Page extends Component
         var value = this.props.fragment.value();
 
         this.setState({
-            content: value.content.map((entry) => {
-                return this.props.app.store.fragment(entry.key);
+            content: value.content.map((entryKey) => {
+                return this.props.app.store.fragment(entryKey);
             })
         });
     }
