@@ -1,14 +1,14 @@
-from .transaction import Transaction
+from ..core import transaction
+from ..core import dataset
 
 class Element:
     nextKey = 0
-    nextTrans = 0
 
-    def __init__(self, observer, etype):
+    def __init__(self, etype):
         self.key = Element.nextKey
         self.etype = etype
-        self.observer = observer
 
+        dataset.gdata().append(self)
         Element.nextKey = Element.nextKey + 1
 
     def value(self):
@@ -22,4 +22,4 @@ class Element:
         }
 
     def transaction(self, ttype, reverse):
-        return Transaction(self.observer, self, ttype, reverse)
+        return transaction.Transaction(dataset.gdata().observer, self, ttype, reverse)

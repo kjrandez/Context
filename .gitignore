@@ -21,3 +21,8 @@ browser/yarn-debug.log*
 browser/yarn-error.log*
 kernel/elements/__pycache__/
 .vscode/
+host/__pycache__/
+host/kernel/__pycache__/
+host/kernel/core/__pycache__/
+host/kernel/elements/__pycache__/
+host/pyphantom/__pycache__/

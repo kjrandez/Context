@@ -1,19 +1,17 @@
-import asyncio
 import websockets
 import json
 from aioconsole import ainput
-import janus
 
-from local import Local
-from remote import Remote
-from ledger import Ledger
-import model
+from .core import Dataset, Ledger, Local, Remote
 
 class Kernel:
     def __init__(self, loop):
         self.ledger = Ledger(loop)
-        self.root = model.default(self.ledger)
         self.remotes = []
+
+        data = Dataset(self.ledger)
+        data.makeDefault()
+        self.root = data.root
 
         loop.create_task(self.persistence())
         loop.create_task(self.console())
@@ -43,9 +41,6 @@ class Kernel:
         handler = Local(self.root, self.ledger)
         while True:
             command = await ainput("")
-            if(command == "exit"):
-                asyncio.get_event_loop().stop()
-                break
             await handler.dispatch(command)
 
     async def persistence(self):
@@ -53,16 +48,3 @@ class Kernel:
             transaction = await self.ledger.next()
             for remote in self.remotes:
                 await remote.mutation(transaction)
-
-async def periodic():
-    while True:
-        await asyncio.sleep(0.2)
-
-if __name__ == "__main__":
-    try:
-        loop = asyncio.get_event_loop()
-        Kernel(loop)
-        loop.create_task(periodic())
-        loop.run_forever()
-    except KeyboardInterrupt:
-        raise

@@ -1,5 +1,5 @@
 from aioconsole import ainput
-from elements import Text, Page, Image
+from ..elements import Text, Page, Image
 
 class Local:
     def __init__(self, root, observer):

@@ -1,8 +1,8 @@
 from .element import Element
 
 class Page(Element):
-    def __init__(self, observer, content = [], column = False):
-        super().__init__(observer, "page")
+    def __init__(self, content = [], column = False):
+        super().__init__("page")
         self.content = content
         self.column = column
     
