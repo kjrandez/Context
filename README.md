@@ -1,4 +1,4 @@
-# LabNotebook
+# Context
 An experimental approach to keeping a modern scientific / engineering lab notebook.
 
 As of right now only builds/runs on Windows.
