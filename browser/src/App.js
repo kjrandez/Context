@@ -69,10 +69,10 @@ export default class App
         var message = JSON.parse(event.data);
         console.log("Received message: ");
         console.log(message);
-        
+         
         switch(message.selector) {
             case 'renderPage':
-                this.store.setModel(message.arguments[0]);
+                this.store.setModel(message.arguments[0], message.arguments[1]);
                 this.root.setModel(this.store.topLevelContent());
                 break;
             default:

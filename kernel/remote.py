@@ -14,10 +14,8 @@ class Remote:
 
     def setRoot(self, root):
         self.root = root
-
-        flattened = root.traverse()
-        self.senseList = flattened.keys()
-        self.modelList = flattened.values()
+        self.flattened = self.root.traverse()
+        self.senseKeys = self.flattened.keys()
 
     async def mutation(self, transaction):
         print("Transaction #" + str(transaction.index) + " " + json.dumps(transaction.model()))
@@ -27,19 +25,7 @@ class Remote:
             await self.commands[msg["selector"]](msg)
 
     async def commandRequestTopPage(self, msg):
-        self.websocket.send(json.dumps({
+        await self.websocket.send(json.dumps({
             "selector" : "renderPage",
-            "arguments" : [self.root.key, self.modelList]
+            "arguments" : [self.root.key, self.flattened]
         }))
-
-# WARNING: Update this function to work with recursive pages
-# and remember to update sensitivity list after relevant mutations
-
-def sensitivityList(element):
-    list = [self.root.traverse()]
-
-    if isinstance(element, Page):
-        for child in element.content:
-            list = list + sensitivityList(child)
-
-    return list

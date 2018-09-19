@@ -12,20 +12,19 @@ export default class Store
         return this.topLevel;
     }
 
-    setModel(model) {
-        this.topLevel = model.value.content.map(elementModel => {
-            this.load(elementModel);
-            return this.fragmentDict[elementModel.key];
-        });
+    setModel(rootKey, elements) {
+        this.load(elements)
+        var root = this.modelDict[rootKey];
+        this.topLevel = root.value.content.map(key => this.fragmentDict[key])
+        console.log(this.topLevel)
     }
 
-    load(model) {
-        if(!(model.key in this.fragmentDict)) {
-            this.fragmentDict[model.key] = new Fragment(this, model)
-            this.modelDict[model.key] = model;
-
-            if(model.type === "page")
-                model.value.content.forEach(elementModel => this.load(elementModel));
+    load(modelList) {
+        for(var key in modelList) {
+            if(!(key in this.fragmentDict)) {
+                this.fragmentDict[key] = new Fragment(this, modelList[key])
+            }
+            this.modelDict[key] = modelList[key]
         }
     }
 
