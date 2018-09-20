@@ -1,5 +1,4 @@
-from ..core import transaction
-from ..core import dataset
+from ..core import Dataset, Transaction
 
 class Element:
     nextKey = 0
@@ -8,8 +7,11 @@ class Element:
         self.key = Element.nextKey
         self.etype = etype
 
-        dataset.gdata().append(self)
+        Dataset.singleton.append(self)
         Element.nextKey = Element.nextKey + 1
+
+    def isPage(self):
+        return False
 
     def value(self):
         return None
@@ -22,4 +24,4 @@ class Element:
         }
 
     def transaction(self, ttype, reverse):
-        return transaction.Transaction(dataset.gdata().observer, self, ttype, reverse)
+        return Transaction(Dataset.singleton.observer, self, ttype, reverse)

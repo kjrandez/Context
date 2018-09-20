@@ -6,6 +6,9 @@ class Page(Element):
         self.content = content
         self.column = column
     
+    def isPage(self):
+        return True
+
     def value(self):
         return {
             "content" : [x.key for x in self.content],

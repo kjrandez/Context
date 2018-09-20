@@ -1,5 +1,4 @@
 import json
-from ..elements import Page
 
 class Remote:
     def __init__(self, root, observer, websocket):

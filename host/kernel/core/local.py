@@ -1,8 +1,9 @@
 from aioconsole import ainput
-from ..elements import Text, Page, Image
 
 class Local:
     def __init__(self, root, observer):
+        from ..elements import Text, Page, Image
+
         self.root = root
         self.observer = observer
         self.context = root
@@ -47,7 +48,7 @@ class Local:
     async def commandEnter(self, args):
         entryIndex = int(args)
         newContext = self.context.content[entryIndex]
-        if isinstance(newContext, Page):
+        if newContext.isPage():
             self.context = newContext
             print("Entered " + self.context.etype + "_" + str(self.context.key))
         else:
