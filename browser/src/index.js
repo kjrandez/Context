@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import registerServiceWorker from './registerServiceWorker';
-import './index.css';
 import {Top} from './visual';
 import App from './app.js';
 
