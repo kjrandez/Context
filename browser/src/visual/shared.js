@@ -1,7 +1,7 @@
 import React from 'react';
-import Text from './Text.js';
-import Image from './Image.js';
-import Page from './Page.js';
+import Text from './text.js';
+import Image from './image.js';
+import Page from './page.js';
 
 export function elementList(fragments, selection, app) {
     return fragments.map(fragment => {

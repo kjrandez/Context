@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import Element from './Element.js';
+import Element from './element.js';
 import {elementList} from './shared.js';
 
 export default class Page extends Component

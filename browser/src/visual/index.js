@@ -1,7 +1,7 @@
-import Top from './Top.js';
-import Text from './Text.js';
-import Image from './Image.js';
-import Page from './Page.js';
-import Element from './Element.js';
+import Top from './top.js';
+import Text from './text.js';
+import Image from './image.js';
+import Page from './page.js';
+import Element from './element.js';
 
 export {Top, Element, Page, Text, Image};

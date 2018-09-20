@@ -1,4 +1,4 @@
-import Fragment from './Fragment.js';
+import Fragment from './fragment.js';
 
 export default class Store
 {

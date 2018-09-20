@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import Element from './Element.js';
+import Element from './element.js';
 
-export default class Text extends Component
+export default class Image extends Component
 {
     constructor(props) {
         super(props);
@@ -9,22 +9,17 @@ export default class Text extends Component
         var value = this.props.fragment.value();
 
         this.state = {
-            content: value.content
+            src: value.src,
+            alt: value.alt
         }
-    }
-
-    onChange(event) {
-        this.props.fragment.invoke({
-            selector: "update",
-            arguments: [event.target.value]
-        });
     }
 
     modelChanged() {
         var value = this.props.fragment.value();
 
         this.setState({
-            content: value.content
+            src: value.src,
+            alt: value.alt
         });
     }
 
@@ -34,9 +29,7 @@ export default class Text extends Component
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>
-                <textarea
-                    onChange={(event) => this.onChange(event)}
-                    value={this.state.content} />
+                <img src={this.state.src} alt={this.state.alt} />
             </Element>
         );
     }

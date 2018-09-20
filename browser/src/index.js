@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 import {Top} from './visual';
-import App from './App.js';
+import App from './app.js';
 
 var app = new App();
 registerServiceWorker();
