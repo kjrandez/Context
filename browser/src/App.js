@@ -4,7 +4,7 @@ export default class App
 {
     constructor()
     {
-        this.store = new Store();
+        this.store = new Store(this);
         this.kernel = new WebSocket("ws://localhost:8085/broadcast");
         this.kernel.onopen = (event) => this.kernelOpen(event);
         this.kernel.onclose = (event) => this.kernelClose(event);
@@ -54,11 +54,15 @@ export default class App
         this.top.setSelection(this.selection);
     }
 
-    kernelOpen(event) {
+    kernelSend(selector, data) {
         this.kernel.send(JSON.stringify({
-            selector: "requestRoot",
-            arguments: []
-        }))
+            selector: selector,
+            data: data
+        }));
+    }
+
+    kernelOpen(event) {
+        this.kernelSend("requestRoot", null);
     }
     
     kernelClose(event) {

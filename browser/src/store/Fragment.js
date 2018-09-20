@@ -22,8 +22,8 @@ export default class Fragment
         return this.store.value(this.immKey);
     }
 
-    event(desc) {
-        this.store.event(this, desc);
+    invoke(desc) {
+        this.store.invoke(this, desc);
     }
 
     update() {

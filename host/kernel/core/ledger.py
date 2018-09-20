@@ -20,6 +20,7 @@ class Ledger:
             self.lock.acquire()
             self.ongoing = trans
         else:
+            assert False
             # Need to check if trans is a reversed operation,
             # if so, the lock is already obtained, and the reverse index
             # should be that of the ongoing transaction

@@ -14,9 +14,9 @@ export default class Text extends Component
     }
 
     onChange(event) {
-        this.props.fragment.event({
-            transaction: "update",
-            value: event.target.value
+        this.props.fragment.invoke({
+            selector: "update",
+            arguments: [event.target.value]
         });
     }
 

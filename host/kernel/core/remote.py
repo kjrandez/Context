@@ -6,7 +6,7 @@ class Remote:
         self.root = root
         self.observer = observer
         self.websocket = websocket
-        self.remoteTrans = []
+        self.ignoreTrans = []
         self.topPage = None
 
         self.commands = {
@@ -17,26 +17,26 @@ class Remote:
 
     async def dispatch(self, msg):
         if msg["selector"] in self.commands:
-            await self.commands[msg["selector"]](msg)
+            await self.commands[msg["selector"]](msg["data"])
 
-    async def commandInvoke(self, msg):
-        target = Dataset.singleton.lookup(msg.target)
-        selector = getattr(target, msg.selector)
-        arguments = [resolvedArgument(X) for X in msg.arguments]
+    async def commandInvoke(self, data):
+        target = Dataset.singleton.lookup(data["element"])
+        selector = getattr(target, data["selector"])
+        arguments = [resolvedArgument(X) for X in data["arguments"]]
 
-        resultTrans = selector(target, *arguments)
-        self.remoteTrans.append(resultTrans)
+        resultTrans = selector(*arguments)
+        if not data["respond"]:
+            self.ignoreTrans.append(resultTrans)
 
-    async def commandRequestRoot(self, msg):
+    async def commandRequestRoot(self, data):
         await self.providePage(self.root)
 
-    async def commandRequestPage(self, msg):
-        await self.providePage(Dataset.singleton.lookup(msg["page"]))
+    async def commandRequestPage(self, data):
+        await self.providePage(Dataset.singleton.lookup(data["page"]))
 
     async def update(self, trans):
-        print("Transaction #" + str(trans.index) + " " + json.dumps(trans.model()))
-        if trans in self.remoteTrans:
-            self.remoteTrans.remove(trans)
+        if trans.index in self.ignoreTrans:
+            self.ignoreTrans.remove(trans.index)
             return
         if not trans.element.key in self.senseKeys:
             return
@@ -63,7 +63,7 @@ class Remote:
         self.senseKeys = self.flattened.keys()
 
 def resolvedArgument(arg):
-    if arg.valueType == "object":
-        return Dataset.singleton.lookup(arg.value)
+    if arg["type"] == "obj":
+        return Dataset.singleton.lookup(arg["value"])
     else:
-        return arg.value
+        return arg["value"]
