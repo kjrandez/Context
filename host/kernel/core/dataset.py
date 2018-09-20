@@ -12,6 +12,9 @@ class Dataset:
         
         Dataset.singleton = self
     
+    def lookup(self, key):
+        return self.objMap[key]
+
     def append(self, inst):
         assert not (inst.key in self.objMap)
         self.objMap[inst.key] = inst

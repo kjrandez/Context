@@ -47,4 +47,4 @@ class Kernel:
         while True:
             transaction = await self.ledger.next()
             for remote in self.remotes:
-                await remote.mutation(transaction)
+                await remote.update(transaction)

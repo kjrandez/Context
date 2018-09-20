@@ -26,7 +26,7 @@ export default class Fragment
         this.store.event(this, desc);
     }
 
-    changed() {
+    update() {
         if(this.visual != null) {
             this.visual.modelChanged();
         }

@@ -9,11 +9,11 @@ export default class App
         this.kernel.onopen = (event) => this.kernelOpen(event);
         this.kernel.onclose = (event) => this.kernelClose(event);
         this.selection = [];
-        this.root = null;
+        this.top = null;
     }
 
     startup(component) {
-        this.root = component;
+        this.top = component;
         this.kernel.onmessage = (event) => this.kernelMessage(event);
 
         document.onkeyup = (event) => this.documentKeyUp(event);
@@ -46,17 +46,17 @@ export default class App
                 this.selection = null;
         }
 
-        this.root.setSelection(this.selection);
+        this.top.setSelection(this.selection);
     }
 
     deselected() {
         this.selection = [];
-        this.root.setSelection(this.selection);
+        this.top.setSelection(this.selection);
     }
 
     kernelOpen(event) {
         this.kernel.send(JSON.stringify({
-            selector: "requestTopPage",
+            selector: "requestRoot",
             arguments: []
         }))
     }
@@ -73,7 +73,10 @@ export default class App
         switch(message.selector) {
             case 'renderPage':
                 this.store.setModel(message.arguments[0], message.arguments[1]);
-                this.root.setModel(this.store.topLevelContent());
+                this.top.setTopLevel(this.store.topLevelFragment());
+                break;
+            case 'update':
+                this.store.update(message.arguments[0], message.arguments[1]);
                 break;
             default:
                 console.log("Unhandled message");

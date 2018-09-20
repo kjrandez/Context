@@ -5,25 +5,39 @@ export default class Store
     constructor() {
         this.fragmentDict = {}
         this.modelDict = {}
-        this.topLevel = []
+        this.topLevel = null
     }
 
-    topLevelContent() {
+    topLevelFragment() {
         return this.topLevel;
     }
 
-    setModel(rootKey, elements) {
-        this.load(elements)
-        var root = this.modelDict[rootKey];
-        this.topLevel = root.value.content.map(key => this.fragmentDict[key])
+    setModel(topPageKey, elements) {
+        this.loadModelDict(elements)
+        this.topLevel = this.fragmentDict[topPageKey]
     }
 
-    load(modelList) {
-        for(var key in modelList) {
-            if(!(key in this.fragmentDict)) {
-                this.fragmentDict[key] = new Fragment(this, modelList[key])
+    update(trans, elementModels) {
+        this.loadModelList(elementModels);
+        var updatedFragment = this.fragmentDict[trans.key]
+        updatedFragment.update()
+    }
+
+    loadModelList(newModelList) {
+        newModelList.forEach(model => {
+            if(!(model.key in this.fragmentDict)) {
+                this.fragmentDict[model.key] = new Fragment(this, model)
             }
-            this.modelDict[key] = modelList[key]
+            this.modelDict[model.key] = model;
+        });
+    }
+
+    loadModelDict(newModelDict) {
+        for(var key in newModelDict) {
+            if(!(key in this.fragmentDict)) {
+                this.fragmentDict[key] = new Fragment(this, newModelDict[key])
+            }
+            this.modelDict[key] = newModelDict[key]
         }
     }
 
@@ -35,7 +49,7 @@ export default class Store
         if(fragment.type() === "text" && desc.transaction === "update") {
             var model = this.modelDict[fragment.key()];
             model.value.content = desc.value;
-            fragment.changed();
+            fragment.update();
         }
     }
 

@@ -76,7 +76,7 @@ class Local:
             return
         
         instClass = self.classList[args]
-        constructorArgs = [self.observer]
+        constructorArgs = []
         while True:
             line = await ainput(" + ")
             if line == "GO":
