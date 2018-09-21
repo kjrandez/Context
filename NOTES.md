@@ -1,27 +1,44 @@
 ### Notes
 
-Top-level = opened notebook...
-Each client has a certain page that it's centered on.
-Kernel needs to maintain a list of pages that are in focus by clients.
+Basic Functionality TODO:
 
-When an element is mutated, need to know whether that elementis under a focused page
-If so, need to propagate change or the whole modified page to the client(s).
+=Browser
+- Views for:
+    - Text (Markdown editor)
+    - Nested Pages
+    - Column Pages
+- Integration of blueprint.js visuals
+- Drag + drop of items and pages
+- Indent key function
+- Drop from external to browser
+- Buffer viewer w/ element preview popup
+- Rendering options:
+    - Page - Expand/collapse or just direct link
 
-How to know whether an element is under a focused page? Is it possible without letting
-the element know who it's parents are?
+=Kernel
+- Complete RPC availability via console
+- Undo/Redo function
+- Executable block
+- Cloneability / Atomicity
+- Buffer for copied items
+- Persistence w/ Disk
 
-Want to avoid elements knowing their parents, forming an access-controlled sandbox
+THEN,
+1. Snapshot export
+2. Virtual filesystem
+3. Peer-to-peer synchronization
 
-Especially because elements can have multiple parent nodes.
+FIXES:
+- Keys for multiple identical elements
+- Make sure recursive pages can't cause infinite loop
+    (collapsed by default)
+- Complete RPC in console
+- Select needs to select actual item, not all items with same key
 
-Maybe each page generates a sensitivity list?
-
-How can the browser provide the necessary information to let the kernel find the object
-in question...
-
-Basically the question is, should we just let the kernel maintain it's own flattened list
-of objects? If not, the browser needs to basically provide a path to the object in question.
-
-path based on keys, because order could feasibly change due to a modification request...
-
-of course modification from another source could also affect the keys;awoeijf;awoeifjlsi
+NOTES:
+- All pages that aren't columns should be closed by default, until manually
+    opened in which case the state should be saved
+- Upon indent of items, the page should be expanded
+- Columns w/in columns shouldn't be allowed, render as collapsed page
+- Pages which are recursive should have any iteration after the first
+    instance automatically collapsed regardless of saved state
