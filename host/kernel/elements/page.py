@@ -48,7 +48,7 @@ class Page(Element):
         trans.detail["index"] = index
         trans.reference(inst)
         
-        self.content.insert(inst, index)
+        self.content.insert(index, inst)
 
         trans.reverseOp = self.removeAt
         trans.reverseArgs = [index]

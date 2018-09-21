@@ -1,4 +1,6 @@
+import json
 from aioconsole import ainput
+from .dataset import Dataset
 
 class Local:
     def __init__(self, root, observer):
@@ -7,18 +9,13 @@ class Local:
         self.root = root
         self.observer = observer
         self.context = root
-        self.clipboard = None
 
         self.commands = {
             "list" : self.commandList,
             "enter" : self.commandEnter,
             "root" : self.commandRoot,
             "exec" : self.commandExec,
-            "insert" : self.commandInsert,
-            "remove" : self.commandRemove,
-            "paste" : self.commandPaste,
-            "copy" : self.commandCopy,
-            "clip" : self.commandClip
+            "make" : self.commandMake
         }
         self.classList = {
             "text" : Text,
@@ -41,74 +38,51 @@ class Local:
 
     async def commandList(self, args):
         i = 0
+        print("Listing " + str(self.context.key))
         for entry in self.context.content:
-            print(str(i) + ") " + entry.etype + "_" + str(entry.key))
+            print(str(i) + ". " + entry.etype + " " + str(entry.key))
             i = i + 1
 
     async def commandEnter(self, args):
-        entryIndex = int(args)
-        newContext = self.context.content[entryIndex]
+        newContext = Dataset.singleton.lookup(int(args))
         if newContext.isPage():
             self.context = newContext
-            print("Entered " + self.context.etype + "_" + str(self.context.key))
+            print("Entered " + str(self.context.key))
         else:
             print("Error")
 
     async def commandRoot(self, args):
         self.context = self.root
-        print("Entered " + self.context.etype + "_" + str(self.context.key))
+        print("Entered " + str(self.context.key))
 
     async def commandExec(self, args):
-        code = ""
-        while True:
-            line = await ainput(" | ")
-            if line == "GO":
-                break
-            else:
-                line = line +  "\n"
-                code = code + line
-        
-        self.context.localExec(code)
+        split = args.split()
+        target = Dataset.singleton.lookup(int(split[0]))
+        selector = selector = getattr(target, split[1])
 
-    async def commandInsert(self, args):
+        arguments = await promptArgs()
+        selector(*arguments)
+
+    async def commandMake(self, args):
         if not (args in self.classList):
             print("Error")
             return
-        
+
         instClass = self.classList[args]
-        constructorArgs = []
-        while True:
-            line = await ainput(" + ")
-            if line == "GO":
-                break
-            else:
-                constructorArgs.append(line)
 
+        constructorArgs = await promptArgs()
         inst = instClass(*constructorArgs)
-        print(inst)
-        self.context.append(inst)
+        print("Key: " + str(inst.key))
 
-    async def commandRemove(self, args):
-        index = int(args)
-        inst = self.context.content[index]
-        self.context.removeAt(index)
-        print(inst)
-
-    async def commandCopy(self, args):
-        index = int(args)
-        inst = self.context.content[index]
-        self.clipboard = inst
-        print(inst)
-
-    async def commandPaste(self, args):
-        if self.clipboard == None:
-            print("Error")
-            return
-        
-        inst = self.clipboard
-    
-        print(inst)
-        self.context.append(inst)
-
-    async def commandClip(self, args):
-        print(self.clipboard)
+async def promptArgs():
+    args = []
+    while True:
+        line = await ainput(" | ")
+        if line == "GO":
+            break
+        else:
+            if line[0] == "+":
+                args.append(Dataset.singleton.lookup(int(line[1:])))
+            else:
+                args.append(json.loads(line))
+    return args

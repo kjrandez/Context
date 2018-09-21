@@ -29,12 +29,7 @@ THEN,
 3. Peer-to-peer synchronization
 
 FIXES:
-- Keys for multiple identical elements
-- Make sure recursive pages can't cause infinite loop
-    (collapsed by default)
 - Complete RPC in console
-- Select needs to select actual item, not all items with same key
-
 
 
 NOTES:
