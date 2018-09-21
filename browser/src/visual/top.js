@@ -25,7 +25,7 @@ export default class App extends Component {
     setTopLevel(fragment) {
         // Update fragment connection
         if(this.topFragment != null)
-            this.topFragment.disconnect()
+            this.topFragment.disconnect(this)
         this.topFragment = fragment;
         this.topFragment.connect(this)
 

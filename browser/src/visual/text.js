@@ -48,6 +48,6 @@ export default class Text extends Component
     }
 
     componentWillUnmount() {
-        this.props.fragment.disconnect();
+        this.props.fragment.disconnect(this);
     }
 }

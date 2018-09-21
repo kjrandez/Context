@@ -26,6 +26,23 @@ export default class Page extends Component
         });
     }
 
+    isRecursivePage() {
+        return this.props.path.indexOf(this.props.fragment.key()) >= 0;
+    }
+
+    pageContent() {
+        if(!this.isRecursivePage()) {
+            return elementList(
+                this.state.content, 
+                this.props.path.concat(this.props.fragment.key()),
+                this.props.selection,
+                this.props.app
+            )
+        } else {
+            return <p>Recursive page {this.props.fragment.key()}</p>
+        }
+    }
+
     render() {
         return (
             <Element
@@ -34,12 +51,7 @@ export default class Page extends Component
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>
-                {elementList(
-                    this.state.content, 
-                    this.props.path + [this.props.fragment.key()],
-                    this.props.selection,
-                    this.props.app
-                )}
+                    {this.pageContent()}
             </Element>
         );
     }
@@ -49,6 +61,6 @@ export default class Page extends Component
     }
 
     componentWillUnmount() {
-        this.props.fragment.disconnect();
+        this.props.fragment.disconnect(this);
     }
 }

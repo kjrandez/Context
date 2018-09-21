@@ -41,6 +41,6 @@ export default class Image extends Component
     }
 
     componentWillUnmount() {
-        this.props.fragment.disconnect();
+        this.props.fragment.disconnect(this);
     }
 }

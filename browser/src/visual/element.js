@@ -6,6 +6,9 @@ export default class Element extends Component
     constructor(props) {
         super(props);
         this.uniqueSelection = new Selection(props.path, props.index, props.fragment);
+
+        console.log("Path: ");
+        console.log(props.path);
     }
 
     onMouseDown(event) {

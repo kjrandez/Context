@@ -7,7 +7,7 @@ export default class Fragment
         this.store = store;
         this.immKey = model.key;
         this.immType = model.type;
-        this.visual = null;
+        this.visuals = [];
     }
 
     key() {
@@ -27,16 +27,14 @@ export default class Fragment
     }
 
     update() {
-        if(this.visual != null) {
-            this.visual.modelChanged();
-        }
+        this.visuals.forEach(visual => visual.modelChanged());
     }
 
     connect(visual) {
-        this.visual = visual;
+        this.visuals.push(visual);
     }
 
-    disconnect() {
-        this.visual = null;
+    disconnect(visual) {
+        this.visuals.splice(this.visuals.indexOf(visual), 1);
     }
 }
