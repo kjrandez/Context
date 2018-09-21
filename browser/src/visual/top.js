@@ -49,6 +49,19 @@ export default class App extends Component {
         });
     }
 
+    pageContent() {
+        if(this.topFragment != null) {
+            return elementList(
+                this.state.content,
+                [this.topFragment.key()],
+                this.state.selection,
+                this.props.app
+            );
+        } else {
+            return <p>Loading...</p>
+        }
+    }
+
     render() {
         return (
             <div
@@ -57,7 +70,7 @@ export default class App extends Component {
                 <Inspector app={this.props.app} selection={this.state.selection} />
                 <div id="page">
                     <div id="top-spacer"></div>
-                    {elementList(this.state.content, this.state.selection, this.props.app)}
+                        {this.pageContent()}
                     <div id="bottom-spacer"></div>
                 </div>
             </div>

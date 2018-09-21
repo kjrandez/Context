@@ -32,7 +32,12 @@ export default class Page extends Component
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>
-                {elementList(this.state.content, this.props.selection, this.props.app)}
+                {elementList(
+                    this.state.content, 
+                    this.props.path + [this.props.key],
+                    this.props.selection,
+                    this.props.app
+                )}
             </Element>
         );
     }

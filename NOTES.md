@@ -35,6 +35,8 @@ FIXES:
 - Complete RPC in console
 - Select needs to select actual item, not all items with same key
 
+
+
 NOTES:
 - All pages that aren't columns should be closed by default, until manually
     opened in which case the state should be saved
