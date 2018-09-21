@@ -1,5 +1,5 @@
 # Context
-An experimental approach to keeping a modern scientific / engineering lab notebook.
+An experimental approach to keeping a modern scientific / engineering lab notebook. See the evolving [functional description](CONTEXT.md) for more info.
 
 As of right now only builds/runs on Windows.
 
