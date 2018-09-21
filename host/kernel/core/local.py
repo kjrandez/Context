@@ -1,4 +1,5 @@
 import json
+import traceback
 from aioconsole import ainput
 from .dataset import Dataset
 
@@ -14,7 +15,7 @@ class Local:
             "list" : self.commandList,
             "enter" : self.commandEnter,
             "root" : self.commandRoot,
-            "exec" : self.commandExec,
+            "invoke" : self.commandInvoke,
             "make" : self.commandMake
         }
         self.classList = {
@@ -33,7 +34,13 @@ class Local:
         args = " ".join(parts[1:])
 
         if parts[0] in self.commands:
-            await self.commands[command](args)
+            try:
+                await self.commands[command](args)
+            except KeyboardInterrupt:
+                raise
+            except:
+                trace = traceback.format_exc()
+                print(trace)
         else:
             print("Error")
 
@@ -56,7 +63,7 @@ class Local:
         self.context = self.root
         print("Entered " + str(self.context.key))
 
-    async def commandExec(self, args):
+    async def commandInvoke(self, args):
         split = args.split()
         target = Dataset.singleton.lookup(int(split[0]))
         selector = selector = getattr(target, split[1])

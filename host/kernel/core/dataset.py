@@ -20,12 +20,13 @@ class Dataset:
         self.objMap[inst.key] = inst
 
     def makeDefault(self):
-        from ..elements import Page, Text, Image
+        from ..elements import Page, Text, Image, Script
 
         self.root = Page([
             Text('### Hello world'),
             Text('How are you doing today?'),
             Text("I'm doing just fine thank you very much."),
+            Script("print(\"Hello world!\")"),
             Page([
                 Page([
                     Text('Introduction'),

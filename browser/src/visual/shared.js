@@ -2,6 +2,7 @@ import React from 'react';
 import Text from './text.js';
 import Image from './image.js';
 import Page from './page.js';
+import Script from './script.js';
 
 function timesInArray(anItem, array) {
     var count = 0;
@@ -38,6 +39,14 @@ export function elementList(fragments, path, selection, app) {
                     app={app} />;
             case "Image":
                 return <Image
+                    key={key}
+                    fragment={fragment}
+                    index={index}
+                    path={path}
+                    selection={selection}
+                    app={app} />;
+            case "Script":
+                return <Script 
                     key={key}
                     fragment={fragment}
                     index={index}

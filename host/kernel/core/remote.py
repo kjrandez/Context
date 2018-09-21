@@ -25,8 +25,9 @@ class Remote:
         arguments = [resolvedArgument(X) for X in data["arguments"]]
 
         resultTrans = selector(*arguments)
-        if not data["respond"]:
-            self.ignoreTrans.append(resultTrans)
+        if resultTrans != None:
+            if not data["respond"]:
+                self.ignoreTrans.append(resultTrans)
 
     async def commandRequestRoot(self, data):
         await self.providePage(self.root)

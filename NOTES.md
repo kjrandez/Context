@@ -3,10 +3,11 @@
 Basic Functionality TODO:
 
 =Browser
-- Views for:
+- Views & side-menus for:
     - Text (Markdown editor)
     - Nested Pages
     - Column Pages
+    - Images, Scripts, Files, Websites
 - Integration of blueprint.js visuals
 - Drag + drop of items and pagesand external things
 - Indent key function
@@ -15,8 +16,8 @@ Basic Functionality TODO:
     - Page - Expand/collapse or just direct link
 
 =Kernel
+- Basic elements: Page, Text, Image, Script, File, Website
 - Undo/Redo function
-- Executable block
 - Cloneability / Atomicity
 - Buffer for copied items
 - Persistence w/ Disk
@@ -25,6 +26,7 @@ THEN,
 1. Snapshot export
 2. Virtual filesystem
 3. Peer-to-peer synchronization
+4. Tablet + stylus version
 
 NOTES:
 - All pages that aren't columns should be closed by default, until manually

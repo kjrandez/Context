@@ -9,9 +9,10 @@ class Transaction:
         self.observer = observer
         self.detail = {}
 
-        self.observer.begin(self)
         self.index = Transaction.nextIndex
         Transaction.nextIndex = Transaction.nextIndex + 1
+        
+        self.observer.begin(self)
 
     def reference(self, element):
         self.others.append(element)

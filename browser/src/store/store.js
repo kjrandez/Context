@@ -9,7 +9,8 @@ export default class Store
         this.topLevel = null;
 
         this.localHandlers = {
-            "Text-update": this.invlocTextUpdate.bind(this)
+            "Text-update": this.invlocContentUpdate.bind(this),
+            "Script-update": this.invlocContentUpdate.bind(this)
         };
     }
 
@@ -65,7 +66,7 @@ export default class Store
         });
     }
 
-    invlocTextUpdate(fragment, desc) {
+    invlocContentUpdate(fragment, desc) {
         var model = this.modelDict[fragment.key()];
         model.value.content = desc.value;
         fragment.update();
@@ -78,7 +79,7 @@ export default class Store
 
 function encoded(argument) {
     if(argument instanceof Fragment)
-        return { type: "obj", value: argument.key }
+        return { type: "obj", value: argument.key() }
     else
         return { type: "std", value: argument };
 }
