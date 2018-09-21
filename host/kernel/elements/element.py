@@ -3,10 +3,8 @@ from ..core import Dataset, Transaction
 class Element:
     nextKey = 0
 
-    def __init__(self, etype):
+    def __init__(self):
         self.key = Element.nextKey
-        self.etype = etype
-
         Dataset.singleton.append(self)
         Element.nextKey = Element.nextKey + 1
 
@@ -19,7 +17,7 @@ class Element:
     def model(self):
         return {
             "key" : self.key,
-            "type" : self.etype,
+            "type" : type(self).__name__,
             "value" : self.value()
         }
 

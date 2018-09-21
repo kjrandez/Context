@@ -9,7 +9,7 @@ export default class Store
         this.topLevel = null;
 
         this.localHandlers = {
-            "text-update": this.invlocTextUpdate.bind(this)
+            "Text-update": this.invlocTextUpdate.bind(this)
         };
     }
 

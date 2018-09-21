@@ -2,9 +2,12 @@ from .element import Element
 
 class Image(Element):
     def __init__(self, src, alt):
-        super().__init__("image")
+        super().__init__()
         self.src = src
         self.alt = alt
+
+    def typeName(self):
+        return "image"
 
     def value(self):
         return {

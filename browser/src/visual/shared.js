@@ -20,7 +20,7 @@ export function elementList(fragments, path, selection, app) {
             key += "-" + index;
 
         switch(fragment.type()) {
-            case "page":
+            case "Page":
                 return <Page
                     key={key}
                     fragment={fragment}
@@ -28,7 +28,7 @@ export function elementList(fragments, path, selection, app) {
                     path={path}
                     selection={selection}
                     app={app} />;
-            case "text":
+            case "Text":
                 return <Text
                     key={key}
                     fragment={fragment}
@@ -36,7 +36,7 @@ export function elementList(fragments, path, selection, app) {
                     path={path}
                     selection={selection}
                     app={app} />;
-            case "image":
+            case "Image":
                 return <Image
                     key={key}
                     fragment={fragment}

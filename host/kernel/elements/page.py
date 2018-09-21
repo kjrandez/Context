@@ -2,10 +2,13 @@ from .element import Element
 
 class Page(Element):
     def __init__(self, content = [], column = False):
-        super().__init__("page")
+        super().__init__()
         self.content = content
         self.column = column
     
+    def typeName(self):
+        return "page"
+
     def isPage(self):
         return True
 
@@ -14,10 +17,7 @@ class Page(Element):
             "content" : [x.key for x in self.content],
             "column" : self.column
         }
-
-    def localExec(self, code):
-        exec(code, globals(), locals())
-
+    
     def flattened(self):
         entries = {self.key : self.model()}
         self.traverse(entries)

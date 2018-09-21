@@ -8,15 +8,13 @@ Basic Functionality TODO:
     - Nested Pages
     - Column Pages
 - Integration of blueprint.js visuals
-- Drag + drop of items and pages
+- Drag + drop of items and pagesand external things
 - Indent key function
-- Drop from external to browser
 - Buffer viewer w/ element preview popup
 - Rendering options:
     - Page - Expand/collapse or just direct link
 
 =Kernel
-- Complete RPC availability via console
 - Undo/Redo function
 - Executable block
 - Cloneability / Atomicity
@@ -27,10 +25,6 @@ THEN,
 1. Snapshot export
 2. Virtual filesystem
 3. Peer-to-peer synchronization
-
-FIXES:
-- Complete RPC in console
-
 
 NOTES:
 - All pages that aren't columns should be closed by default, until manually

@@ -4,7 +4,7 @@ from .dataset import Dataset
 
 class Local:
     def __init__(self, root, observer):
-        from ..elements import Text, Page, Image
+        from ..elements import Text, Page, Image, Script
 
         self.root = root
         self.observer = observer
@@ -18,9 +18,10 @@ class Local:
             "make" : self.commandMake
         }
         self.classList = {
-            "text" : Text,
-            "image" : Image,
-            "page" : Page
+            "Text" : Text,
+            "Image" : Image,
+            "Page" : Page,
+            "Script" : Script
         }
 
     async def dispatch(self, message):
@@ -40,7 +41,7 @@ class Local:
         i = 0
         print("Listing " + str(self.context.key))
         for entry in self.context.content:
-            print(str(i) + ". " + entry.etype + " " + str(entry.key))
+            print(str(i) + ". " + type(entry).__name__ + " " + str(entry.key))
             i = i + 1
 
     async def commandEnter(self, args):
