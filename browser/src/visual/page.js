@@ -29,12 +29,14 @@ export default class Page extends Component
     render() {
         return (
             <Element
+                path={this.props.path}
+                index={this.props.index}
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>
                 {elementList(
                     this.state.content, 
-                    this.props.path + [this.props.key],
+                    this.props.path + [this.props.fragment.key()],
                     this.props.selection,
                     this.props.app
                 )}

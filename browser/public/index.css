@@ -1,0 +1,68 @@
+html, body, #root, #scene {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background-color: #F0F0F0;
+}
+
+#page {
+	min-height: 100%;
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 0 20px;
+	overflow: auto;
+	background-color: #FCFCFC;
+	border-left: 1px solid #BBB;
+	border-right: 1px solid #BBB;
+}
+
+#inspector {
+    height: 100%;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+	pointer-events: none;
+	position: fixed;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	width: 300px;
+}
+
+.inspector-hidden {
+	right: -300px; /* 0 width - change this with JavaScript */
+}
+
+.inspector-visible {
+	transition: 0.2s;
+	right: 0
+}
+
+.inspector-content {
+	pointer-events: all;
+	max-height: 80%;
+	max-width: 278px;
+	background-color: #FCFCFC;
+	border: 1px solid #BBB;
+	margin-right: 10px;
+	padding: 10px;
+	overflow: hidden;
+}
+
+#top-spacer {
+	min-height: 10px;
+}
+
+#bottom-spacer {
+	min-height: 50px;
+}
+
+.element {
+	overflow: auto;
+	border: 2px solid blue;
+	margin: 10px;
+}
+
+.selected-element {
+	background-color: green;
+}

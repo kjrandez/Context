@@ -19,7 +19,7 @@ export default class App extends Component {
     }
 
     onMouseDown(event) {
-        this.props.app.deselected();
+        this.props.app.selected(null, false);
     }
 
     setTopLevel(fragment) {
@@ -42,10 +42,10 @@ export default class App extends Component {
         });
     }
 
-    setSelection(fragments) {
+    setSelection(selection) {
         // The top-level's state includes the selected page contents
         this.setState({
-            selection: fragments
+            selection: selection
         });
     }
 

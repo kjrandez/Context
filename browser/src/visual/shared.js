@@ -5,10 +5,11 @@ import Page from './page.js';
 
 export function elementList(fragments, path, selection, app) {
     return fragments.map((fragment, index) => {
+        var key = fragment.key() + "-" + index;
         switch(fragment.type()) {
             case "page":
                 return <Page
-                    key={fragment.key()}
+                    key={key}
                     fragment={fragment}
                     index={index}
                     path={path}
@@ -16,7 +17,7 @@ export function elementList(fragments, path, selection, app) {
                     app={app} />;
             case "text":
                 return <Text
-                    key={fragment.key()}
+                    key={key}
                     fragment={fragment}
                     index={index}
                     path={path}
@@ -24,7 +25,7 @@ export function elementList(fragments, path, selection, app) {
                     app={app} />;
             case "image":
                 return <Image
-                    key={fragment.key()}
+                    key={key}
                     fragment={fragment}
                     index={index}
                     path={path}

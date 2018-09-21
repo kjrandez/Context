@@ -25,9 +25,9 @@ export default class App
             this.selected(null, false);
     }
 
-    selected(fragment, ctrlDown) {
+    selected(newSelection, ctrlDown) {
         if(ctrlDown) {
-            var index = this.selection.indexOf(fragment);
+            var index = this.selection.indexOf(newSelection);
             if(index >= 0) {
                 // Ctrl is down and we clicked on an already-selected
                 // element, so de-select it.
@@ -36,21 +36,16 @@ export default class App
             else {
                 // Ctrl is down and we clicked on a non-selected element,
                 // so add it to the list of selections.
-                this.selection.push(fragment);
+                this.selection.push(newSelection);
             }
         }
         else {
-            if(fragment != null)
-                this.selection = [fragment];
+            if(newSelection != null)
+                this.selection = [newSelection];
             else
-                this.selection = null;
+                this.selection = [];
         }
 
-        this.top.setSelection(this.selection);
-    }
-
-    deselected() {
-        this.selection = [];
         this.top.setSelection(this.selection);
     }
 

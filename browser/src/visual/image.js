@@ -26,6 +26,8 @@ export default class Image extends Component
     render() {
         return (
             <Element
+                path={this.props.path}
+                index={this.props.index}
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>

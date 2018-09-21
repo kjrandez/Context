@@ -13,7 +13,8 @@ export default class Inspector extends Component
         if(this.props.selection.length !== 1)
             return null;
         
-        var fragment = this.props.selection[0];
+        var selection = this.props.selection[0];
+        var fragment = selection.fragment;
         var value = this.props.app.store.value(fragment.key());
 
         return (
