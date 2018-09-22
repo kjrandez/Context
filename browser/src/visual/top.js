@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {elementList} from './shared.js';
-import Inspector from './inspector.js';
+import {Inspector} from './inspector';
 
 export default class App extends Component {
     constructor(props) {

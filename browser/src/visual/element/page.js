@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Element from './element.js';
-import {elementList} from './shared.js';
+import {elementList} from '../shared.js';
 import { Collapse } from "@blueprintjs/core";
 
 export default class Page extends Component

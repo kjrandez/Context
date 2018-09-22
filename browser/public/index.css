@@ -95,11 +95,11 @@ html, body, #root, #scene {
 	pointer-events: all;
 	max-height: 80%;
 	max-width: 278px;
-	background-color: #FCFCFC;
-	border: 1px solid #BBB;
+	background-color: #DDD;
 	margin-right: 10px;
-	padding: 10px;
+	padding: 3px;
 	overflow: hidden;
+	border-radius: 3px;
 }
 
 #top-spacer {

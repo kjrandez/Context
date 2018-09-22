@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import Selection from '../selection.js';
+import Selection from '../../selection.js';
 
 export default class Element extends Component 
 {

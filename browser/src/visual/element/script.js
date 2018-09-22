@@ -15,26 +15,10 @@ export default class Script extends Component
         }
     }
 
-    onClick() {
-        var parentKey = this.props.path[this.props.path.length - 1];
-        var parent = this.props.app.store.fragment(parentKey)
-
-        this.props.fragment.invoke({
-            selector: "execute",
-            arguments: [parent, this.state.cbChecked]
-        });
-    }
-
     onChange(event) {
         this.props.fragment.invoke({
             selector: "update",
             arguments: [event.target.value]
-        });
-    }
-
-    cbChange(event) {
-        this.setState({
-            cbChecked: event.target.checked
         });
     }
 
@@ -54,15 +38,6 @@ export default class Script extends Component
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>
-                <div>
-                    Script
-                    <button type="button" onClick={() => this.onClick()}>Run</button>
-                    Run in new thread?
-                    <input
-                        type="checkbox"
-                        checked={this.state.cbChecked}
-                        onChange={(ev) => this.cbChange(ev)} />
-                </div>
                 <Textarea
                     className="code-edit"
                     onChange={(ev) => this.onChange(ev)}

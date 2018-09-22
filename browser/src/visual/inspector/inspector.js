@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import ScriptInspector from './scriptInspector';
 
 export default class Inspector extends Component
 {
@@ -15,21 +16,28 @@ export default class Inspector extends Component
         
         var selection = this.props.selection[0];
         var fragment = selection.fragment;
-        var value = this.props.app.store.value(fragment.key());
 
-        return (
-            <span>
-                <b>Key:</b> {fragment.key()}<br />
-                <b>Type:</b> {fragment.type()}<br />
-                <br/>
-                {JSON.stringify(value)}
-            </span>
-        )
+        switch(fragment.type()) {
+            case "Script":
+                return <ScriptInspector
+                    path={selection.path}
+                    fragment={fragment}
+                    app={this.props.app}/>
+            default:
+                return null;
+        }
+    }
+
+    onMouseDown(event) {
+        event.stopPropagation();
     }
 
     render() {
         return(
-            <div id="inspector" className={this.className()}>
+            <div
+                id="inspector"
+                className={this.className()}
+                onMouseDown={(ev) => this.onMouseDown(ev)}>
                 <div className="inspector-content">
                     {this.inspectorContent()}
                 </div>
