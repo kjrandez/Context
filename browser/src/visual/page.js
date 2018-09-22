@@ -51,7 +51,9 @@ export default class Page extends Component
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>
-                    {this.pageContent()}
+                    <div className="page-content">
+                        {this.pageContent()}
+                    </div>
             </Element>
         );
     }

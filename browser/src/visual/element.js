@@ -17,19 +17,22 @@ export default class Element extends Component
         return this.props.selection.indexOf(this.uniqueSelection) >= 0;
     }
 
-    className() {
-        if(this.isSelected())
-            return "element selected-element";
-        else
-            return "element";
+    elementContentClass() {
+        return this.isSelected() ? "element-content selected" : "element-content";
+    }
+
+    elementHandleClass() {
+        return this.isSelected() ? "element-handle selected" : "element-handle";
     }
 
     render() {
         return (
-            <div
-                className={this.className()}
-                onMouseDown={(event) => this.onMouseDown(event)}>
-                {this.props.children}
+            <div className="element" onMouseDown={(event) => this.onMouseDown(event)}>
+                <div className="element-spacer"></div>
+                <div className={this.elementHandleClass()}></div>
+                <div className={this.elementContentClass()}>
+                    {this.props.children}
+                </div>
             </div>
         )
     }

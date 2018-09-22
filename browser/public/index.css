@@ -2,18 +2,17 @@ html, body, #root, #scene {
 	height: 100%;
 	margin: 0;
 	padding: 0;
-	background-color: #F0F0F0;
+	background-color: #FAFAFA;
 }
 
 #page {
 	min-height: 100%;
 	max-width: 900px;
 	margin: 0 auto;
-	padding: 0 20px;
+	padding: 0;
+	padding-left: 12px;
 	overflow: auto;
-	background-color: #FCFCFC;
-	border-left: 1px solid #BBB;
-	border-right: 1px solid #BBB;
+	border-left: 2px solid #BBB;
 }
 
 #inspector {
@@ -59,10 +58,40 @@ html, body, #root, #scene {
 
 .element {
 	overflow: auto;
-	border: 2px solid blue;
-	margin: 10px;
+	margin: 0;
+	padding: 0;
 }
 
-.selected-element {
-	background-color: green;
+.element-spacer {
+	margin: 0;
+	padding: 0;
+	height: 2px;
+}
+
+.element-handle {
+	margin: 0;
+	padding: 0;
+	height: 10px;
+}
+
+.element-handle.selected {
+	background-color: black;
+}
+
+.element-content {
+	margin: 0;
+	padding: 1px;
+}
+
+.element-content.selected {
+	background-color: white;
+	margin: 0;
+	padding: 0;
+	border: 1px solid black;
+}
+
+.page-content {
+	margin: 0;
+	padding-left: 12px;
+	border-left: 2px solid #BBB;
 }
