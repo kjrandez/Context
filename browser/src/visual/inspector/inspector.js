@@ -55,11 +55,13 @@ export default class Inspector extends Component
             case "Script":
                 return <ScriptInspector
                     path={selection.path}
+                    index={selection.index}
                     fragment={fragment}
                     app={this.props.app} />
             default:
                 return <GenericInspector
                     path={selection.path}
+                    index={selection.index}
                     fragment={fragment}
                     app={this.props.app} />
         }

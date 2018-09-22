@@ -17,7 +17,12 @@ export default class GenericInspector extends Component
     render() {
         return(
             <ButtonGroup minimal={false} vertical="true" onMouseEnter={()=>{}}>
-                {commonInspectorButtons(this.props.path, this.props.fragment, this.props.app)}
+                {commonInspectorButtons(
+                    this.props.path,
+                    this.props.index,
+                    this.props.fragment,
+                    this.props.app
+                )}
             </ButtonGroup>
         );
     }

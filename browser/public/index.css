@@ -46,7 +46,7 @@ div {
 
 p {
 	padding: 0;
-	margin: 0;
+	margin: 2px 0;
 }
 
 html, body, #root, #scene {
@@ -167,4 +167,8 @@ html, body, #root, #scene {
 
 .page-body {
 	flex: 1;
+}
+
+.info-content {
+	padding: 5px;
 }

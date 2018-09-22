@@ -17,10 +17,15 @@ export default class ScriptInspector extends Component
     render() {
         return(
             <ButtonGroup minimal={false} vertical="true" onMouseEnter={()=>{}}>
-                <Button icon="publish-function" onClick={()=>this.run(false)}></Button>
-                <Button icon="derive-column" onClick={()=>this.run(true)}></Button>
+                <Button title="Run script" icon="publish-function" onClick={()=>this.run(false)}></Button>
+                <Button title="Run in thread" icon="derive-column" onClick={()=>this.run(true)}></Button>
                 <Divider />
-                {commonInspectorButtons(this.props.path, this.props.fragment, this.props.app)}
+                {commonInspectorButtons(
+                    this.props.path,
+                    this.props.index,
+                    this.props.fragment,
+                    this.props.app
+                )}
             </ButtonGroup>
         );
     }
