@@ -1,20 +1,54 @@
 import React, {Component} from 'react';
 import ScriptInspector from './scriptInspector';
+import GenericInspector from './genericInspector';
 
 export default class Inspector extends Component
 {
-    className() {
-        if(this.props.selection.length === 1)
+    constructor(props) {
+        super(props);
+        this.contentRef = React.createRef();
+    }
+
+    componentDidUpdate() {
+        if(this.contentRef.current != null) {
+            var rect = this.contentRef.current.getBoundingClientRect();
+            if(rect.top < 10) {
+                this.contentRef.current.style.marginTop = "10px";
+            }
+            else if(rect.bottom > (window.innerHeight - 10)) {
+                var newTop = window.innerHeight - rect.height - 10;
+                this.contentRef.current.style.marginTop = newTop + "px";
+            }
+        }
+    }
+
+    currentSelection() {
+        if(this.props.selection.length !== 1)
+            return null;
+        return this.props.selection[0];
+    }
+
+    className(selection) {
+        if(selection != null)
             return "inspector-visible";
         else
             return "inspector-hidden";
     }
 
-    inspectorContent() {
-        if(this.props.selection.length !== 1)
+    inspectorContent(selection) {
+        return (
+            <div ref={this.contentRef}
+            className="inspector-content"
+            style={{marginTop: this.inspectorLoc(selection)}}>
+                {this.inspectorContentInner(selection)}
+            </div>
+        );
+    }
+
+    inspectorContentInner(selection) {    
+        if(selection == null)
             return null;
         
-        var selection = this.props.selection[0];
         var fragment = selection.fragment;
 
         switch(fragment.type()) {
@@ -22,10 +56,19 @@ export default class Inspector extends Component
                 return <ScriptInspector
                     path={selection.path}
                     fragment={fragment}
-                    app={this.props.app}/>
+                    app={this.props.app} />
             default:
-                return null;
+                return <GenericInspector
+                    path={selection.path}
+                    fragment={fragment}
+                    app={this.props.app} />
         }
+    }
+
+    inspectorLoc(selection) {
+        if(selection == null)
+            return 10;
+        return selection.ref.current.getBoundingClientRect().top;
     }
 
     onMouseDown(event) {
@@ -33,14 +76,13 @@ export default class Inspector extends Component
     }
 
     render() {
+        var selection = this.currentSelection();
+
         return(
-            <div
-                id="inspector"
-                className={this.className()}
-                onMouseDown={(ev) => this.onMouseDown(ev)}>
-                <div className="inspector-content">
-                    {this.inspectorContent()}
-                </div>
+            <div id="inspector"
+            className={this.className(selection)}
+            onMouseDown={(ev) => this.onMouseDown(ev)}>
+                {this.inspectorContent(selection)}
             </div>
         )
     }

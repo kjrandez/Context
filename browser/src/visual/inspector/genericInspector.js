@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Button, ButtonGroup, Divider } from '@blueprintjs/core';
+import { ButtonGroup } from '@blueprintjs/core';
 import { commonInspectorButtons } from './shared';
 
-export default class ScriptInspector extends Component
+export default class GenericInspector extends Component
 {
     run(threaded) {
         var parentKey = this.props.path[this.props.path.length - 1];
@@ -17,9 +17,6 @@ export default class ScriptInspector extends Component
     render() {
         return(
             <ButtonGroup minimal={false} vertical="true" onMouseEnter={()=>{}}>
-                <Button icon="publish-function" onClick={()=>this.run(false)}></Button>
-                <Button icon="derive-column" onClick={()=>this.run(true)}></Button>
-                <Divider />
                 {commonInspectorButtons(this.props.path, this.props.fragment, this.props.app)}
             </ButtonGroup>
         );

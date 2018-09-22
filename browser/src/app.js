@@ -49,6 +49,14 @@ export default class App
         this.top.setSelection(this.selection);
     }
 
+    deselected(selection) {
+        var index = this.selection.indexOf(selection);
+        if(index >= 0) {
+            this.selection.splice(index, 1);
+        }
+        this.top.setSelection(this.selection);
+    }
+
     kernelSend(selector, data) {
         this.kernel.send(JSON.stringify({
             selector: selector,

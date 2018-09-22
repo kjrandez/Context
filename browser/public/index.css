@@ -70,14 +70,13 @@ html, body, #root, #scene {
 }
 
 #inspector {
-    height: 100%;
     z-index: 1;
     top: 0;
     overflow-x: hidden;
 	pointer-events: none;
 	position: fixed;
 	display: flex;
-	align-items: center;
+	align-items: top;
 	justify-content: flex-end;
 	width: 300px;
 }
@@ -93,13 +92,13 @@ html, body, #root, #scene {
 
 .inspector-content {
 	pointer-events: all;
-	max-height: 80%;
 	max-width: 278px;
 	background-color: #DDD;
+	border: 1px solid #BBB;
 	margin-right: 10px;
 	padding: 3px;
 	overflow: hidden;
-	border-radius: 3px;
+	border-radius: 6px;
 }
 
 #top-spacer {

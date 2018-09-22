@@ -40,6 +40,7 @@ export default class Script extends Component
                 app={this.props.app}>
                 <Textarea
                     className="code-edit"
+                    spellCheck="false"
                     onChange={(ev) => this.onChange(ev)}
                     value={this.state.content} />
             </Element>
