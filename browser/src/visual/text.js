@@ -38,7 +38,7 @@ export default class Text extends Component
                 selection={this.props.selection}
                 app={this.props.app}>
                 <Textarea
-                    className="text-element"
+                    className="text-edit"
                     onChange={(event) => this.onChange(event)}
                     value={this.state.content} />
             </Element>

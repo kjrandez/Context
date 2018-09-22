@@ -64,7 +64,7 @@ export default class Script extends Component
                         onChange={(ev) => this.cbChange(ev)} />
                 </div>
                 <Textarea
-                    className="text-element"
+                    className="code-edit"
                     onChange={(ev) => this.onChange(ev)}
                     value={this.state.content} />
             </Element>

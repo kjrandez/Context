@@ -9,6 +9,7 @@ Basic Functionality TODO:
     - Column Pages
     - Images, Scripts, Files, Websites
 - Integration of blueprint.js visuals
+- Navigation between pages
 - Drag + drop of items and pagesand external things
 - Indent key function
 - Buffer viewer w/ element preview popup
@@ -21,6 +22,9 @@ Basic Functionality TODO:
 - Cloneability / Atomicity
 - Buffer for copied items
 - Persistence w/ Disk
+
+= FIXES
+- Editing text then collapsing, text disappears
 
 THEN,
 1. Snapshot export

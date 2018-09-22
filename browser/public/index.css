@@ -2,11 +2,61 @@ html {
 	overflow-y: scroll;
 }
 
+textarea {
+	width: 100%;
+	margin: 0px;
+	box-sizing: border-box;
+	vertical-align: top;
+	background: transparent;
+	font: inherit;
+	border: 0;
+}
+
+.text-edit {
+	outline: 0;
+}
+
+.code-edit {
+	outline: 0;
+	font-family: monospace;
+	background-color: #F0F0F0;
+}
+
+.element-content.selected .code-edit {
+	background-color: transparent;
+}
+
+button {
+	outline: 0;
+}
+
+button:focus {
+	outline:0;
+}
+
+img {
+	max-width:100%;
+	max-height:100%;
+}
+
+div {
+	padding: 0;
+	margin: 0;
+}
+
+p {
+	padding: 0;
+	margin: 0;
+}
+
 html, body, #root, #scene {
 	height: 100%;
 	margin: 0;
 	padding: 0;
 	background-color: #FAFAFA;
+	font-family: Arial;
+	font-size: 14px;
+	font-style: normal;
 }
 
 #page {
@@ -74,12 +124,14 @@ html, body, #root, #scene {
 
 .element-handle {
 	margin: 0;
-	padding: 0;
+	padding: 1px;
 	height: 10px;
 }
 
 .element-handle.selected {
-	background-color: black;
+	border: 1px solid #BBB;
+	border-bottom: 0px;
+	background-color: #DDD;
 }
 
 .element-content {
@@ -91,7 +143,7 @@ html, body, #root, #scene {
 	background-color: white;
 	margin: 0;
 	padding: 0;
-	border: 1px solid black;
+	border: 1px solid #BBB;
 }
 
 .page {
@@ -116,25 +168,4 @@ html, body, #root, #scene {
 
 .page-body {
 	flex: 1;
-}
-
-textarea.text-element {
-	width: 100%;
-	margin: 0px;
-	box-sizing: border-box;
-	vertical-align: top;
-	background: inherit;
-	font: inherit;
-	border: 0;
-	outline: 0;
-}
-
-button {
-	outline: 0;
-}
-button:focus {outline:0;}
-
-img {
-	max-width:100%;
-	max-height:100%;
 }
