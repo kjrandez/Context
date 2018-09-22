@@ -1,3 +1,7 @@
+html {
+	overflow-y: scroll;
+}
+
 html, body, #root, #scene {
 	height: 100%;
 	margin: 0;
@@ -65,7 +69,7 @@ html, body, #root, #scene {
 .element-spacer {
 	margin: 0;
 	padding: 0;
-	height: 2px;
+	height: 0px;
 }
 
 .element-handle {
@@ -90,8 +94,47 @@ html, body, #root, #scene {
 	border: 1px solid black;
 }
 
-.page-content {
-	margin: 0;
-	padding-left: 12px;
-	border-left: 2px solid #BBB;
+.page {
+	display: flex;
+}
+
+.page-sidebar {
+	margin-top: 10px;
+	overflow: hidden;
+}
+
+.page-sidebar-line {
+	border-left: 1px solid #BBB;
+	height: 100%;
+	margin-left: 11px;
+}
+
+.page-header-rule {
+	margin-top: 22px;
+	border-top: 1px solid #BBB;
+}
+
+.page-body {
+	flex: 1;
+}
+
+textarea.text-element {
+	width: 100%;
+	margin: 0px;
+	box-sizing: border-box;
+	vertical-align: top;
+	background: inherit;
+	font: inherit;
+	border: 0;
+	outline: 0;
+}
+
+button {
+	outline: 0;
+}
+button:focus {outline:0;}
+
+img {
+	max-width:100%;
+	max-height:100%;
 }

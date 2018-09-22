@@ -28,10 +28,10 @@ class Dataset:
             Text("I'm doing just fine thank you very much."),
             Script("print(\"Hello world!\")"),
             Page([
-                Page([
                     Text('Introduction'),
                     Text(lorem1)
-                ]),
+            ]),
+            Page([
                 Page([
                     Text('Mas informacion'),
                     Text(lorem2)

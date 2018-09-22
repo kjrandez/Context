@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Textarea from 'react-textarea-autosize';
 import Element from './element.js';
 
 export default class Script extends Component
@@ -62,7 +63,8 @@ export default class Script extends Component
                         checked={this.state.cbChecked}
                         onChange={(ev) => this.cbChange(ev)} />
                 </div>
-                <textarea
+                <Textarea
+                    className="text-element"
                     onChange={(ev) => this.onChange(ev)}
                     value={this.state.content} />
             </Element>

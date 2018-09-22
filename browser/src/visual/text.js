@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Textarea from 'react-textarea-autosize';
 import Element from './element.js';
 
 export default class Text extends Component
@@ -36,7 +37,8 @@ export default class Text extends Component
                 fragment={this.props.fragment}
                 selection={this.props.selection}
                 app={this.props.app}>
-                <textarea
+                <Textarea
+                    className="text-element"
                     onChange={(event) => this.onChange(event)}
                     value={this.state.content} />
             </Element>

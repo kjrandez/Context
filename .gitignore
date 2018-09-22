@@ -27,3 +27,4 @@ host/kernel/core/__pycache__/
 host/kernel/elements/__pycache__/
 host/pyphantom/__pycache__/
 host/filesystem/__pycache__/
+node_modules/
