@@ -23,12 +23,14 @@ export default class Page extends Component
 
     modelChanged() {
         var value = this.props.fragment.value();
+        var latestEntryKey = (value.latestEntry == null) ? null : value.latestEntry.key;
 
         this.setState({
             content: value.content.map(entry => {
                 return {
                     key: entry.key,
-                    fragment: this.props.app.store.fragment(entry.element)
+                    fragment: this.props.app.store.fragment(entry.element),
+                    latest: entry.key === latestEntryKey
                 }
             })
         });
@@ -60,7 +62,8 @@ export default class Page extends Component
             [headerElement],
             this.props.loc.path.concat(this.props.fragment.id()),
             this.props.selection,
-            this.props.app
+            this.props.app,
+            false
         )
     }
 
@@ -76,7 +79,8 @@ export default class Page extends Component
                 pageContent, 
                 this.props.loc.path.concat(this.props.fragment.id()),
                 this.props.selection,
-                this.props.app
+                this.props.app,
+                true
             )
         } else {
             return <p>Recursive page {this.props.fragment.id()}</p>

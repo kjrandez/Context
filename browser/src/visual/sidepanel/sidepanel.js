@@ -70,7 +70,7 @@ export default class SidePanel extends Component
             <div id="sidepanel-outer" className={this.sidepanelOuterClass()}>
                 <div id="sidepanel-inner" className={this.sidepanelInnerClass()}>
                     <div id="sidepanel-content">
-                        <div class="sidepanel-tab-buttons">
+                        <div className="sidepanel-tab-buttons">
                             <Tabs id="TabsExample"
                             onChange={newTab => this.onChange(newTab)}
                             selectedTabId={this.state.selectedTab}>

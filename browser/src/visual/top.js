@@ -35,12 +35,14 @@ export default class App extends Component {
 
     modelChanged() {
         var value = this.topFragment.value();
+        var latestEntryKey = (value.latestEntry == null) ? null : value.latestEntry.key;
 
         this.setState({
             content: value.content.map(pageEntry => {
                 return {
                     key: pageEntry.key,
-                    fragment: this.props.app.store.fragment(pageEntry.element)
+                    fragment: this.props.app.store.fragment(pageEntry.element),
+                    latest: pageEntry.key === latestEntryKey
                 }
             })
         });
@@ -59,7 +61,8 @@ export default class App extends Component {
                 this.state.content,
                 [this.topFragment.id()],
                 this.state.selection,
-                this.props.app
+                this.props.app, 
+                true
             );
         } else {
             return <p>Loading...</p>

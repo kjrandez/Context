@@ -272,3 +272,21 @@ html, body, #root, #scene {
 .info-content {
 	padding: 5px;
 }
+
+.append-button {
+	margin-top: 10px;
+	margin-left: 5px;
+	width: 50px;
+	height: 14px;
+	background-color: #EAEAEA;
+	border: none;
+}
+
+.append-button:hover {
+	cursor: pointer;
+	background-color: #DDD;
+}
+
+.append-button:active {
+	background-color: #CCC;
+}

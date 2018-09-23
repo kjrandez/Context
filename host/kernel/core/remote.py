@@ -63,8 +63,29 @@ class Remote:
         self.flattened = self.topPage.flattened()
         self.senseIds = self.flattened.keys()
 
+classList = None
+
+def constructorFor(elementClass):
+    global classList
+
+    if classList == None:
+        from ..elements import Text, Page, Image, Script
+        classList = {
+            "Text" : Text,
+            "Image" : Image,
+            "Page" : Page,
+            "Script" : Script
+        }
+    
+    return classList[elementClass]
+
 def resolvedArgument(arg):
     if arg["type"] == "obj":
         return Dataset.singleton.lookup(arg["value"])
+    elif arg["type"] == "new":
+        elementClass = arg["value"]["elementType"]
+        constructorArgs = [resolvedArgument(x) for x in arg["value"]["args"]]
+        constructor = constructorFor(elementClass)
+        return constructor(*constructorArgs)
     else:
         return arg["value"]

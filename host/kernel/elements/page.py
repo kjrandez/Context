@@ -6,7 +6,11 @@ class PageEntry():
     def __init__(self, element):
         self.element = element
         self.key = PageEntry.nextKey
+
         PageEntry.nextKey = PageEntry.nextKey + 1
+
+    def model(self):
+        return {"key" : self.key, "element" : self.element.id}
 
     def __eq__(self, other):
         if isinstance(other, PageEntry):
@@ -15,7 +19,7 @@ class PageEntry():
             return self.key == other
         else:
             return self.element == other
-    
+
     def __ne__(self, other):
         return not self.__eq__(other)
 
@@ -23,14 +27,13 @@ class Page(Element):
     def __init__(self, content = [], column = False):
         super().__init__()
         self.content = [resolvedEntry(x) for x in content]
+        self.latestEntry = None
         self.column = column
-
-    def typeName(self):
-        return "page"
 
     def value(self):
         return {
-            "content" : [{"key" : x.key, "element" : x.element.id} for x in self.content],
+            "content" : [x.model() for x in self.content],
+            "latestEntry" : self.latestEntry.model() if (self.latestEntry != None) else None,
             "column" : self.column
         }
     
@@ -58,19 +61,21 @@ class Page(Element):
         """ Returns the offset of the specified entry or first element instance """
         return self.content.index(keyEntryOrElement)
 
-    def append(self, inst, reverse = None):
+    def append(self, inst, noteEntry = False, reverse = None):
         """ Trans: Appends an element to the end of the Page """
         trans = self.transaction(reverse)
         trans.reference(inst)
 
         entry = PageEntry(inst)
         self.content.append(entry)
+        if(noteEntry):
+            self.latestEntry = entry;
 
         trans.reverseOp = self.remove
         trans.reverseArgs = [entry]
         return trans.complete()
 
-    def insertBefore(self, inst, keyEntryOrElement, reverse = None):
+    def insertBefore(self, inst, keyEntryOrElement, noteEntry = False, reverse = None):
         """ Trans: Inserts an element before the entry or first element instance """
         trans = self.transaction(reverse)
         trans.reference(inst)
@@ -79,7 +84,9 @@ class Page(Element):
             offset = self.content.index(keyEntryOrElement)
             entry = PageEntry(inst)
             self.content.insert(offset, entry)
-
+            if(noteEntry):
+                self.latestEntry = entry;
+            
             trans.reverseOp = self.remove
             trans.reverseArgs = [entry]
             return trans.complete()
@@ -87,7 +94,7 @@ class Page(Element):
             trans.cancel()
             raise
 
-    def insertAfter(self, inst, keyEntryOrElement, reverse = None):
+    def insertAfter(self, inst, keyEntryOrElement, noteEntry = False, reverse = None):
         """ Trans: Inserts an element after the entry or first element instance """
         trans = self.transaction(reverse)
         trans.reference(inst)
@@ -96,7 +103,9 @@ class Page(Element):
             offset = self.content.index(keyEntryOrElement)
             entry = PageEntry(inst)
             self.content.insert(offset + 1, entry)
-
+            if(noteEntry):
+                self.latestEntry = entry
+            
             trans.reverseOp = self.remove
             trans.reverseArgs = [entry]
             return trans.complete()
@@ -104,7 +113,7 @@ class Page(Element):
             trans.cancel()
             raise
         
-    def insertAt(self, inst, offset, reverse = None):
+    def insertAt(self, inst, offset, noteEntry = False, reverse = None):
         """ Trans: Insert an element at the specified offset """
         trans = self.transaction(reverse)
         trans.reference(inst)
@@ -112,7 +121,9 @@ class Page(Element):
         try:
             entry = PageEntry(inst)
             self.content.insert(offset, entry)
-
+            if(noteEntry):
+                self.latestEntry = entry
+            
             trans.reverseOp = self.remove
             trans.reverseArgs = [entry]
             return trans.complete()

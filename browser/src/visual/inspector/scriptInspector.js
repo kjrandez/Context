@@ -9,10 +9,7 @@ export default class ScriptInspector extends Component
         var parentId = path[path.length - 1];
         var parent = this.props.app.store.fragment(parentId)
 
-        this.props.fragment.invoke({
-            selector: "execute",
-            arguments: [parent, threaded]
-        });
+        this.props.fragment.invoke("execute", [parent, threaded]);
     }
 
     render() {

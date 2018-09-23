@@ -9,6 +9,7 @@ export default class App
         this.kernel.onopen = (event) => this.kernelOpen(event);
         this.kernel.onclose = (event) => this.kernelClose(event);
         this.selection = [];
+        this.grabPath = null;
         this.top = null;
     }
 
@@ -25,7 +26,17 @@ export default class App
             this.selected(null, false);
     }
 
+    setGrabPath(path) {
+        this.grabPath = path;
+    }
+
+    getGrabPath(path) {
+        return this.grabPath;
+    }
+
     selected(newSelection, ctrlDown) {
+        this.grabPath = null;
+
         if(ctrlDown) {
             var index = this.selection.indexOf(newSelection);
             if(index >= 0) {
@@ -50,6 +61,8 @@ export default class App
     }
 
     deselected(selection) {
+        this.grabPath = null;
+
         var index = this.selection.indexOf(selection);
         if(index >= 0) {
             this.selection.splice(index, 1);

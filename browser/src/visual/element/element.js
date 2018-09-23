@@ -15,6 +15,19 @@ export default class Element extends Component
         this.props.app.selected(this.uniqueSelection, event.ctrlKey);
     }
 
+    componentWillMount() {
+        if(this.props.loc.latest) {
+            console.log("I am a mounting component who is the latest entry.");
+            var grabPath = this.props.app.getGrabPath();
+            if(grabPath == null)
+                return;
+            
+            var samePath = this.props.loc.path.every((item, index) => item === grabPath[index])
+            if(samePath)
+                this.props.app.selected(this.uniqueSelection, false);
+        }
+    }
+
     componentWillUnmount() {
         this.props.app.deselected(this.uniqueSelection);
     }
@@ -33,10 +46,9 @@ export default class Element extends Component
 
     render() {
         return (
-            <div
-                className="element"
-                onMouseDown={(event) => this.onMouseDown(event)}
-                ref={this.uniqueSelection.ref}>
+            <div className="element"
+            onMouseDown={(event) => this.onMouseDown(event)}
+            ref={this.uniqueSelection.ref}>
                 <div className="element-spacer"></div>
                 <div className={this.elementHandleClass()}></div>
                 <div className={this.elementContentClass()}>

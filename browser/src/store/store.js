@@ -1,4 +1,5 @@
 import Fragment from './fragment.js';
+import NewElement from './newElement.js';
 
 export default class Store
 {
@@ -51,17 +52,17 @@ export default class Store
         return this.fragmentDict[id];
     }
 
-    invoke(fragment, desc) {
+    invoke(fragment, selector, args) {
         var requestUpdate = true;
-        var invlocId = fragment.type() + "-" + desc.selector;
+        var invlocId = fragment.type() + "-" + selector;
         if(invlocId in this.localHandlers) {
-            this.localHandlers[invlocId](fragment, desc.arguments)
+            this.localHandlers[invlocId](fragment, args)
             requestUpdate = false;
         }
         this.app.kernelSend("invoke", {
             element: fragment.id(),
-            selector: desc.selector,
-            arguments: desc.arguments.map(arg => encoded(arg)),
+            selector: selector,
+            arguments: args.map(arg => encoded(arg)),
             respond: requestUpdate
         });
     }
@@ -77,9 +78,14 @@ export default class Store
     }
 }
 
-function encoded(argument) {
-    if(argument instanceof Fragment)
-        return { type: "obj", value: argument.id() }
+function encoded(param) {
+    if(param instanceof Fragment)
+        return { type: "obj", value: param.id() }
+    else if(param instanceof NewElement)
+        return { type: "new", value: {
+            elementType: param.elementType,
+            args: param.args.map(arg => encoded(arg))
+        }}
     else
-        return { type: "std", value: argument };
+        return { type: "std", value: param };
 }
