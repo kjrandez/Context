@@ -1,58 +1,40 @@
 import React from 'react';
 import {Text, Image, Page, Script} from './element';
 
-function timesInArray(anItem, array) {
-    var count = 0;
-    array.forEach(item => {
-        if(item === anItem)
-            count++
-    });
-    return count;
-}
-
-export function elementList(fragments, path, selection, app) {
-    return fragments.map((fragment, index) => {
-
-        var key = fragment.id();
-        if(timesInArray(fragment, fragments) > 1)
-            key += "-" + index;
-
-        switch(fragment.type()) {
+export function elementList(entries, path, selection, app) {
+    return entries.map(entry => {
+        switch(entry.fragment.type()) {
             case "Page":
                 return <Page
-                    key={key}
-                    fragment={fragment}
-                    index={index}
-                    path={path}
+                    key={entry.key}
+                    fragment={entry.fragment}
+                    loc={{path: path, key: entry.key}}
                     selection={selection}
                     app={app} />;
             case "Text":
                 return <Text
-                    key={key}
-                    fragment={fragment}
-                    index={index}
-                    path={path}
+                    key={entry.key}
+                    fragment={entry.fragment}
+                    loc={{path: path, key: entry.key}}
                     selection={selection}
                     app={app} />;
             case "Image":
                 return <Image
-                    key={key}
-                    fragment={fragment}
-                    index={index}
-                    path={path}
+                    key={entry.key}
+                    fragment={entry.fragment}
+                    loc={{path: path, key: entry.key}}
                     selection={selection}
                     app={app} />;
             case "Script":
                 return <Script 
-                    key={key}
-                    fragment={fragment}
-                    index={index}
-                    path={path}
+                    key={entry.key}
+                    fragment={entry.fragment}
+                    loc={{path: path, key: entry.key}}
                     selection={selection}
                     app={app} />;
             default:
-                return <p key={fragment.id()}>
-                    Undefined element: {fragment.type()}
+                return <p key={entry.key}>
+                    Undefined element: {entry.fragment.type()}
                 </p>;
         }
     });

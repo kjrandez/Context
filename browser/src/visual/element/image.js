@@ -26,9 +26,8 @@ export default class Image extends Component
     render() {
         return (
             <Element
-                path={this.props.path}
-                index={this.props.index}
                 fragment={this.props.fragment}
+                loc={this.props.loc}
                 selection={this.props.selection}
                 app={this.props.app}>
                 <img src={this.state.src} alt={this.state.alt} />
@@ -36,7 +35,7 @@ export default class Image extends Component
         );
     }
 
-    componentDidMount() {
+    componentWillMount() {
         this.props.fragment.connect(this);
     }
 

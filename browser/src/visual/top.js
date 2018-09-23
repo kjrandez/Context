@@ -36,8 +36,11 @@ export default class App extends Component {
         var value = this.topFragment.value();
 
         this.setState({
-            content: value.content.map((entryId) => {
-                return this.props.app.store.fragment(entryId);
+            content: value.content.map(pageEntry => {
+                return {
+                    key: pageEntry.key,
+                    fragment: this.props.app.store.fragment(pageEntry.element)
+                }
             })
         });
     }

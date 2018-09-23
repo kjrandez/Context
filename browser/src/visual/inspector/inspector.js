@@ -54,15 +54,13 @@ export default class Inspector extends Component
         switch(fragment.type()) {
             case "Script":
                 return <ScriptInspector
-                    path={selection.path}
-                    index={selection.index}
                     fragment={fragment}
+                    loc={selection.loc}
                     app={this.props.app} />
             default:
                 return <GenericInspector
-                    path={selection.path}
-                    index={selection.index}
                     fragment={fragment}
+                    loc={selection.loc}
                     app={this.props.app} />
         }
     }

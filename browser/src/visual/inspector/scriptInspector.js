@@ -5,7 +5,8 @@ import { commonInspectorButtons } from './shared';
 export default class ScriptInspector extends Component
 {
     run(threaded) {
-        var parentId = this.props.path[this.props.path.length - 1];
+        var path = this.props.loc.path;
+        var parentId = path[path.length - 1];
         var parent = this.props.app.store.fragment(parentId)
 
         this.props.fragment.invoke({
@@ -21,8 +22,7 @@ export default class ScriptInspector extends Component
                 <Button title="Run in thread" icon="derive-column" onClick={()=>this.run(true)}></Button>
                 <Divider />
                 {commonInspectorButtons(
-                    this.props.path,
-                    this.props.index,
+                    this.props.loc,
                     this.props.fragment,
                     this.props.app
                 )}

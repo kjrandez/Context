@@ -6,7 +6,7 @@ export default class Element extends Component
     constructor(props) {
         super(props);
         this.uniqueSelection = new Selection(
-            props.path, props.index, props.fragment, React.createRef()
+            props.loc, props.fragment, React.createRef()
         );
     }
 

@@ -11,8 +11,11 @@ export default class Page extends Component
         var value = this.props.fragment.value();
 
         this.state = {
-            content: value.content.map((entryId) => {
-                return this.props.app.store.fragment(entryId);
+            content: value.content.map(entry => {
+                return {
+                    key: entry.key,
+                    fragment: this.props.app.store.fragment(entry.element)
+                }
             }),
             isOpen: false
         }
@@ -22,25 +25,28 @@ export default class Page extends Component
         var value = this.props.fragment.value();
 
         this.setState({
-            content: value.content.map((entryId) => {
-                return this.props.app.store.fragment(entryId);
+            content: value.content.map(entry => {
+                return {
+                    key: entry.key,
+                    fragment: this.props.app.store.fragment(entry.element)
+                }
             })
         });
     }
 
     isRecursivePage() {
-        return this.props.path.indexOf(this.props.fragment.id()) >= 0;
+        return this.props.loc.path.indexOf(this.props.fragment.id()) >= 0;
     }
 
-    firstTextElement() {
+    firstTextEntry() {
         if(this.state.content.length < 2)
             return null;
         
-        var firstElement = this.state.content[0];
-        if(firstElement.type() !== "Text")
+        var firstEntry = this.state.content[0];
+        if(firstEntry.fragment.type() !== "Text")
             return null;
         
-        return firstElement;
+        return firstEntry;
     }
 
     headerContent(headerElement) {
@@ -52,7 +58,7 @@ export default class Page extends Component
 
         return elementList(
             [headerElement],
-            this.props.path.concat(this.props.fragment.id()),
+            this.props.loc.path.concat(this.props.fragment.id()),
             this.props.selection,
             this.props.app
         )
@@ -68,7 +74,7 @@ export default class Page extends Component
         if(!this.isRecursivePage()) {
             return elementList(
                 pageContent, 
-                this.props.path.concat(this.props.fragment.id()),
+                this.props.loc.path.concat(this.props.fragment.id()),
                 this.props.selection,
                 this.props.app
             )
@@ -99,13 +105,12 @@ export default class Page extends Component
     }
 
     render() {
-        var headerElement = this.firstTextElement();
+        var headerElement = this.firstTextEntry();
 
         return (
             <Element
-                path={this.props.path}
-                index={this.props.index}
                 fragment={this.props.fragment}
+                loc={this.props.loc}
                 selection={this.props.selection}
                 app={this.props.app}>
                     <div className="page">
@@ -133,7 +138,7 @@ export default class Page extends Component
         );
     }
 
-    componentDidMount() {
+    componentWillMount() {
         this.props.fragment.connect(this);
     }
 

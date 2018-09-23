@@ -55,7 +55,7 @@ export default class Store
         var requestUpdate = true;
         var invlocId = fragment.type() + "-" + desc.selector;
         if(invlocId in this.localHandlers) {
-            this.localHandlers[invlocId](fragment, desc)
+            this.localHandlers[invlocId](fragment, desc.arguments)
             requestUpdate = false;
         }
         this.app.kernelSend("invoke", {
@@ -66,9 +66,9 @@ export default class Store
         });
     }
 
-    invlocContentUpdate(fragment, desc) {
+    invlocContentUpdate(fragment, args) {
         var model = this.modelDict[fragment.id()];
-        model.value.content = desc.value;
+        model.value.content = args[0];
         fragment.update();
     }
 

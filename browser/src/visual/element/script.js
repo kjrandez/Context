@@ -33,9 +33,8 @@ export default class Script extends Component
     render() {
         return (
             <Element
-                path={this.props.path}
-                index={this.props.index}
                 fragment={this.props.fragment}
+                loc={this.props.loc}
                 selection={this.props.selection}
                 app={this.props.app}>
                 <Textarea
@@ -47,7 +46,7 @@ export default class Script extends Component
         );
     }
 
-    componentDidMount() {
+    componentWillMount() {
         this.props.fragment.connect(this);
     }
 

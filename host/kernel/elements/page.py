@@ -29,14 +29,14 @@ class Page(Element):
         return "page"
 
     def value(self):
-        """return {
+        return {
             "content" : [{"key" : x.key, "element" : x.element.id} for x in self.content],
             "column" : self.column
-        }"""
-        return {
+        }
+        """return {
             "content" : [x.element.id for x in self.content],
             "column" : self.column
-        }
+        }"""
     
     def flattened(self):
         """ Returns a dictionary of the models of every element in this hierarchy including self """

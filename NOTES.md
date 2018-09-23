@@ -23,11 +23,8 @@ Basic Functionality TODO:
 - Buffer for copied items
 - Persistence w/ Disk
 
-= FIXES
-- Editing text then collapsing, text disappears
-
-Or, it could maintain a separate list of identical shape so that if you want to know the specific
-thing you can find out. Use that identifier
+=Bugs
+...
 
 THEN,
 1. Snapshot export
