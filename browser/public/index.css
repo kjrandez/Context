@@ -59,6 +59,86 @@ html, body, #root, #scene {
 	font-style: normal;
 }
 
+#scene {
+	display: flex;
+	flex-direction: row;
+}
+
+#left-column {
+	min-width: 50px;
+}
+
+#center-column {
+	flex: 1;
+}
+
+#right-column {
+	min-width: 50px;
+}
+
+#pasteboard {
+	height: 100%;
+}
+
+.pasteboard-hidden {
+	width: 50px;
+	transition: 0.3s;
+}
+
+.pasteboard-visible {
+	width: 300px;
+	transition: 0.3s;
+}
+
+#pasteboard-button {
+	position: fixed;
+    width:50px;
+	height:50px;
+	top: 50%;
+	margin-top: -50px;
+}
+
+.pasteboard-button-hidden {
+	left: 0px;
+	transition: 0.3s;
+}
+
+.pasteboard-button-visible {
+	left: 250px;
+	transition: 0.3s;
+}
+
+#pasteboard-content {
+	z-index: 1;
+	top: 0;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	pointer-events: none;
+	position: fixed;
+	width: 250px;
+	height: 100%;
+	padding-left: 10px;
+	padding-right: 0px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.pasteboard-content-hidden {
+	left: -300px;
+	transition: 0.3s;
+}
+
+.pasteboard-content-visible {
+	left: 0px;
+	transition: 0.3s;
+}
+
+#pasteboard-panel {
+	height: 100%;
+	background-color: #EAEAEA;
+	border-radius: 6px;
+}
+
 #page {
 	min-height: 100%;
 	max-width: 900px;
@@ -95,7 +175,7 @@ html, body, #root, #scene {
 	max-width: 278px;
 	background-color: #DDD;
 	border: 1px solid #BBB;
-	margin-right: 10px;
+	margin-right: 5px;
 	padding: 3px;
 	overflow: hidden;
 	border-radius: 6px;

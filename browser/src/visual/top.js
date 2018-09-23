@@ -1,6 +1,7 @@
-import React, {Component} from 'react';
-import {elementList} from './shared.js';
-import {Inspector} from './inspector';
+import React, { Component } from 'react';
+import { elementList } from './shared.js';
+import { Inspector } from './inspector';
+import Pasteboard from './pasteboard';
 
 export default class App extends Component {
     constructor(props) {
@@ -70,11 +71,18 @@ export default class App extends Component {
             <div
                 id="scene"
                 onMouseDown={(event) => this.onMouseDown(event)}>
-                <Inspector app={this.props.app} selection={this.state.selection} />
-                <div id="page">
-                    <div id="top-spacer"></div>
-                        {this.pageContent()}
-                    <div id="bottom-spacer"></div>
+                <div id="left-column">
+                    <Pasteboard />
+                </div>
+                <div id="center-column">
+                    <div id="page">
+                        <div id="top-spacer"></div>
+                            {this.pageContent()}
+                        <div id="bottom-spacer"></div>
+                    </div>
+                </div>
+                <div id="right-column">
+                    <Inspector app={this.props.app} selection={this.state.selection} />
                 </div>
             </div>
         );

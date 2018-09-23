@@ -14,8 +14,7 @@ class Text(Element):
         }
 
     def update(self, value, reverse = None):
-        trans = self.transaction("update", reverse)
-        trans.detail["value"] = value
+        trans = self.transaction(reverse)
 
         prev = self.content
         self.content = value
@@ -25,8 +24,7 @@ class Text(Element):
         return trans.complete()
 
     def insert(self, value, start, reverse = None):
-        trans = self.transaction("insert", reverse)
-        trans.detail["value"] = value
+        trans = self.transaction(reverse)
         
         try:
             if (start < 0) or (start > len(self.content)):
@@ -43,9 +41,7 @@ class Text(Element):
             raise
 
     def remove(self, start, stop, reverse = None):
-        trans = self.transaction("insert", reverse)
-        trans.detail["start"] = start
-        trans.detail["stop"] = stop
+        trans = self.transaction(reverse)
 
         try:
             if (start < 0) or (start > len(self.content)):

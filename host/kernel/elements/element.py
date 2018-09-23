@@ -21,5 +21,5 @@ class Element:
             "value" : self.value()
         }
 
-    def transaction(self, ttype, reverse):
-        return Transaction(Dataset.singleton.observer, self, ttype, reverse)
+    def transaction(self, reverse):
+        return Transaction(Dataset.singleton.observer, self, reverse)

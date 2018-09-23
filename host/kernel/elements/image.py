@@ -16,9 +16,7 @@ class Image(Element):
         }
     
     def update(self, srcValue, altValue, reverse = None):
-        trans = self.transaction("update", reverse)
-        trans.detail["src"] = srcValue
-        trans.detail["alt"] = altValue
+        trans = self.transaction(reverse)
 
         prevSrc = self.src
         prevAlt = self.alt
