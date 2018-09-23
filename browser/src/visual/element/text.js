@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import Textarea from 'react-textarea-autosize';
-import Element from './element.js';
 
 export default class Text extends Component
 {
@@ -8,10 +7,11 @@ export default class Text extends Component
         super(props);
 
         var value = this.props.fragment.value();
-
         this.state = {
             content: value.content
         }
+
+        this.textarea = null;
     }
 
     onChange(event) {
@@ -28,21 +28,22 @@ export default class Text extends Component
 
     render() {
         return (
-            <Element
-                fragment={this.props.fragment}
-                loc={this.props.loc}
-                selection={this.props.selection}
-                app={this.props.app}>
-                <Textarea
-                    className="text-edit"
-                    onChange={(event) => this.onChange(event)}
-                    value={this.state.content} />
-            </Element>
+            <Textarea
+            inputRef={val => (this.textarea = val)}
+            className="text-edit"
+            onChange={(event) => this.onChange(event)}
+            value={this.state.content} />
         );
     }
 
     componentWillMount() {
         this.props.fragment.connect(this);
+    }
+
+    componentDidMount() {
+        if(this.props.grabFocus && this.textarea != null) {
+            this.textarea.focus();
+        }
     }
 
     componentWillUnmount() {

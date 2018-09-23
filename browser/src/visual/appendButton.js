@@ -9,7 +9,7 @@ export default class AppendButton extends Component
 
         // Append newly-created element, and note which entry it is.
         fragment.invoke("append", [
-            new NewElement("Text", ["Insert text..."]),
+            new NewElement("Text", [""]),
             true
         ])
 

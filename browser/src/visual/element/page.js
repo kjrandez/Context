@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import Element from './element.js';
 import {elementList} from '../shared.js';
 import { Collapse } from "@blueprintjs/core";
 
@@ -112,33 +111,27 @@ export default class Page extends Component
         var headerElement = this.firstTextEntry();
 
         return (
-            <Element
-                fragment={this.props.fragment}
-                loc={this.props.loc}
-                selection={this.props.selection}
-                app={this.props.app}>
-                    <div className="page">
-                        <div className="page-sidebar">
-                            <div className="page-sidebar-button">
-                                <button
-                                    type="button"
-                                    className={this.expandButtonClass()}
-                                    onMouseDown={(event) => this.onMouseDown(event)}
-                                    onClick={(event) => this.onClick(event)}>
-                                </button>
-                            </div>
-                            <div className="page-sidebar-line"></div>
-                        </div>
-                        <div className="page-body">
-                            <div>
-                                {this.headerContent(headerElement)}
-                            </div>
-                            <Collapse isOpen={this.state.isOpen}>
-                                {this.revealContent(headerElement)}
-                            </Collapse>
-                        </div>
+            <div className="page">
+                <div className="page-sidebar">
+                    <div className="page-sidebar-button">
+                        <button
+                            type="button"
+                            className={this.expandButtonClass()}
+                            onMouseDown={(event) => this.onMouseDown(event)}
+                            onClick={(event) => this.onClick(event)}>
+                        </button>
                     </div>
-            </Element>
+                    <div className="page-sidebar-line"></div>
+                </div>
+                <div className="page-body">
+                    <div>
+                        {this.headerContent(headerElement)}
+                    </div>
+                    <Collapse isOpen={this.state.isOpen}>
+                        {this.revealContent(headerElement)}
+                    </Collapse>
+                </div>
+            </div>
         );
     }
 
