@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { elementList } from './shared.js';
 import { Inspector } from './inspector';
-import Pasteboard from './pasteboard';
+import { SidePanel } from './sidepanel';
 
 export default class App extends Component {
     constructor(props) {
@@ -72,7 +72,7 @@ export default class App extends Component {
                 id="scene"
                 onMouseDown={(event) => this.onMouseDown(event)}>
                 <div id="left-column">
-                    <Pasteboard />
+                    <SidePanel />
                 </div>
                 <div id="center-column">
                     <div id="page">

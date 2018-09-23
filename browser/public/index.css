@@ -76,21 +76,21 @@ html, body, #root, #scene {
 	min-width: 50px;
 }
 
-#pasteboard {
+#sidepanel-outer {
 	height: 100%;
 }
 
-.pasteboard-hidden {
+.sidepanel-outer-hidden {
 	width: 50px;
 	transition: 0.3s;
 }
 
-.pasteboard-visible {
+.sidepanel-outer-visible {
 	width: 300px;
 	transition: 0.3s;
 }
 
-#pasteboard-button {
+#sidepanel-button {
 	position: fixed;
     width:50px;
 	height:50px;
@@ -98,22 +98,21 @@ html, body, #root, #scene {
 	margin-top: -50px;
 }
 
-.pasteboard-button-hidden {
+.sidepanel-button-hidden {
 	left: 0px;
 	transition: 0.3s;
 }
 
-.pasteboard-button-visible {
+.sidepanel-button-visible {
 	left: 250px;
 	transition: 0.3s;
 }
 
-#pasteboard-content {
+#sidepanel-inner {
 	z-index: 1;
 	top: 0;
 	overflow-x: hidden;
 	overflow-y: hidden;
-	pointer-events: none;
 	position: fixed;
 	width: 250px;
 	height: 100%;
@@ -123,20 +122,41 @@ html, body, #root, #scene {
 	padding-bottom: 10px;
 }
 
-.pasteboard-content-hidden {
+.sidepanel-inner-hidden {
 	left: -300px;
 	transition: 0.3s;
 }
 
-.pasteboard-content-visible {
+.sidepanel-inner-visible {
 	left: 0px;
 	transition: 0.3s;
 }
 
-#pasteboard-panel {
+#sidepanel-content {
 	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.sidepanel-tab-buttons {
+	margin-left: 4px;
+	margin-bottom: 10px;
+}
+
+.sidepanel-tab-buttons div {
+	outline: 0;
+}
+
+.sidepanel-tab-buttons div:focus {
+	outline:0;
+}
+
+.sidepanel-tab-content {
 	background-color: #EAEAEA;
+	border: 1px solid #BBB;
 	border-radius: 6px;
+	flex: 1;
+	padding: 6px;
 }
 
 #page {
