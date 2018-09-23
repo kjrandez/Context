@@ -11,8 +11,8 @@ export default class Page extends Component
         var value = this.props.fragment.value();
 
         this.state = {
-            content: value.content.map((entryKey) => {
-                return this.props.app.store.fragment(entryKey);
+            content: value.content.map((entryId) => {
+                return this.props.app.store.fragment(entryId);
             }),
             isOpen: false
         }
@@ -22,14 +22,14 @@ export default class Page extends Component
         var value = this.props.fragment.value();
 
         this.setState({
-            content: value.content.map((entryKey) => {
-                return this.props.app.store.fragment(entryKey);
+            content: value.content.map((entryId) => {
+                return this.props.app.store.fragment(entryId);
             })
         });
     }
 
     isRecursivePage() {
-        return this.props.path.indexOf(this.props.fragment.key()) >= 0;
+        return this.props.path.indexOf(this.props.fragment.id()) >= 0;
     }
 
     firstTextElement() {
@@ -52,7 +52,7 @@ export default class Page extends Component
 
         return elementList(
             [headerElement],
-            this.props.path.concat(this.props.fragment.key()),
+            this.props.path.concat(this.props.fragment.id()),
             this.props.selection,
             this.props.app
         )
@@ -68,12 +68,12 @@ export default class Page extends Component
         if(!this.isRecursivePage()) {
             return elementList(
                 pageContent, 
-                this.props.path.concat(this.props.fragment.key()),
+                this.props.path.concat(this.props.fragment.id()),
                 this.props.selection,
                 this.props.app
             )
         } else {
-            return <p>Recursive page {this.props.fragment.key()}</p>
+            return <p>Recursive page {this.props.fragment.id()}</p>
         }
     }
 

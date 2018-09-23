@@ -18,48 +18,48 @@ export default class Store
         return this.topLevel;
     }
 
-    setModel(topPageKey, elements) {
+    setModel(topPageId, elements) {
         this.loadModelDict(elements);
-        this.topLevel = this.fragmentDict[topPageKey];
+        this.topLevel = this.fragmentDict[topPageId];
     }
 
     update(trans, elementModels) {
         this.loadModelList(elementModels);
-        var updatedFragment = this.fragmentDict[trans.key];
+        var updatedFragment = this.fragmentDict[trans.id];
         updatedFragment.update();
     }
 
     loadModelList(newModelList) {
         newModelList.forEach(model => {
-            if(!(model.key in this.fragmentDict)) {
-                this.fragmentDict[model.key] = new Fragment(this, model)
+            if(!(model.id in this.fragmentDict)) {
+                this.fragmentDict[model.id] = new Fragment(this, model)
             }
-            this.modelDict[model.key] = model;
+            this.modelDict[model.id] = model;
         });
     }
 
     loadModelDict(newModelDict) {
-        for(var key in newModelDict) {
-            if(!(key in this.fragmentDict)) {
-                this.fragmentDict[key] = new Fragment(this, newModelDict[key])
+        for(var id in newModelDict) {
+            if(!(id in this.fragmentDict)) {
+                this.fragmentDict[id] = new Fragment(this, newModelDict[id])
             }
-            this.modelDict[key] = newModelDict[key]
+            this.modelDict[id] = newModelDict[id]
         }
     }
 
-    fragment(key) {
-        return this.fragmentDict[key];
+    fragment(id) {
+        return this.fragmentDict[id];
     }
 
     invoke(fragment, desc) {
         var requestUpdate = true;
-        var invlocKey = fragment.type() + "-" + desc.selector;
-        if(invlocKey in this.localHandlers) {
-            this.localHandlers[invlocKey](fragment, desc)
+        var invlocId = fragment.type() + "-" + desc.selector;
+        if(invlocId in this.localHandlers) {
+            this.localHandlers[invlocId](fragment, desc)
             requestUpdate = false;
         }
         this.app.kernelSend("invoke", {
-            element: fragment.key(),
+            element: fragment.id(),
             selector: desc.selector,
             arguments: desc.arguments.map(arg => encoded(arg)),
             respond: requestUpdate
@@ -67,19 +67,19 @@ export default class Store
     }
 
     invlocContentUpdate(fragment, desc) {
-        var model = this.modelDict[fragment.key()];
+        var model = this.modelDict[fragment.id()];
         model.value.content = desc.value;
         fragment.update();
     }
 
-    value(key) {
-        return this.modelDict[key].value;
+    value(id) {
+        return this.modelDict[id].value;
     }
 }
 
 function encoded(argument) {
     if(argument instanceof Fragment)
-        return { type: "obj", value: argument.key() }
+        return { type: "obj", value: argument.id() }
     else
         return { type: "std", value: argument };
 }

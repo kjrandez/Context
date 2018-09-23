@@ -20,7 +20,7 @@ class Transaction:
     def model(self):
         return {
             "index" : self.index,
-            "key" : self.element.key,
+            "id" : self.element.id,
             "type" : self.ttype,
             "detail" : self.detail
         }

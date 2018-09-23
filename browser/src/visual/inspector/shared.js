@@ -4,7 +4,7 @@ import {Popover, Button, Divider} from '@blueprintjs/core';
 function infoContent(path, index, fragment) {
     return(
         <div className="info-content">
-            <p>Key: {fragment.key()}</p>
+            <p>id: {fragment.id()}</p>
             <p>Type: {fragment.type()}</p>
             <p>Path: {JSON.stringify(path)}</p>
             <p>Index: {index}</p>

@@ -36,8 +36,8 @@ export default class App extends Component {
         var value = this.topFragment.value();
 
         this.setState({
-            content: value.content.map((entryKey) => {
-                return this.props.app.store.fragment(entryKey);
+            content: value.content.map((entryId) => {
+                return this.props.app.store.fragment(entryId);
             })
         });
     }
@@ -53,7 +53,7 @@ export default class App extends Component {
         if(this.topFragment != null) {
             return elementList(
                 this.state.content,
-                [this.topFragment.key()],
+                [this.topFragment.id()],
                 this.state.selection,
                 this.props.app
             );

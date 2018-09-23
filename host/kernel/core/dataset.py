@@ -12,12 +12,12 @@ class Dataset:
         
         Dataset.singleton = self
     
-    def lookup(self, key):
-        return self.objMap[key]
+    def lookup(self, id):
+        return self.objMap[id]
 
     def append(self, inst):
-        assert not (inst.key in self.objMap)
-        self.objMap[inst.key] = inst
+        assert not (inst.id in self.objMap)
+        self.objMap[inst.id] = inst
 
     def makeDefault(self):
         from ..elements import Page, Text, Image, Script

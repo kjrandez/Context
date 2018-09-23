@@ -5,8 +5,8 @@ import { commonInspectorButtons } from './shared';
 export default class ScriptInspector extends Component
 {
     run(threaded) {
-        var parentKey = this.props.path[this.props.path.length - 1];
-        var parent = this.props.app.store.fragment(parentKey)
+        var parentId = this.props.path[this.props.path.length - 1];
+        var parent = this.props.app.store.fragment(parentId)
 
         this.props.fragment.invoke({
             selector: "execute",

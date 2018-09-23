@@ -13,7 +13,7 @@ function timesInArray(anItem, array) {
 export function elementList(fragments, path, selection, app) {
     return fragments.map((fragment, index) => {
 
-        var key = fragment.key();
+        var key = fragment.id();
         if(timesInArray(fragment, fragments) > 1)
             key += "-" + index;
 
@@ -51,7 +51,7 @@ export function elementList(fragments, path, selection, app) {
                     selection={selection}
                     app={app} />;
             default:
-                return <p key={fragment.key()}>
+                return <p key={fragment.id()}>
                     Undefined element: {fragment.type()}
                 </p>;
         }

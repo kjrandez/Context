@@ -26,6 +26,9 @@ Basic Functionality TODO:
 = FIXES
 - Editing text then collapsing, text disappears
 
+Or, it could maintain a separate list of identical shape so that if you want to know the specific
+thing you can find out. Use that identifier
+
 THEN,
 1. Snapshot export
 2. Virtual filesystem

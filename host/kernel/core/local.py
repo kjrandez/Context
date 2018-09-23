@@ -46,22 +46,23 @@ class Local:
 
     async def commandList(self, args):
         i = 0
-        print("Listing " + str(self.context.key))
+        print("Listing " + str(self.context.id))
         for entry in self.context.content:
-            print(str(i) + ". " + type(entry).__name__ + " " + str(entry.key))
+            print("#" + str(entry.key) + " " + type(entry.element).__name__ + " " + str(entry.element.id))
             i = i + 1
 
     async def commandEnter(self, args):
+        from ..elements import Page
         newContext = Dataset.singleton.lookup(int(args))
-        if newContext.isPage():
+        if isinstance(newContext, Page):
             self.context = newContext
-            print("Entered " + str(self.context.key))
+            print("Entered " + str(self.context.id))
         else:
             print("Error")
 
     async def commandRoot(self, args):
         self.context = self.root
-        print("Entered " + str(self.context.key))
+        print("Entered " + str(self.context.id))
 
     async def commandInvoke(self, args):
         split = args.split()
@@ -80,7 +81,7 @@ class Local:
 
         constructorArgs = await promptArgs()
         inst = instClass(*constructorArgs)
-        print("Key: " + str(inst.key))
+        print("Id: " + str(inst.id))
 
 async def promptArgs():
     args = []

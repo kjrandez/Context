@@ -5,13 +5,13 @@ export default class Fragment
 
     constructor(store, model) {
         this.store = store;
-        this.immKey = model.key;
+        this.immId = model.id;
         this.immType = model.type;
         this.visuals = [];
     }
 
-    key() {
-        return this.immKey;
+    id() {
+        return this.immId;
     }
 
     type() {
@@ -19,7 +19,7 @@ export default class Fragment
     }
 
     value() {
-        return this.store.value(this.immKey);
+        return this.store.value(this.immId);
     }
 
     invoke(desc) {

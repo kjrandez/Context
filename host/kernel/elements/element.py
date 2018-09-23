@@ -1,12 +1,12 @@
 from ..core import Dataset, Transaction
 
 class Element:
-    nextKey = 0
+    nextId = 0
 
     def __init__(self):
-        self.key = Element.nextKey
+        self.id = Element.nextId
         Dataset.singleton.append(self)
-        Element.nextKey = Element.nextKey + 1
+        Element.nextId = Element.nextId + 1
 
     def isPage(self):
         return False
@@ -16,7 +16,7 @@ class Element:
 
     def model(self):
         return {
-            "key" : self.key,
+            "id" : self.id,
             "type" : type(self).__name__,
             "value" : self.value()
         }

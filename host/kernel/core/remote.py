@@ -39,7 +39,7 @@ class Remote:
         if trans.index in self.ignoreTrans:
             self.ignoreTrans.remove(trans.index)
             return
-        if not trans.element.key in self.senseKeys:
+        if not trans.element.id in self.senseIds:
             return
 
         updatedModels = [trans.element.model()]
@@ -55,13 +55,13 @@ class Remote:
 
         await self.websocket.send(json.dumps({
             "selector" : "renderPage",
-            "arguments" : [self.topPage.key, self.flattened]
+            "arguments" : [self.topPage.id, self.flattened]
         }))
 
     def setTopPage(self, page):
         self.topPage = page
         self.flattened = self.topPage.flattened()
-        self.senseKeys = self.flattened.keys()
+        self.senseIds = self.flattened.keys()
 
 def resolvedArgument(arg):
     if arg["type"] == "obj":

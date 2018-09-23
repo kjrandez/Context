@@ -1,84 +1,97 @@
 from .element import Element
 
+class PageEntry():
+    nextKey = 0
+
+    def __init__(self, element):
+        self.element = element
+        self.key = PageEntry.nextKey
+        PageEntry.nextKey = PageEntry.nextKey + 1
+
+    def __eq__(self, other):
+        if isinstance(other, PageEntry):
+            return self.key == other.key
+        elif isinstance(other, int):
+            return self.key == other
+        else:
+            return self.element == other
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 class Page(Element):
     def __init__(self, content = [], column = False):
         super().__init__()
-        self.content = content
+        self.content = [resolvedEntry(x) for x in content]
         self.column = column
-    
+
     def typeName(self):
         return "page"
 
-    def isPage(self):
-        return True
-
     def value(self):
+        """return {
+            "content" : [{"key" : x.key, "element" : x.element.id} for x in self.content],
+            "column" : self.column
+        }"""
         return {
-            "content" : [x.key for x in self.content],
+            "content" : [x.element.id for x in self.content],
             "column" : self.column
         }
     
     def flattened(self):
-        entries = {self.key : self.model()}
+        """ Returns a dictionary of the models of every element in this hierarchy including self """
+        entries = {self.id : self.model()}
         self.traverse(entries)
         return entries
 
     def traverse(self, entries = {}):
+        """ Adds the model of each page entry to the dictionary, recursing into other pages """
         for entry in self.content:
-            if entry.key in entries:
+            element = entry.element
+            if element.id in entries:
                 continue
-            entries[entry.key] = entry.model()
-            if isinstance(entry, Page):
-                entry.traverse(entries)
+            entries[element.id] = element.model()
+            if isinstance(element, Page):
+                element.traverse(entries)
+
+    def elements(self):
+        """ Returns a list of elements corresponding to the page's entries. """
+        return [x.element for x in self.content]
 
     def append(self, inst, reverse = None):
+        """ Trans: Appends an element to the end of the Page """
         trans = self.transaction("append", reverse)
-        trans.detail["inst"] = inst.key
+        trans.detail["inst"] = inst.id
         trans.reference(inst)
 
-        self.content.append(inst)
+        entry = PageEntry(inst)
+        self.content.append(entry)
 
-        trans.reverseOp = self.removeAt
-        trans.reverseArgs = [len(self.content) - 1]
+        trans.reverseOp = self.remove
+        trans.reverseArgs = [entry]
         return trans.complete()
     
-    def insertAt(self, inst, index, reverse = None):
-        trans = self.transaction("insertAt", reverse)
-        trans.detail["inst"] = inst.key
-        trans.detail["index"] = index
-        trans.reference(inst)
-        
-        self.content.insert(index, inst)
+    def insertBefore(self, inst, keyEntryOrElement, reverse = None):
+        """ Trans: Inserts an element before the entry or first element instance """
+        pass
 
-        trans.reverseOp = self.removeAt
-        trans.reverseArgs = [index]
-        return trans.complete()
+    def insertAfter(self, inst, keyEntryOrElement, reverse = None):
+        """ Trans: Inserts an element after the entry or first element instance """
+        pass
     
-    def remove(self, inst, reverse = None):
-        trans = self.transaction("remove", reverse)
-        trans.detail["inst"] = inst.key
+    def insertAt(self, inst, offset, reverse = None):
+        """ Trans: Insert an element at the specified offset """
 
-        try:
-            index = self.content.index(inst)
-            self.content.remove(inst) 
-
-            trans.reverseOp = self.insertAt
-            trans.reverseArgs = [inst, index]
-            return trans.complete()
-        except ValueError:
-            trans.cancel()
-            raise
+    def remove(self, keyEntryOrElement, reverse = None):
+        """ Trans: Removes the entry or first element instance """
+        pass
     
-    def removeAt(self, index, reverse = None):
-        trans = self.transaction("removeAt", reverse)
-        trans.detail["index"] = index
+    def removeAt(self, offset, reverse = None):
+        """ Trans: Removes the entry at the specified offset """
+        pass
 
-        try:
-            inst = self.content.pop(index)
-
-            trans.reverseOp = self.insertAt
-            trans.reverseArgs = [inst, index]
-            return trans.complete()
-        except IndexError:
-            trans.cancel()
-            raise
+def resolvedEntry(item):
+    """ Returns the argument if it is a PageEntry, otherwise a PageEntry of the element """
+    if isinstance(item, PageEntry):
+        return item
+    return PageEntry(item)
