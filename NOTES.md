@@ -5,16 +5,15 @@ Basic Functionality TODO:
 =Browser
 - Views & side-menus for:
     - Text (Markdown editor)
-    - Nested Pages
-    - Column Pages
-    - Images, Scripts, Files, Websites
+    - Nested Pages & Column Pages
+    - Files, Images, Scripts, Weblinks
 - Integration of blueprint.js visuals
 - Navigation between pages
 - Drag + drop of items and pagesand external things
 - Indent key function
 - Buffer viewer w/ element preview popup
-- Rendering options:
-    - Page - Expand/collapse or just direct link
+- History viewer w/ time travel
+
 
 =Kernel
 - Basic elements: Page, Text->Script, Website, File->Image
@@ -30,11 +29,12 @@ THEN,
 1. Snapshot export
 2. Dedicated CEF browser window
 3. Inline Matplotlib
-4. Peer-to-peer synchronization
-5. Background file tracking
-6. Virtual filesystem
-7. Cloud sync & Version control tracking
-8. Tablet + stylus version
+4. Data source vs. type differentiation
+5. Peer-to-peer synchronization
+6. Background file tracking
+7. Virtual filesystem
+8. Cloud sync & Version control tracking
+9. Tablet + stylus version
 
 NOTES:
 - All pages that aren't columns should be closed by default, until manually

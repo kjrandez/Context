@@ -61,26 +61,34 @@ export default class AppendButton extends Component
             <div className="append-more-menu">
             <ButtonGroup minimal={false} onMouseEnter={()=>{}}>
 
-                <Button icon="new-text-box"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addText()}></Button>
-
-                <Button icon="media"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addImage()}></Button>
-
                 <Button icon="document"
                 className="bp3-popover-dismiss"
                 onClick={()=>this.addPage()}></Button>
+                
+                <Button icon="annotation"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addText()}></Button>
 
                 <Button icon="function"
                 className="bp3-popover-dismiss"
                 onClick={()=>this.addScript()}></Button>
 
+                <Button icon="folder-open"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addFile()}></Button>
+
+                <Button icon="media"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addImage()}></Button>
+
+                <Button icon="link"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addLink()}></Button>
+
                 <Divider />
 
                 <Button active={this.state.defaultActive}
-                onClick={()=>this.defaultToggle()}>Set Default</Button>
+                onClick={()=>this.defaultToggle()}>Default</Button>
 
             </ButtonGroup>
             </div>
