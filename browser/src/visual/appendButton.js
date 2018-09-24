@@ -1,15 +1,44 @@
 import React, { Component } from 'react';
 import { NewElement } from '../store';
+import { Button, ButtonGroup, Divider, Popover, Icon, Position } from '@blueprintjs/core';
 
 export default class AppendButton extends Component
 {
-    onClick() {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            defaultActive: false
+        };
+    }
+
+    onClick(ev) {
+        // Should add whatever the default is
+        this.addText();
+    }
+
+    addText() {
+        this.append(new NewElement("Text", [""]));
+    }
+
+    addPage() {
+
+    }
+
+    addImage() {
+
+    }
+
+    addScript() {
+
+    }
+
+    append(newElement) {
         var path = this.props.path;
         var fragment = this.props.app.store.fragment(path[path.length - 1])
 
-        // Append newly-created element, and note which entry it is.
         fragment.invoke("append", [
-            new NewElement("Text", [""]),
+            newElement,
             true
         ])
 
@@ -21,14 +50,56 @@ export default class AppendButton extends Component
         event.stopPropagation();
     }
 
+    defaultToggle() {
+        this.setState({
+            defaultActive: !this.state.defaultActive
+        });
+    }
+
+    appendMoreMenu() {
+        return(
+            <div className="append-more-menu">
+            <ButtonGroup minimal={false} onMouseEnter={()=>{}}>
+
+                <Button icon="new-text-box"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addText()}></Button>
+
+                <Button icon="media"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addImage()}></Button>
+
+                <Button icon="document"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addPage()}></Button>
+
+                <Button icon="function"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addScript()}></Button>
+
+                <Divider />
+
+                <Button active={this.state.defaultActive}
+                onClick={()=>this.defaultToggle()}>Set Default</Button>
+
+            </ButtonGroup>
+            </div>
+        )
+    }
+
     render() {
         return(
             <div className="element">
                 <div className="element-spacer"></div>
-                <button className="append-button"
-                onClick={()=>this.onClick()}
-                onMouseDown={(ev)=>this.onMouseDown(ev)}>
-                </button>
+                    <div className="append-button-container">
+                        <button className="append-button"
+                        onClick={ev => this.onClick(ev)}
+                        onContextMenu={ev => this.onClick(ev)}
+                        onMouseDown={(ev)=>this.onMouseDown(ev)}></button>
+                        <Popover content={this.appendMoreMenu()} position={Position.RIGHT}>
+                            <button onMouseDown={(ev)=>this.onMouseDown(ev)} className="append-more-button"><Icon icon="more" /></button>
+                        </Popover>
+                    </div>
             </div>
         );
     }

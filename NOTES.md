@@ -39,3 +39,36 @@ NOTES:
 - Columns w/in columns shouldn't be allowed, render as collapsed page
 - Pages which are recursive should have any iteration after the first
     instance automatically collapsed regardless of saved state
+
+TEXT
+annotation
+align-left
+align-justify
+text-highlight
+paragraph
+menu
+list
+new-text-box ***
+
+PAGE
+document ***
+
+sCRIPT
+function ***
+console
+
+IMAGE
+media ***
+
+WEB
+link ***
+
+DISKFILE (Don't use)
+floppy-disk
+document-open
+document-share
+cloud
+
+INK
+draw ***
+
