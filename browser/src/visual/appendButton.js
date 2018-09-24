@@ -18,19 +18,19 @@ export default class AppendButton extends Component
     }
 
     addText() {
-        this.append(new NewElement("Text", [""]));
+        this.append(new NewElement("Text", []));
     }
 
     addPage() {
-
+        this.append(new NewElement("Page", []));
     }
 
     addImage() {
-
+        this.append(new NewElement("Image", []));
     }
 
     addScript() {
-
+        this.append(new NewElement("Script", []));
     }
 
     append(newElement) {

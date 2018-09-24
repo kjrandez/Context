@@ -24,7 +24,7 @@ Basic Functionality TODO:
 - Persistence w/ Disk
 
 =Bugs
-...
+- Sensitivity list not being updated when new elements added to hierarchy
 
 THEN,
 1. Snapshot export

@@ -165,7 +165,7 @@ html, body, #root, #scene {
 	margin: 0 auto;
 	padding: 0;
 	padding-left: 12px;
-	overflow: auto;
+	overflow: visible;
 	border-left: 2px solid #BBB;
 }
 
@@ -210,7 +210,7 @@ html, body, #root, #scene {
 }
 
 .element {
-	overflow: auto;
+	overflow: visible;
 	margin: 0;
 	padding: 0;
 }

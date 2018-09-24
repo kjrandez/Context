@@ -20,6 +20,8 @@ export default class Store
     }
 
     setModel(topPageId, elements) {
+        this.modelDict = {}
+        this.fragmentDict = {}
         this.loadModelDict(elements);
         this.topLevel = this.fragmentDict[topPageId];
     }

@@ -8,6 +8,7 @@ export default class App
         this.kernel = new WebSocket("ws://localhost:8085/broadcast");
         this.kernel.onopen = (event) => this.kernelOpen(event);
         this.kernel.onclose = (event) => this.kernelClose(event);
+        this.nextPath = [];
         this.selection = [];
         this.grabPath = null;
         this.top = null;
@@ -24,6 +25,11 @@ export default class App
         event = event || window.event;
         if(event.keyCode === 27)
             this.selected(null, false);
+    }
+
+    enterPage(path, pageId) {
+        this.nextPath = path;
+        this.kernelSend("requestPage", { page: pageId });
     }
 
     setGrabPath(path) {
@@ -92,6 +98,7 @@ export default class App
          
         switch(message.selector) {
             case 'renderPage':
+                this.path = this.nextPath;
                 this.store.setModel(message.arguments[0], message.arguments[1]);
                 this.top.setTopLevel(this.store.topLevelFragment());
                 break;

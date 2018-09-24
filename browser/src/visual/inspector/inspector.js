@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
-import ScriptInspector from './scriptInspector';
-import GenericInspector from './genericInspector';
+import { GenericInspector, ScriptInspector, PageInspector } from '.';
 
 export default class Inspector extends Component
 {
@@ -52,6 +51,11 @@ export default class Inspector extends Component
         var fragment = selection.fragment;
 
         switch(fragment.type()) {
+            case "Page":
+                return <PageInspector  
+                    fragment={fragment}
+                    loc={selection.loc}
+                    app={this.props.app} />
             case "Script":
                 return <ScriptInspector
                     fragment={fragment}
