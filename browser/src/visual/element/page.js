@@ -52,26 +52,25 @@ export default class Page extends Component
 
     headerContent(headerElement) {
         if(headerElement == null)
-            if(this.state.isOpen)
-                return null;
-            else
-                return <div className="page-header-rule"></div>
+            return <div className="page-header-rule"></div>
 
-        return elementList(
+        /*return elementList(
             [headerElement],
             this.props.loc.path.concat(this.props.fragment.id()),
             this.props.selection,
             this.props.app,
             false
-        )
+        )*/
+
+        return <p className="page-header">{headerElement.fragment.value().content}</p>
     }
 
     revealContent(headerElement) {
         var pageContent;
-        if(headerElement == null)
+        //if(headerElement == null)
             pageContent = this.state.content;
-        else
-            pageContent = this.state.content.slice(1);
+        //else
+        //    pageContent = this.state.content.slice(1);
         
         if(!this.isRecursivePage()) {
             return elementList(
@@ -124,9 +123,11 @@ export default class Page extends Component
                     <div className="page-sidebar-line"></div>
                 </div>
                 <div className="page-body">
-                    <div>
-                        {this.headerContent(headerElement)}
-                    </div>
+                    <Collapse isOpen={!this.state.isOpen}>
+                        <div>
+                            {this.headerContent(headerElement)}
+                        </div>
+                    </Collapse>
                     <Collapse isOpen={this.state.isOpen}>
                         {this.revealContent(headerElement)}
                     </Collapse>

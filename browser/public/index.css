@@ -49,7 +49,7 @@ p {
 	margin: 2px 0;
 }
 
-html, body, #root, #scene {
+html, body, #root {
 	height: 100%;
 	margin: 0;
 	padding: 0;
@@ -60,6 +60,7 @@ html, body, #root, #scene {
 }
 
 #scene {
+	min-height: 100%;
 	display: flex;
 	flex-direction: row;
 }
@@ -250,7 +251,7 @@ html, body, #root, #scene {
 }
 
 .page-sidebar {
-	margin-top: 10px;
+	margin-top: 0px;
 	overflow: hidden;
 }
 
@@ -260,8 +261,14 @@ html, body, #root, #scene {
 	margin-left: 11px;
 }
 
+.page-header {
+	font-weight: bold;
+	margin-top: 3px;
+}
+
 .page-header-rule {
-	margin-top: 22px;
+	margin-top: 12px;
+	max-width: 500px;
 	border-top: 1px solid #BBB;
 }
 
