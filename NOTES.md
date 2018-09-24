@@ -17,7 +17,7 @@ Basic Functionality TODO:
     - Page - Expand/collapse or just direct link
 
 =Kernel
-- Basic elements: Page, Text, Image, Script, File, Website
+- Basic elements: Page, Text->Script, Website, File->Image
 - Undo/Redo function
 - Cloneability / Atomicity
 - Buffer for copied items
@@ -28,9 +28,13 @@ Basic Functionality TODO:
 
 THEN,
 1. Snapshot export
-2. Virtual filesystem
-3. Peer-to-peer synchronization
-4. Tablet + stylus version
+2. Dedicated CEF browser window
+3. Inline Matplotlib
+4. Peer-to-peer synchronization
+5. Background file tracking
+6. Virtual filesystem
+7. Cloud sync & Version control tracking
+8. Tablet + stylus version
 
 NOTES:
 - All pages that aren't columns should be closed by default, until manually
