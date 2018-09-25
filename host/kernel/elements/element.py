@@ -21,5 +21,14 @@ class Element:
             "value" : self.value()
         }
 
+    def flatten(self, entries = {}, notAlreadyPresent = None):
+        """ Incorporate my own model and any models under this hierarchy into 'entries' """
+        if self.id not in entries:
+            myModel = self.model()
+            entries[self.id] = myModel
+            if notAlreadyPresent != None:
+                notAlreadyPresent(myModel)
+        return entries
+    
     def transaction(self, reverse):
         return Transaction(Dataset.singleton.observer, self, reverse)

@@ -37,21 +37,12 @@ class Page(Element):
             "column" : self.column
         }
     
-    def flattened(self):
-        """ Returns a dictionary of the models of every element in this hierarchy including self """
-        entries = {self.id : self.model()}
-        self.traverse(entries)
-        return entries
-
-    def traverse(self, entries = {}):
-        """ Adds the model of each page entry to the dictionary, recursing into other pages """
+    def flatten(self, entries = {}, notAlreadyPresent = None):
+        """ Incorporate my own model and any models under this hierarchy into the dictionary """
+        super().flatten(entries, notAlreadyPresent)
         for entry in self.content:
-            element = entry.element
-            if element.id in entries:
-                continue
-            entries[element.id] = element.model()
-            if isinstance(element, Page):
-                element.traverse(entries)
+            entry.element.flatten(entries, notAlreadyPresent)
+        return entries
 
     def elements(self):
         """ Returns a list of elements corresponding to the page's entries. """
@@ -69,7 +60,7 @@ class Page(Element):
         entry = PageEntry(inst)
         self.content.append(entry)
         if(noteEntry):
-            self.latestEntry = entry;
+            self.latestEntry = entry
 
         trans.reverseOp = self.remove
         trans.reverseArgs = [entry]

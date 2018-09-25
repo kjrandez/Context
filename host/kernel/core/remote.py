@@ -44,6 +44,7 @@ class Remote:
 
         updatedModels = [trans.element.model()]
         updatedModels = updatedModels + [X.model() for X in trans.others]
+        #self.incorporateOthers(trans.others)
 
         await self.websocket.send(json.dumps({
             "selector" : "update",
@@ -60,8 +61,19 @@ class Remote:
 
     def setTopPage(self, page):
         self.topPage = page
-        self.flattened = self.topPage.flattened()
-        self.senseIds = self.flattened.keys()
+        self.flattened = self.topPage.flatten()
+        self.senseIds = list(self.flattened.keys())
+
+    def incorporateOthers(self, others):
+        updatedModels = {}
+
+        def noteUpdatedModel(model):
+            id = model["id"]
+            updatedModels[id] = model
+            self.senseIds.append(id)
+
+        for element in others:
+            element.flatten(self.flattened, noteUpdatedModel)
 
 classList = None
 

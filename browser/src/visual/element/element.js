@@ -19,21 +19,45 @@ class Element extends Component
             if(grabPath != null) {
                 var samePath = this.props.loc.path.every((item, index) => item === grabPath[index])
                 if(samePath) {
-                    this.props.app.selected(this.uniqueSelection, false);
+                    this.props.app.grabSelection(this.uniqueSelection);
                     this.grabFocus = true;
                 }
             }
         }
+
+        this.state = { hide: false }
     }
 
     setRefNode(node) {
         this.refNode.current = node;
     }
 
-    droppedAt(path, beforeKey) {
+    droppedAt(newPath, beforeKey) {
         console.log("Drag complete");
-        console.log(path);
+        console.log(newPath);
         console.log(beforeKey);
+
+        // Remove this page entry from the parent
+        var myPath = this.props.loc.path;
+        var parentId = myPath[myPath.length - 1];
+        var parent = this.props.app.store.fragment(parentId);
+        parent.invoke("remove", [this.props.loc.key]);
+
+        // Get reference to the new parent page
+        var newParentId = newPath[newPath.length - 1];
+        var newParent = this.props.app.store.fragment(newParentId);
+
+        // Allow selection to be grabbed when element is inserted
+        this.props.app.setGrabPath(newPath);
+
+        // Add this element to the new page before the given key or at the end
+        if(beforeKey != null)
+            newParent.invoke("insertBefore", [this.props.fragment, beforeKey, true]);
+        else
+            newParent.invoke("append", [this.props.fragment, true]);
+        
+        // Keep this element invisible while background operations are occurring
+        this.setState({ hide: true });
     }
 
     onMouseDown(event) {
@@ -50,7 +74,7 @@ class Element extends Component
     }
 
     elementClass() {
-        return this.props.isDragging ? "element dragging" : "element";
+        return (this.props.isDragging || this.state.hide) ? "element dragging" : "element";
     }
 
     elementContentClass() {

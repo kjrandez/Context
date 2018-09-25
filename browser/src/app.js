@@ -33,6 +33,7 @@ export default class App
     }
 
     setGrabPath(path) {
+        // Loose end if a call fails.
         this.grabPath = path;
     }
 
@@ -40,9 +41,12 @@ export default class App
         return this.grabPath;
     }
 
-    selected(newSelection, ctrlDown) {
+    grabSelection(newSelection) {
+        this.selected(newSelection, false);
         this.grabPath = null;
+    }
 
+    selected(newSelection, ctrlDown) {
         if(ctrlDown) {
             var index = this.selection.indexOf(newSelection);
             if(index >= 0) {
@@ -67,8 +71,6 @@ export default class App
     }
 
     deselected(selection) {
-        this.grabPath = null;
-
         var index = this.selection.indexOf(selection);
         if(index >= 0) {
             this.selection.splice(index, 1);

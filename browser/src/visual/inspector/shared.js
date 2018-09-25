@@ -12,13 +12,26 @@ function infoContent(path, key, fragment) {
     );
 }
 
+function doDelete(loc, store) {
+    var parentId = loc.path[loc.path.length - 1];
+    var parent = store.fragment(parentId);
+
+    // Remove the entry with this key from the parent
+    parent.invoke("remove", [loc.key]);
+}
+
 export function commonInspectorButtons(loc, fragment, app) {
     return([
         <Button title="Paste" key="combut0" icon="clipboard"></Button>,
         <Button title="Pin to pasteboard" key="combut1" icon="pin"></Button>,
         <Button title="Duplicate to pasteboard" key="combut2" icon="duplicate"></Button>,
         <Button title="Cut to pasteboard" key="combut3" icon="cut"></Button>,
-        <Button title="Delete" key="combut7" icon="delete"></Button>,
+        
+        <Button title="Delete"
+        key="combut7"
+        icon="delete"
+        onClick={() => doDelete(loc, app.store)}></Button>,
+        
         <Divider key="combut4" />,
         <Popover key="combut5" content={infoContent(loc.path, loc.key, fragment)}>
             <Button title="Inspect" icon="info-sign"></Button>
