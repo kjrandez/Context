@@ -1,14 +1,16 @@
 import React, {Component} from 'react';
 import Selection from '../../selection.js';
 import { Page, Image, Text, Script } from '.';
+import { DragSource, DropTarget } from 'react-dnd';
 
-export default class Element extends Component 
+class Element extends Component 
 {
     constructor(props) {
         super(props);
 
+        this.refNode = { current: null };
         this.uniqueSelection = new Selection(
-            props.loc, props.fragment, React.createRef()
+            props.loc, props.fragment, this.refNode
         );
 
         this.grabFocus = false;
@@ -24,6 +26,10 @@ export default class Element extends Component
         }
     }
 
+    setRefNode(node) {
+        this.refNode.current = node;
+    }
+
     onMouseDown(event) {
         event.stopPropagation();
         this.props.app.selected(this.uniqueSelection, event.ctrlKey);
@@ -37,12 +43,20 @@ export default class Element extends Component
         return this.props.selection.indexOf(this.uniqueSelection) >= 0;
     }
 
+    elementClass() {
+        return this.props.isDragging ? "element dragging" : "element";
+    }
+
     elementContentClass() {
         return this.isSelected() ? "element-content selected" : "element-content";
     }
 
     elementHandleClass() {
         return this.isSelected() ? "element-handle selected" : "element-handle";
+    }
+
+    elementSpacerClass() {
+        return this.props.isOver ? "element-spacer expanded" : "element-spacer";
     }
 
     specializedElement() {
@@ -87,16 +101,54 @@ export default class Element extends Component
     }
 
     render() {
-        return (
-            <div className="element"
+        var dropTarget = this.props.dropTarget;
+        var dragSource = this.props.dragSource;
+        var dragPreview = this.props.dragPreview;
+
+        return dropTarget(dragPreview(
+            <div className={this.elementClass()}
             onMouseDown={(event) => this.onMouseDown(event)}
-            ref={this.uniqueSelection.ref}>
-                <div className="element-spacer"></div>
-                <div className={this.elementHandleClass()}></div>
+            ref={node => this.setRefNode(node)}>
+                <div className={this.elementSpacerClass()}><div className="element-spacer-internal"></div></div>
+                {dragSource(<div className={this.elementHandleClass()}></div>)}
                 <div className={this.elementContentClass()}>
                     {this.specializedElement()}
                 </div>
             </div>
-        )
+        ));
     }
 }
+
+const dragSource = {
+    beginDrag(props) {
+        return {};
+    }
+};
+
+function dragCollect(connect, monitor) {
+    return {
+        dragSource: connect.dragSource(),
+        dragPreview: connect.dragPreview(),
+        isDragging: monitor.isDragging()
+    };
+}
+
+const dropTarget = {
+    drop(props, monitor) {},
+
+    canDrop(props) {
+        return true;
+    }
+};
+
+function dropCollect(connect, monitor) {
+    return {
+        dropTarget: connect.dropTarget(),
+        isOver: monitor.isOver()
+    }
+}
+
+Element = DragSource("element", dragSource, dragCollect)(Element);
+Element = DropTarget("element", dropTarget, dropCollect)(Element);
+
+export default Element;

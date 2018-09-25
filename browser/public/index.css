@@ -219,10 +219,23 @@ html, body, #root {
 	padding: 0;
 }
 
+.element.dragging {
+	display: none;
+}
+
 .element-spacer {
 	margin: 0;
 	padding: 0;
 	height: 0px;
+    -webkit-transition: height 0.08s; /* Safari */
+    transition: height 0.08s;
+    transition-timing-function: linear;
+}
+.element-spacer.expanded {
+	height: 25px;
+	-webkit-transition: height 0.08s; /* Safari */
+    transition: height 0.08s;
+	transition-timing-function: linear;
 }
 
 .element-handle {

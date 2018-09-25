@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 import { elementList } from './shared.js';
 import { Inspector } from './inspector';
 import { SidePanel } from './sidepanel';
 
-export default class App extends Component {
+class Top extends Component {
     constructor(props) {
         super(props);
 
@@ -91,3 +93,5 @@ export default class App extends Component {
         );
     }
 }  
+
+export default DragDropContext(HTML5Backend)(Top);
