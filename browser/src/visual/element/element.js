@@ -30,6 +30,12 @@ class Element extends Component
         this.refNode.current = node;
     }
 
+    droppedAt(path, beforeKey) {
+        console.log("Drag complete");
+        console.log(path);
+        console.log(beforeKey);
+    }
+
     onMouseDown(event) {
         event.stopPropagation();
         this.props.app.selected(this.uniqueSelection, event.ctrlKey);
@@ -109,7 +115,7 @@ class Element extends Component
             <div className={this.elementClass()}
             onMouseDown={(event) => this.onMouseDown(event)}
             ref={node => this.setRefNode(node)}>
-                <div className={this.elementSpacerClass()}><div className="element-spacer-internal"></div></div>
+                <div className={this.elementSpacerClass()}></div>
                 {dragSource(<div className={this.elementHandleClass()}></div>)}
                 <div className={this.elementContentClass()}>
                     {this.specializedElement()}
@@ -122,6 +128,14 @@ class Element extends Component
 const dragSource = {
     beginDrag(props) {
         return {};
+    },
+
+    endDrag(props, monitor, component) {
+        var result = monitor.getDropResult();
+        if(result == null)
+            return;
+        
+        component.droppedAt(result.path, result.key);
     }
 };
 
@@ -134,17 +148,21 @@ function dragCollect(connect, monitor) {
 }
 
 const dropTarget = {
-    drop(props, monitor) {},
+    drop(props, monitor) {
+        if(monitor.getDropResult() != null)
+            return;
 
-    canDrop(props) {
-        return true;
+        return { 
+            path: props.loc.path,
+            key: props.loc.key
+        };
     }
 };
 
 function dropCollect(connect, monitor) {
     return {
         dropTarget: connect.dropTarget(),
-        isOver: monitor.isOver()
+        isOver: monitor.isOver({ shallow: true }) 
     }
 }
 

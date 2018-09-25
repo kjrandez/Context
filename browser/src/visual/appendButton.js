@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { NewElement } from '../store';
 import { Button, ButtonGroup, Divider, Popover, Icon, Position } from '@blueprintjs/core';
+import { DropTarget } from 'react-dnd';
 
-export default class AppendButton extends Component
+class AppendButton extends Component
 {
     constructor(props) {
         super(props)
@@ -95,20 +96,53 @@ export default class AppendButton extends Component
         )
     }
 
+    elementSpacerClass() {
+        return this.props.isOver ? "element-spacer expanded" : "element-spacer";
+    }
+
     render() {
-        return(
+        var dropTarget = this.props.dropTarget;
+
+        return dropTarget(
             <div className="element">
-                <div className="element-spacer"></div>
-                    <div className="append-button-container">
-                        <button className="append-button"
-                        onClick={ev => this.onClick(ev)}
-                        onContextMenu={ev => this.onClick(ev)}
-                        onMouseDown={(ev)=>this.onMouseDown(ev)}></button>
-                        <Popover content={this.appendMoreMenu()} position={Position.RIGHT}>
-                            <button onMouseDown={(ev)=>this.onMouseDown(ev)} className="append-more-button"><Icon icon="more" /></button>
-                        </Popover>
-                    </div>
+                <div className={this.elementSpacerClass()}></div>
+                <div className="element-content">
+
+                    <div className="append-button"
+                    onClick={ev => this.onClick(ev)}
+                    onContextMenu={ev => this.onClick(ev)}
+                    onMouseDown={(ev)=>this.onMouseDown(ev)}></div>
+                    
+                    <Popover content={this.appendMoreMenu()} position={Position.RIGHT}>
+                        <div className="append-more-button"
+                        onMouseDown={(ev)=>this.onMouseDown(ev)}>
+                            <Icon icon="more" />
+                        </div>
+                    </Popover>
+
+                </div>
             </div>
         );
     }
 }
+
+const dropTarget = {
+    drop(props, monitor) {
+        if(monitor.getDropResult() != null)
+            return;
+        
+        return {
+            path: props.path,
+            key: null
+        };
+    }
+};
+
+function dropCollect(connect, monitor) {
+    return {
+        dropTarget: connect.dropTarget(),
+        isOver: monitor.isOver({ shallow: true }) 
+    }
+}
+
+export default DropTarget("element", dropTarget, dropCollect)(AppendButton);
