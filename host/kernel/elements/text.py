@@ -4,9 +4,6 @@ class Text(Element):
     def __init__(self, content = ""):
         super().__init__()
         self.content = content
-    
-    def typeName(self):
-        return "text"
 
     def value(self):
         return {

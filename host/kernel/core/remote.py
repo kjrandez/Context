@@ -9,6 +9,8 @@ class Remote:
         self.ignoreTrans = []
         self.topPage = None
 
+        print("Making new remote")
+
         self.commands = {
             "requestRoot" : self.commandRequestRoot,
             "requestPage" : self.commandRequestPage,
@@ -44,7 +46,7 @@ class Remote:
 
         updatedModels = [trans.element.model()]
         updatedModels = updatedModels + [X.model() for X in trans.others]
-        #self.incorporateOthers(trans.others)
+        self.incorporateOthers(trans.others)
 
         await self.websocket.send(json.dumps({
             "selector" : "update",
@@ -74,6 +76,8 @@ class Remote:
 
         for element in others:
             element.flatten(self.flattened, noteUpdatedModel)
+
+        return updatedModels
 
 classList = None
 

@@ -31,18 +31,22 @@ class Page(Element):
         self.column = column
 
     def value(self):
-        return {
+        result = {
             "content" : [x.model() for x in self.content],
             "latestEntry" : self.latestEntry.model() if (self.latestEntry != None) else None,
             "column" : self.column
         }
+        return result
     
-    def flatten(self, entries = {}, notAlreadyPresent = None):
+    def flatten(self, modelsSoFar = None, notAlreadyPresent = None):
         """ Incorporate my own model and any models under this hierarchy into the dictionary """
-        super().flatten(entries, notAlreadyPresent)
+        modelsSoFar = super().flatten(modelsSoFar, notAlreadyPresent)
+        
         for entry in self.content:
-            entry.element.flatten(entries, notAlreadyPresent)
-        return entries
+            print("Flattening entry with ID: " + str(entry.element.id))
+            entry.element.flatten(modelsSoFar, notAlreadyPresent)
+        
+        return modelsSoFar
 
     def elements(self):
         """ Returns a list of elements corresponding to the page's entries. """
