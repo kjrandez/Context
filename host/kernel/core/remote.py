@@ -44,9 +44,8 @@ class Remote:
         if not trans.element.id in self.senseIds:
             return
 
-        updatedModels = [trans.element.model()]
-        updatedModels = updatedModels + [X.model() for X in trans.others]
-        self.incorporateOthers(trans.others)
+        updatedModels = self.incorporateOthers(trans.others)
+        updatedModels[trans.element.id] = trans.element.model()
 
         await self.websocket.send(json.dumps({
             "selector" : "update",

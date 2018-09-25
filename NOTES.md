@@ -9,7 +9,7 @@ Basic Functionality TODO:
     - Files, Images, Scripts, Weblinks
 - Integration of blueprint.js visuals
 - Navigation between pages
-- Drag + drop of items and pagesand external things
+- Drag + drop of items and pages and external things
 - Indent key function
 - Buffer viewer w/ element preview popup
 - History viewer w/ time travel
@@ -25,6 +25,7 @@ Basic Functionality TODO:
 =Bugs
 - Sensitivity list not being updated when new elements added to hierarchy
 - Padding of parent page element causes glitch when dragging across edge of inner
+- Header for collapsed nested pages doesn't update
 
 THEN,
 1. Snapshot export

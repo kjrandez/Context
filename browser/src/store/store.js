@@ -27,18 +27,9 @@ export default class Store
     }
 
     update(trans, elementModels) {
-        this.loadModelList(elementModels);
+        this.loadModelDict(elementModels);
         var updatedFragment = this.fragmentDict[trans.id];
         updatedFragment.update();
-    }
-
-    loadModelList(newModelList) {
-        newModelList.forEach(model => {
-            if(!(model.id in this.fragmentDict)) {
-                this.fragmentDict[model.id] = new Fragment(this, model)
-            }
-            this.modelDict[model.id] = model;
-        });
     }
 
     loadModelDict(newModelDict) {
