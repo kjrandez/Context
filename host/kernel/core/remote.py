@@ -14,7 +14,9 @@ class Remote:
         self.commands = {
             "requestRoot" : self.commandRequestRoot,
             "requestPage" : self.commandRequestPage,
-            "invoke" : self.commandInvoke
+            "invoke" : self.commandInvoke,
+            "addFile" : self.commandAddFile,
+            "addImage" : self.commandAddImage
         }
 
     async def dispatch(self, msg):
@@ -36,6 +38,16 @@ class Remote:
 
     async def commandRequestPage(self, data):
         await self.providePage(Dataset.singleton.lookup(data["page"]))
+
+    async def commandAddFile(self, data):
+        parent = Dataset.singleton.lookup(data["page"])
+        print("Adding file to parent: " + str(data["page"]))
+        print(str(parent))
+
+    async def commandAddImage(self, data):
+        parent = Dataset.singleton.lookup(data["page"])
+        print("Adding image to parent: " + str(data["page"]))
+        print(str(parent))
 
     async def update(self, trans):
         if trans.index in self.ignoreTrans:
@@ -84,12 +96,12 @@ def constructorFor(elementClass):
     global classList
 
     if classList == None:
-        from ..elements import Text, Page, Image, Script
+        from ..elements import Text, Page, Script, Link
         classList = {
             "Text" : Text,
-            "Image" : Image,
             "Page" : Page,
-            "Script" : Script
+            "Script" : Script,
+            "Link" : Link
         }
     
     return classList[elementClass]

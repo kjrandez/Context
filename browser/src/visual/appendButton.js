@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { NewElement } from '../store';
-import { Button, ButtonGroup, Divider, Popover, Icon, Position } from '@blueprintjs/core';
+import { Button, ButtonGroup, Divider, Popover, Icon, Position, ControlGroup, InputGroup } from '@blueprintjs/core';
 import { DropTarget } from 'react-dnd';
 
 class AppendButton extends Component
@@ -9,7 +9,9 @@ class AppendButton extends Component
         super(props)
 
         this.state = {
-            defaultActive: false
+            defaultActive: false,
+            hrefValue: "",
+            linkAddOpen: false
         };
     }
 
@@ -18,20 +20,48 @@ class AppendButton extends Component
         this.addText();
     }
 
-    addText() {
-        this.append(new NewElement("Text", []));
-    }
-
     addPage() {
         this.append(new NewElement("Page", []));
     }
 
-    addImage() {
-        this.append(new NewElement("Image", []));
+    addText() {
+        this.append(new NewElement("Text", []));
     }
 
     addScript() {
         this.append(new NewElement("Script", []));
+    }
+
+    addFile() {
+        var parentId = this.props.path[this.props.path.length - 1];
+        this.props.app.kernelSend("addFile", { page: parentId });
+    }
+
+    addImage() {
+        var parentId = this.props.path[this.props.path.length - 1];
+        this.props.app.kernelSend("addImage", { page: parentId });
+    }
+
+    addLink() {
+        this.setState({
+            hrefValue: "",
+            linkAddOpen: true
+        });
+    }
+
+    addLinkComplete() {
+        this.append(new NewElement("Link", [this.state.hrefValue]));
+    }
+
+    addLinkInputRef(ref) {
+        if(ref != null)
+            ref.focus();
+    }
+
+    addLinkInputChanged(ev) {
+        this.setState({
+            hrefValue: ev.target.value
+        });
     }
 
     append(newElement) {
@@ -57,54 +87,82 @@ class AppendButton extends Component
         });
     }
 
-    appendMoreMenu() {
-        return(
-            <div className="append-more-menu">
-            <ButtonGroup minimal={false} onMouseEnter={()=>{}}>
-
-                <Button icon="document"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addPage()}></Button>
-                
-                <Button icon="annotation"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addText()}></Button>
-
-                <Button icon="function"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addScript()}></Button>
-
-                <Button icon="folder-open"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addFile()}></Button>
-
-                <Button icon="media"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addImage()}></Button>
-
-                <Button icon="link"
-                className="bp3-popover-dismiss"
-                onClick={()=>this.addLink()}></Button>
-
-                <Divider />
-
-                <Button active={this.state.defaultActive}
-                onClick={()=>this.defaultToggle()}>Default</Button>
-
-            </ButtonGroup>
-            </div>
-        )
-    }
-
     elementSpacerClass() {
         return this.props.isOver ? "element-spacer expanded" : "element-spacer";
+    }
+
+    popoverContent() {
+        if(this.state.linkAddOpen)
+            return this.addLinkMenu();
+        else
+            return this.appendMoreMenu();
+    }
+
+    popoverDismissed() {
+        this.setState({
+            linkAddOpen: false
+        });
+    }
+
+    addLinkMenu() {
+        return(
+            <div className="link-add-popover" onMouseDown={ev => this.onMouseDown(ev)}>
+                <ControlGroup fill={true} vertical={false}>
+                    <InputGroup placeholder="Link address..."
+                    inputRef={ref => this.addLinkInputRef(ref)}
+                    onChange={ev => this.addLinkInputChanged(ev)}
+                    value={this.state.hrefValue} />
+                    <Button icon="add"
+                    className="bp3-popover-dismiss"
+                    onClick={() => this.addLinkComplete()}></Button>
+                </ControlGroup>
+            </div>
+        );
+    }
+
+    appendMoreMenu() {
+        return(
+            <div className="append-more-menu" onMouseDown={ev => this.onMouseDown(ev)}>
+                <ButtonGroup minimal={false} onMouseEnter={()=>{}}>
+
+                    <Button icon="document"
+                    className="bp3-popover-dismiss"
+                    onClick={()=>this.addPage()}></Button>
+                    
+                    <Button icon="annotation"
+                    className="bp3-popover-dismiss"
+                    onClick={()=>this.addText()}></Button>
+
+                    <Button icon="function"
+                    className="bp3-popover-dismiss"
+                    onClick={()=>this.addScript()}></Button>
+
+                    <Button icon="folder-open"
+                    className="bp3-popover-dismiss"
+                    onClick={()=>this.addFile()}></Button>
+
+                    <Button icon="media"
+                    className="bp3-popover-dismiss"
+                    onClick={()=>this.addImage()}></Button>
+
+                    <Button icon="link"
+                    onClick={()=>this.addLink()}></Button>
+
+                    <Divider />
+
+                    <Button active={this.state.defaultActive}
+                    onClick={()=>this.defaultToggle()}>Default</Button>
+
+                </ButtonGroup>
+            </div>
+        )
     }
 
     render() {
         var dropTarget = this.props.dropTarget;
 
         return dropTarget(
-            <div className="element">
+            <div className="element" onMouseDown={ev => this.onMouseDown(ev)}>
                 <div className={this.elementSpacerClass()}></div>
                 <div className="element-content">
 
@@ -113,7 +171,10 @@ class AppendButton extends Component
                     onContextMenu={ev => this.onClick(ev)}
                     onMouseDown={(ev)=>this.onMouseDown(ev)}></div>
                     
-                    <Popover content={this.appendMoreMenu()} position={Position.RIGHT}>
+                    <Popover
+                    content={this.popoverContent()}
+                    position={Position.RIGHT}
+                    onClosed={() => this.popoverDismissed()}>
                         <div className="append-more-button"
                         onMouseDown={(ev)=>this.onMouseDown(ev)}>
                             <Icon icon="more" />

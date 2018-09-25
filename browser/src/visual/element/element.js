@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Selection from '../../selection.js';
-import { Page, Image, Text, Script } from '.';
+import { Page, Image, Text, Script, Link } from '.';
 import { DragSource, DropTarget } from 'react-dnd';
 
 class Element extends Component 
@@ -120,6 +120,13 @@ class Element extends Component
                     app={app} />;
             case "Script":
                 return <Script
+                    fragment={fragment}
+                    loc={loc}
+                    selection={selection}
+                    grabFocus={grabFocus}
+                    app={app} />;
+            case "Link":
+                return <Link
                     fragment={fragment}
                     loc={loc}
                     selection={selection}

@@ -7,13 +7,10 @@ Basic Functionality TODO:
     - Text (Markdown editor)
     - Nested Pages & Column Pages
     - Files, Images, Scripts, Weblinks
-- Integration of blueprint.js visuals
 - Navigation between pages
-- Drag + drop of items and pages and external things
-- Indent key function
 - Buffer viewer w/ element preview popup
 - History viewer w/ time travel
-
+- Keyboard shortcuts, esp. indent
 
 =Kernel
 - Basic elements: Page, Text->Script, Website, File->Image
@@ -29,9 +26,9 @@ Basic Functionality TODO:
 
 THEN,
 1. Snapshot export
-2. Dedicated CEF browser window
+2. CEF/Electron window + External D&D
 3. Inline Matplotlib
-4. Data source vs. type differentiation
+4. Data source abstraction
 5. Peer-to-peer synchronization
 6. Background file tracking
 7. Virtual filesystem

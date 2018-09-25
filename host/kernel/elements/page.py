@@ -43,7 +43,6 @@ class Page(Element):
         modelsSoFar = super().flatten(modelsSoFar, notAlreadyPresent)
         
         for entry in self.content:
-            print("Flattening entry with ID: " + str(entry.element.id))
             entry.element.flatten(modelsSoFar, notAlreadyPresent)
         
         return modelsSoFar
