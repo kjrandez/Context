@@ -4,14 +4,18 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { elementList } from './shared.js';
 import { Inspector } from './inspector';
 import { SidePanel } from './sidepanel';
+import PageHeader from './pageHeader.js';
 
 class Top extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            topFragment: null,
             content: [],
-            selection: []
+            selection: [],
+            pathIds: [],
+            pathFragments: []
         }
 
         this.topFragment = null;
@@ -25,46 +29,67 @@ class Top extends Component {
         this.props.app.selected(null, false);
     }
 
-    setTopLevel(fragment) {
+    setTopLevel(fragment, pathIds) {
         // Update fragment connection
-        if(this.topFragment != null)
-            this.topFragment.disconnect(this)
-        this.topFragment = fragment;
-        this.topFragment.connect(this)
+        if(this.state.topFragment != null)
+            this.state.topFragment.disconnect(this);
+        
+        // Race condition: Shouldn't do this until the state has
+        // actually changed...
+        fragment.connect(this)
 
-        this.modelChanged();
+        // If on a sub-page, remove root and add current to the breadcrumbs
+        var breadcrumbIds = pathIds.slice()
+        breadcrumbIds.push(fragment.id());
+        var pathFragments = breadcrumbIds.map(id => this.props.app.store.fragment(id));
+
+        this.setState({
+            topFragment: fragment,
+            content: this.contentFromFragment(fragment),
+            pathIds: pathIds,
+            pathFragments: pathFragments
+        });
     }
 
     modelChanged() {
-        var value = this.topFragment.value();
+        this.setState({
+            content: this.contentFromFragment(this.state.topFragment)
+        });
+    }
+
+    contentFromFragment(fragment) {
+        var value = fragment.value();
         var latestEntryKey = (value.latestEntry == null) ? null : value.latestEntry.key;
 
-        this.setState({
-            content: value.content.map(pageEntry => {
-                return {
-                    key: pageEntry.key,
-                    fragment: this.props.app.store.fragment(pageEntry.element),
-                    latest: pageEntry.key === latestEntryKey
-                }
-            })
+        return value.content.map(pageEntry => {
+            return {
+                key: pageEntry.key,
+                fragment: this.props.app.store.fragment(pageEntry.element),
+                latest: pageEntry.key === latestEntryKey
+            }
         });
     }
 
     setSelection(selection) {
-        // The top-level's state includes the selected page contents
         this.setState({
             selection: selection
         });
     }
 
     pageContent() {
-        if(this.topFragment != null) {
-            return elementList(
-                this.state.content,
-                [this.topFragment.id()],
-                this.state.selection,
-                this.props.app, 
-                true
+        if(this.state.topFragment != null && this.state.pathFragments != null) {
+            return([
+
+                <PageHeader key="breadcrumb"
+                pathFragments={this.state.pathFragments} app={this.props.app} />,
+
+                elementList(
+                    this.state.content,
+                    this.state.pathIds.concat([this.state.topFragment.id()]),
+                    this.state.selection,
+                    this.props.app, 
+                    true
+                )]
             );
         } else {
             return <p>Loading...</p>

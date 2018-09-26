@@ -2,31 +2,64 @@
 
 Basic Functionality TODO:
 
-=Browser
-- Views & side-menus for:
-    - Text (Markdown editor)
-    - Nested Pages & Column Pages
-    - Files, Images, Scripts, Weblinks
+- Text View
+    - Markdown rendering
+    - Intuitive transition between modes
+- Nested Pages
+    - Intuitive method of navigating to a nested page
+    - Possible option to render only as a link (never nested)
+- Column Pages
+    - Render adjacent pages as columns
+    - Command to separate columns
+    - Insert above/below/within columns
+- Files
+    - Implement file select in python
+    - Find in Explorer
+    - Default open action
+    - Open python file through File element
+- Images
+    - Zoomed in view
+- Scripts
+    - Easy ability to append results
+    - Tab inside editor indents
+- Weblinks
+    - Link sanitizes href
+    - Looks up website information in background
+    - Rendering of Rich Preview
 - Navigation between pages
-- Buffer viewer w/ element preview popup
+    - Kernel needs to send truncated model for path pages
+    - Render breadcrumbs based on page content
+    - Open specific path based on hash url window.location.hash
+- Pasteboard
+    - Implement special page as pasteboard container
+    - Elements appear in pasteboard
+    - Implement pasteboard buttons in action menu
+    - Drag and drop in and out of pasteboard
+    - Implement cloneability vs atomicity
 - History viewer w/ time travel
-- Keyboard shortcuts, esp. indent
-
-=Kernel
-- Basic elements: Page, Text->Script, Website, File->Image
-- Undo/Redo function
-- Cloneability / Atomicity
-- Buffer for copied items
-- Persistence w/ Disk
-
+    - Undo/redo of transactions
+    - Travel forward or backward until specific transaction
+- Keyboard shortcuts
+    - Indent creates page out of selected elements
+    - shift-click follow page, ctrl-click follow in new tab
+- Disk Persistence
+    - Start with ever growing list of data
+    - Break into sectors with byte indicating used/available space (?)
+    - Save and load as JSON
+    - Transactions append elements to dirty list, written out async
+    - Elements record their location in file
+- Misc
+    - Errors when dispatching an RPC need to be caught, reported
+        and remote/browser need to be updated to a sanitized state
+    - Indent-dedent and pasteboard options for multiple selections
+    
 =Bugs
-- Sensitivity list not being updated when new elements added to hierarchy
 - Padding of parent page element causes glitch when dragging across edge of inner
 - Header for collapsed nested pages doesn't update
 
 THEN,
 1. Snapshot export
-2. CEF/Electron window + External D&D
+2. Electron window + External D&D
 3. Inline Matplotlib
 4. Data source abstraction
 5. Peer-to-peer synchronization

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { NewElement } from '../store';
+import NewElement from '../newElement';
 import { Button, ButtonGroup, Divider, Popover, Icon, Position, ControlGroup, InputGroup } from '@blueprintjs/core';
 import { DropTarget } from 'react-dnd';
 

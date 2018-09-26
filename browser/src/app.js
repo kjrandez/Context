@@ -1,4 +1,4 @@
-import {Store} from './store';
+import Store from './store';
 
 export default class App
 {
@@ -27,9 +27,14 @@ export default class App
             this.selected(null, false);
     }
 
+    enterRoot() {
+        this.nextPath = [];
+        this.kernelSend("requestRoot", null);
+    }
+
     enterPage(path, pageId) {
         this.nextPath = path;
-        this.kernelSend("requestPage", { page: pageId });
+        this.kernelSend("requestPage", { page: pageId, path: path });
     }
 
     setGrabPath(path) {
@@ -100,9 +105,8 @@ export default class App
          
         switch(message.selector) {
             case 'renderPage':
-                this.path = this.nextPath;
                 this.store.setModel(message.arguments[0], message.arguments[1]);
-                this.top.setTopLevel(this.store.topLevelFragment());
+                this.top.setTopLevel(this.store.topLevelFragment(), this.nextPath);
                 break;
             case 'update':
                 this.store.update(message.arguments[0], message.arguments[1]);

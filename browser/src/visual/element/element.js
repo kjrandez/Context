@@ -33,10 +33,6 @@ class Element extends Component
     }
 
     droppedAt(newPath, beforeKey) {
-        console.log("Drag complete");
-        console.log(newPath);
-        console.log(beforeKey);
-
         // Remove this page entry from the parent
         var myPath = this.props.loc.path;
         var parentId = myPath[myPath.length - 1];

@@ -34,10 +34,10 @@ class Remote:
                 self.ignoreTrans.append(resultTrans)
 
     async def commandRequestRoot(self, data):
-        await self.providePage(self.root)
+        await self.providePage(self.root, None)
 
     async def commandRequestPage(self, data):
-        await self.providePage(Dataset.singleton.lookup(data["page"]))
+        await self.providePage(Dataset.singleton.lookup(data["page"]), data["path"])
 
     async def commandAddFile(self, data):
         parent = Dataset.singleton.lookup(data["page"])
@@ -53,10 +53,12 @@ class Remote:
         if trans.index in self.ignoreTrans:
             self.ignoreTrans.remove(trans.index)
             return
+
+        # IMPLEMENT DEEP VS SHALLOW SENSITIVITY
         if not trans.element.id in self.senseIds:
             return
 
-        updatedModels = self.incorporateOthers(trans.others)
+        updatedModels = self.incorporateOthers(trans.others, True)
         updatedModels[trans.element.id] = trans.element.model()
 
         await self.websocket.send(json.dumps({
@@ -64,20 +66,25 @@ class Remote:
             "arguments" : [trans.model(), updatedModels]
         }))
 
-    async def providePage(self, page):
-        self.setTopPage(page)
+    async def providePage(self, page, path):
+        self.setTopPage(page, path)
 
         await self.websocket.send(json.dumps({
             "selector" : "renderPage",
             "arguments" : [self.topPage.id, self.flattened]
         }))
 
-    def setTopPage(self, page):
+    def setTopPage(self, page, path):
         self.topPage = page
         self.flattened = self.topPage.flatten()
         self.senseIds = list(self.flattened.keys())
 
-    def incorporateOthers(self, others):
+        if path != None:
+            pathPages = [Dataset.singleton.lookup(x) for x in path]
+            self.incorporateOthers(pathPages, False)
+
+    # IMPLEMENT DEEP vs SHALLOW INCORPORATION
+    def incorporateOthers(self, others, deep):
         updatedModels = {}
 
         def noteUpdatedModel(model):
