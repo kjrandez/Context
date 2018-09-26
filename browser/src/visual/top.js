@@ -29,23 +29,24 @@ class Top extends Component {
         this.props.app.selected(null, false);
     }
 
-    setTopLevel(fragment, pathIds) {
+    setTopLevel(newTopFragment, newPasteboardFragment, pathIds) {
         // Update fragment connection
         if(this.state.topFragment != null)
             this.state.topFragment.disconnect(this);
         
         // Race condition: Shouldn't do this until the state has
         // actually changed...
-        fragment.connect(this)
+        newTopFragment.connect(this)
 
         // If on a sub-page, remove root and add current to the breadcrumbs
         var breadcrumbIds = pathIds.slice()
-        breadcrumbIds.push(fragment.id());
+        breadcrumbIds.push(newTopFragment.id());
         var pathFragments = breadcrumbIds.map(id => this.props.app.store.fragment(id));
 
         this.setState({
-            topFragment: fragment,
-            content: this.contentFromFragment(fragment),
+            topFragment: newTopFragment,
+            pasteboardFragment: newPasteboardFragment,
+            content: this.contentFromFragment(newTopFragment),
             pathIds: pathIds,
             pathFragments: pathFragments
         });
@@ -76,6 +77,13 @@ class Top extends Component {
         });
     }
 
+    sidepanelContent() {
+        if(this.state.pasteboardFragment != null)
+            return <SidePanel paste={this.state.pasteboardFragment} app={this.props.app} />
+        else 
+            return <span />
+    }
+
     pageContent() {
         if(this.state.topFragment != null && this.state.pathFragments != null) {
             return([
@@ -102,7 +110,7 @@ class Top extends Component {
                 id="scene"
                 onMouseDown={(event) => this.onMouseDown(event)}>
                 <div id="left-column">
-                    <SidePanel />
+                    {this.sidepanelContent()}
                 </div>
                 <div id="center-column">
                     <div id="page">
@@ -112,7 +120,7 @@ class Top extends Component {
                     </div>
                 </div>
                 <div id="right-column">
-                    <Inspector app={this.props.app} selection={this.state.selection} />
+                    <Inspector selection={this.state.selection} app={this.props.app} />
                 </div>
             </div>
         );

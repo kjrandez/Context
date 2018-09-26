@@ -3,6 +3,7 @@
 Basic Functionality TODO:
 
 - Text View
+    - Update to use contenteditable div
     - Markdown rendering
     - Intuitive transition between modes
 - Nested Pages
@@ -13,7 +14,7 @@ Basic Functionality TODO:
     - Command to separate columns
     - Insert above/below/within columns
 - Files
-    - Implement file select in python
+    - Implement file select for add menu (ELECTRON)
     - Find in Explorer
     - Default open action
     - Open python file through File element
@@ -29,7 +30,7 @@ Basic Functionality TODO:
 - Navigation between pages
     - Kernel needs to send truncated model for path pages
     - Open specific path based on hash url window.location.hash
-- Pasteboard
+- Pasteboard (ELECTRON FOR CLIPBOARD INTEGRATION)
     - Implement special page as pasteboard container
     - Elements appear in pasteboard
     - Implement pasteboard buttons in action menu

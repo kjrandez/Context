@@ -1,5 +1,9 @@
 import json
 from .dataset import Dataset
+import threading
+import tkinter as tk
+import tkinter.filedialog as filedialog
+import copy
 
 class Remote:
     def __init__(self, root, observer, websocket):
@@ -8,6 +12,7 @@ class Remote:
         self.websocket = websocket
         self.ignoreTrans = []
         self.topPage = None
+        self.pasteboard = Dataset.singleton.pasteboard
 
         print("Making new remote")
 
@@ -41,8 +46,7 @@ class Remote:
 
     async def commandAddFile(self, data):
         parent = Dataset.singleton.lookup(data["page"])
-        print("Adding file to parent: " + str(data["page"]))
-        print(str(parent))
+        threading.Thread(target=addFilePrompt, args=(parent,)).start()
 
     async def commandAddImage(self, data):
         parent = Dataset.singleton.lookup(data["page"])
@@ -71,14 +75,21 @@ class Remote:
 
         await self.websocket.send(json.dumps({
             "selector" : "renderPage",
-            "arguments" : [self.topPage.id, self.flattened]
+            "arguments" : [self.topPage.id, self.pasteboard.id, self.flattened]
         }))
 
     def setTopPage(self, page, path):
         self.topPage = page
+
+        # Generate flattened model based on top page
         self.flattened = self.topPage.flatten()
         self.senseIds = list(self.flattened.keys())
 
+        # Incorporate pasteboard into model
+        self.flattened[self.pasteboard.id] = self.pasteboard.model()
+        self.senseIds.append(self.pasteboard.id)
+
+        # Incorporate parent path pages into model
         if path != None:
             pathPages = [Dataset.singleton.lookup(x) for x in path]
             self.incorporateOthers(pathPages, False)
@@ -96,6 +107,16 @@ class Remote:
             element.flatten(self.flattened, noteUpdatedModel)
 
         return updatedModels
+
+def addFilePrompt(parent):
+    root = tk.Tk()
+    root.title('root win')
+    # create child window
+    top = tk.Toplevel()
+    top.title('top win')
+    top.lift(aboveThis=root)
+
+    root.mainloop()
 
 classList = None
 
@@ -121,5 +142,8 @@ def resolvedArgument(arg):
         constructorArgs = [resolvedArgument(x) for x in arg["value"]["args"]]
         constructor = constructorFor(elementClass)
         return constructor(*constructorArgs)
+    elif arg["type"] == "dup":
+        orig = Dataset.singleton.lookup(arg["value"])
+        return copy.deepcopy(orig)
     else:
         return arg["value"]

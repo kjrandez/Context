@@ -8,6 +8,7 @@ export default class Store
         this.fragmentDict = {};
         this.modelDict = {};
         this.topLevel = null;
+        this.pasteboard = null;
 
         this.localHandlers = {
             "Text-update": this.invlocContentUpdate.bind(this),
@@ -19,11 +20,16 @@ export default class Store
         return this.topLevel;
     }
 
-    setModel(topPageId, elements) {
+    pasteboardFragment() {
+        return this.pasteboard;
+    }
+
+    setModel(topPageId, pasteboardId, elements) {
         this.modelDict = {}
         this.fragmentDict = {}
         this.loadModelDict(elements);
         this.topLevel = this.fragmentDict[topPageId];
+        this.pasteboard = this.fragmentDict[pasteboardId];
     }
 
     update(trans, elementModels) {

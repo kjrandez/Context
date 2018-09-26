@@ -3,6 +3,7 @@ import json
 from aioconsole import ainput
 
 from .core import Dataset, Ledger, Local, Remote
+from .elements import Page
 
 class Kernel:
     def __init__(self, loop):

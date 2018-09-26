@@ -102,11 +102,16 @@ export default class App
         var message = JSON.parse(event.data);
         console.log("Received message: ");
         console.log(message);
-         
+        
+        var args = message.arguments
         switch(message.selector) {
             case 'renderPage':
-                this.store.setModel(message.arguments[0], message.arguments[1]);
-                this.top.setTopLevel(this.store.topLevelFragment(), this.nextPath);
+                this.store.setModel(args[0], args[1], args[2]);
+                this.top.setTopLevel(
+                    this.store.topLevelFragment(),
+                    this.store.pasteboardFragment(),
+                    this.nextPath
+                );
                 break;
             case 'update':
                 this.store.update(message.arguments[0], message.arguments[1]);

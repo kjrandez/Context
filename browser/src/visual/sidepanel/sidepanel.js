@@ -60,7 +60,7 @@ export default class SidePanel extends Component
 
     tabContent() {
         if(this.state.selectedTab === "pasteboard")
-            return <Pasteboard />
+            return <Pasteboard paste={this.props.paste} app={this.props.app} />
         else
             return <History />
     }

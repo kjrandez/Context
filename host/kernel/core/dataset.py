@@ -9,7 +9,7 @@ class Dataset:
         self.observer = observer
         self.objMap = {}
         self.root = None
-        
+
         Dataset.singleton = self
     
     def lookup(self, id):
@@ -20,7 +20,9 @@ class Dataset:
         self.objMap[inst.id] = inst
 
     def makeDefault(self):
-        from ..elements import Page, Text, Image, Script
+        from ..elements import Page, Text, Image, Script, Pasteboard
+
+        self.pasteboard = Pasteboard()
 
         self.root = Page([
             Text('### Hello world'),
