@@ -28,7 +28,6 @@ Basic Functionality TODO:
     - Rendering of Rich Preview
 - Navigation between pages
     - Kernel needs to send truncated model for path pages
-    - Render breadcrumbs based on page content
     - Open specific path based on hash url window.location.hash
 - Pasteboard
     - Implement special page as pasteboard container
@@ -56,6 +55,7 @@ Basic Functionality TODO:
 =Bugs
 - Padding of parent page element causes glitch when dragging across edge of inner
 - Header for collapsed nested pages doesn't update
+- Breadcrumb titles don't update when modified externally
 
 THEN,
 1. Snapshot export
