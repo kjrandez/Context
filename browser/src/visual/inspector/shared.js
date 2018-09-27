@@ -42,7 +42,9 @@ export function commonInspectorButtons(loc, fragment, paste, app) {
         onClick={() => doDelete(loc, app.store)}></Button>,
         
         <Divider key="combut4" />,
-        <Popover key="combut5" content={infoContent(loc.path, loc.key, fragment)}>
+        <Popover key="combut5"
+        transitionDuration={70}
+        content={infoContent(loc.path, loc.key, fragment)}>
             <Button title="Inspect" icon="info-sign"></Button>
         </Popover>,
         

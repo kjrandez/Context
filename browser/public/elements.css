@@ -1,0 +1,104 @@
+.text-edit {
+	outline: 0;
+}
+
+.code-edit {
+	outline: 0;
+	padding: 3px;
+	padding-left: 5px;
+	font-family: monospace;
+	background-color: #F0F0F0;
+}
+
+.element-content.selected .code-edit {
+	background-color: transparent;
+}
+
+.element {
+	overflow: visible;
+	margin: 0;
+	padding: 0;
+}
+
+.element.dragging {
+	display: none;
+}
+
+.element-spacer {
+	margin: 0;
+	padding: 0;
+	height: 0px;
+    -webkit-transition: height 0.08s; /* Safari */
+    transition: height 0.08s;
+    transition-timing-function: linear;
+}
+.element-spacer.expanded {
+	height: 25px;
+	-webkit-transition: height 0.08s; /* Safari */
+    transition: height 0.08s;
+	transition-timing-function: linear;
+}
+
+.element-handle {
+	margin: 0;
+	padding: 1px;
+	height: 10px;
+}
+
+.element-handle.selected {
+	border: 1px solid #DDD;
+	border-bottom: 0px;
+	background-color: #EEE;
+}
+
+.element-handle.selected:hover {
+	cursor: grab;
+}
+
+.element-handle.selected:active {
+	background-color: #DDD;
+	cursor: grabbing;
+}
+
+.element-content {
+	margin: 0;
+	padding: 1px;
+	position: relative;
+}
+
+.element-content.selected {
+	background-color: white;
+	margin: 0;
+	padding: 0;
+	border: 1px solid #DDD;
+}
+
+.page {
+	display: flex;
+}
+
+.page-sidebar {
+	margin-top: 0px;
+	overflow: hidden;
+}
+
+.page-sidebar-line {
+	border-left: 1px solid #BBB;
+	height: 100%;
+	margin-left: 11px;
+}
+
+.page-header {
+	font-weight: bold;
+	margin-top: 3px;
+}
+
+.page-header-rule {
+	margin-top: 12px;
+	max-width: 500px;
+	border-top: 1px solid #BBB;
+}
+
+.page-body {
+	flex: 1;
+}

@@ -21,7 +21,6 @@ export default class Pasteboard extends Component
         });
     }
 
-
     modelChanged() {
         this.setState({
             content: this.contentFromFragment(this.props.paste)

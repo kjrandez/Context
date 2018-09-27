@@ -124,12 +124,8 @@ class AppendButton extends Component
         return(
             <div className="append-more-menu" onMouseDown={ev => this.onMouseDown(ev)}>
                 <ButtonGroup minimal={false} onMouseEnter={()=>{}}>
-
-                    <Button icon="document"
-                    className="bp3-popover-dismiss"
-                    onClick={()=>this.addPage()}></Button>
                     
-                    <Button icon="annotation"
+                    <Button icon="align-left"
                     className="bp3-popover-dismiss"
                     onClick={()=>this.addText()}></Button>
 
@@ -147,6 +143,12 @@ class AppendButton extends Component
 
                     <Button icon="link"
                     onClick={()=>this.addLink()}></Button>
+
+                    <Divider />
+
+                    <Button icon="document"
+                    className="bp3-popover-dismiss"
+                    onClick={()=>this.addPage()}></Button>
 
                     <Divider />
 
@@ -174,6 +176,7 @@ class AppendButton extends Component
                     <Popover
                     content={this.popoverContent()}
                     position={Position.RIGHT}
+                    transitionDuration={70}
                     onClosed={() => this.popoverDismissed()}>
                         <div className="append-more-button"
                         onMouseDown={(ev)=>this.onMouseDown(ev)}>
