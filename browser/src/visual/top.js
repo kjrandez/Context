@@ -84,6 +84,13 @@ class Top extends Component {
             return <span />
     }
 
+    inspectorContent() {
+        if(this.state.pasteboardFragment != null)
+            return <Inspector paste={this.state.pasteboardFragment} selection={this.state.selection} app={this.props.app} />
+        else
+            return <span />
+    }
+
     pageContent() {
         if(this.state.topFragment != null && this.state.pathFragments != null) {
             return([
@@ -120,7 +127,7 @@ class Top extends Component {
                     </div>
                 </div>
                 <div id="right-column">
-                    <Inspector selection={this.state.selection} app={this.props.app} />
+                    {this.inspectorContent()}
                 </div>
             </div>
         );

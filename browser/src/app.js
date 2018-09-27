@@ -66,10 +66,18 @@ export default class App
             }
         }
         else {
-            if(newSelection != null)
+            if(newSelection != null) {
+                if(this.selection.length === 1 && this.selection[0] === newSelection)
+                    return;
+                
                 this.selection = [newSelection];
-            else
+            }
+            else {
+                if(this.selection.length === 0)
+                    return;
+                
                 this.selection = [];
+            }
         }
 
         this.top.setSelection(this.selection);

@@ -55,16 +55,19 @@ export default class Inspector extends Component
                 return <PageInspector  
                     fragment={fragment}
                     loc={selection.loc}
+                    paste={this.props.paste}
                     app={this.props.app} />
             case "Script":
                 return <ScriptInspector
                     fragment={fragment}
                     loc={selection.loc}
+                    paste={this.props.paste}
                     app={this.props.app} />
             default:
                 return <GenericInspector
                     fragment={fragment}
                     loc={selection.loc}
+                    paste={this.props.paste}
                     app={this.props.app} />
         }
     }

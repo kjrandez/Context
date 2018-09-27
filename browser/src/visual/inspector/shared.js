@@ -12,6 +12,10 @@ function infoContent(path, key, fragment) {
     );
 }
 
+function doPin(fragment, paste) {
+    paste.invoke("append", [fragment]);
+}
+
 function doDelete(loc, store) {
     var parentId = loc.path[loc.path.length - 1];
     var parent = store.fragment(parentId);
@@ -20,10 +24,15 @@ function doDelete(loc, store) {
     parent.invoke("remove", [loc.key]);
 }
 
-export function commonInspectorButtons(loc, fragment, app) {
+export function commonInspectorButtons(loc, fragment, paste, app) {
     return([
         <Button title="Paste" key="combut0" icon="clipboard"></Button>,
-        <Button title="Pin to pasteboard" key="combut1" icon="pin"></Button>,
+
+        <Button title="Pin to pasteboard"
+        key="combut1"
+        icon="pin"
+        onClick={() => doPin(fragment, paste)}></Button>,
+
         <Button title="Duplicate to pasteboard" key="combut2" icon="duplicate"></Button>,
         <Button title="Cut to pasteboard" key="combut3" icon="cut"></Button>,
         
