@@ -1,5 +1,7 @@
 import SidePanel from './sidepanel.js';
-import Pasteboard from './pasteboard.js';
+import Clipboard from './clipboard.js';
+import Clip from './clip.js';
+import AppendArea from './appendArea.js';
 import History from './history.js';
 
-export { SidePanel, Pasteboard, History };
+export { SidePanel, Clipboard, Clip, AppendArea, History };

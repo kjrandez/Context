@@ -117,7 +117,7 @@ export default class App
                 this.store.setModel(args[0], args[1], args[2]);
                 this.top.setTopLevel(
                     this.store.topLevelFragment(),
-                    this.store.pasteboardFragment(),
+                    this.store.clipboardFragment(),
                     this.nextPath
                 );
                 break;

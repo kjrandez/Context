@@ -29,7 +29,7 @@ class Top extends Component {
         this.props.app.selected(null, false);
     }
 
-    setTopLevel(newTopFragment, newPasteboardFragment, pathIds) {
+    setTopLevel(newTopFragment, newClipboardFragment, pathIds) {
         // Update fragment connection
         if(this.state.topFragment != null)
             this.state.topFragment.disconnect(this);
@@ -45,7 +45,7 @@ class Top extends Component {
 
         this.setState({
             topFragment: newTopFragment,
-            pasteboardFragment: newPasteboardFragment,
+            clipboardFragment: newClipboardFragment,
             content: this.contentFromFragment(newTopFragment),
             pathIds: pathIds,
             pathFragments: pathFragments
@@ -78,15 +78,15 @@ class Top extends Component {
     }
 
     sidepanelContent() {
-        if(this.state.pasteboardFragment != null)
-            return <SidePanel paste={this.state.pasteboardFragment} app={this.props.app} />
+        if(this.state.clipboardFragment != null)
+            return <SidePanel clip={this.state.clipboardFragment} app={this.props.app} />
         else 
             return <span />
     }
 
     inspectorContent() {
-        if(this.state.pasteboardFragment != null)
-            return <Inspector paste={this.state.pasteboardFragment} selection={this.state.selection} app={this.props.app} />
+        if(this.state.clipboardFragment != null)
+            return <Inspector clip={this.state.clipboardFragment} selection={this.state.selection} app={this.props.app} />
         else
             return <span />
     }

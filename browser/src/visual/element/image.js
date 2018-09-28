@@ -22,9 +22,15 @@ export default class Image extends Component
         });
     }
 
+    onDragStart(ev) {
+        ev.preventDefault();
+    }
+
     render() {
         return (
-            <img src={this.state.src} alt={this.state.alt} />
+            <img onDragStart={ev => this.onDragStart(ev)}
+            src={this.state.src}
+            alt={this.state.alt} />
         );
     }
 

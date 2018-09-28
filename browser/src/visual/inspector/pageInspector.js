@@ -19,7 +19,7 @@ export default class PageInspector extends Component
                 {commonInspectorButtons(
                     this.props.loc,
                     this.props.fragment,
-                    this.props.paste,
+                    this.props.clip,
                     this.props.app
                 )}
             </ButtonGroup>

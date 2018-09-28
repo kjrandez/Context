@@ -162,7 +162,7 @@ const dragSource = {
         if(result == null)
             return;
         
-        component.droppedAt(result.path, result.key);
+        component.droppedAt(result.path, result.key, result.before);
     }
 };
 
@@ -181,7 +181,8 @@ const dropTarget = {
 
         return { 
             path: props.loc.path,
-            key: props.loc.key
+            key: props.loc.key,
+            before: true
         };
     }
 };

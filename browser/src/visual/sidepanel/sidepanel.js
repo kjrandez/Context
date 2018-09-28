@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Tab, Tabs } from "@blueprintjs/core";
-import { Pasteboard, History } from '.';
+import { Clipboard, History } from '.';
 
 export default class SidePanel extends Component
 {
@@ -9,7 +9,7 @@ export default class SidePanel extends Component
 
         this.state = {
             isOpen: false,
-            selectedTab: "pasteboard"
+            selectedTab: "clipboard"
         }
     }
 
@@ -59,8 +59,8 @@ export default class SidePanel extends Component
     }
 
     tabContent() {
-        if(this.state.selectedTab === "pasteboard")
-            return <Pasteboard paste={this.props.paste} app={this.props.app} />
+        if(this.state.selectedTab === "clipboard")
+            return <Clipboard clip={this.props.clip} app={this.props.app} />
         else
             return <History />
     }
@@ -74,7 +74,7 @@ export default class SidePanel extends Component
                             <Tabs id="TabsExample"
                             onChange={newTab => this.onChange(newTab)}
                             selectedTabId={this.state.selectedTab}>
-                                <Tab id="pasteboard" title="Clipboard" />
+                                <Tab id="clipboard" title="Clipboard" />
                                 <Tab id="history" title="History" />
                             </Tabs>
                         </div>

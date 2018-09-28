@@ -92,9 +92,8 @@ class Remote:
         self.flattened = self.topPage.flatten()
         self.senseIds = list(self.flattened.keys())
 
-        # Incorporate pasteboard into model
-        self.flattened[self.pasteboard.id] = self.pasteboard.model()
-        self.senseIds.append(self.pasteboard.id)
+        # Incorporate pasteboard page into model (should be SHALLOW)
+        self.incorporateOthers([self.pasteboard], False)
 
         # Incorporate parent path pages into model
         if path != None:
