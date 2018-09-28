@@ -6,9 +6,6 @@ class Image(Element):
         self.src = src
         self.alt = alt
 
-    def typeName(self):
-        return "image"
-
     def value(self):
         return {
             "src" : self.src,

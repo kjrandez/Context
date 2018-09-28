@@ -6,8 +6,8 @@ class Script(Text):
     def __init__(self, content = ""):
         super().__init__(content)
 
-    def typeName(self):
-        return "script"
+    def duplicate(self, memo):
+        return Script(self.content)
 
     def execute(self, page):
         try:

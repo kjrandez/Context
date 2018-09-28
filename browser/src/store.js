@@ -1,5 +1,6 @@
 import Fragment from './fragment.js';
 import NewElement from './newElement.js';
+import DuplicateElement from './duplicateElement.js';
 
 export default class Store
 {
@@ -93,6 +94,8 @@ function encoded(param) {
             elementType: param.elementType,
             args: param.args.map(arg => encoded(arg))
         }}
+    else if(param instanceof DuplicateElement)
+        return { type: "dup", value: param.fragment.id() }
     else
         return { type: "std", value: param };
 }

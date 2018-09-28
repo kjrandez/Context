@@ -128,6 +128,7 @@ class Remote:
             orig = Dataset.singleton.lookup(arg["value"])
             newInst = copy.deepcopy(orig)
             await self.worker(newInst.backgroundInit)
+            return newInst
         else:
             return arg["value"]
 

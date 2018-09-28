@@ -10,6 +10,9 @@ class Text(Element):
             "content" : self.content
         }
 
+    def duplicate(self, memo):
+        return Text(self.content)
+
     def update(self, value, reverse = None):
         trans = self.transaction(reverse)
 

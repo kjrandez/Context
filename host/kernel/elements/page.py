@@ -1,4 +1,5 @@
 from .element import Element
+import copy
 
 class PageEntry():
     nextKey = 0
@@ -29,6 +30,10 @@ class Page(Element):
         self.content = [resolvedEntry(x) for x in content]
         self.latestEntry = None
         self.column = column
+
+    def duplicate(self, memo):
+        dupContent = [copy.deepcopy(entry.element, memo) for entry in self.content]
+        return Page(dupContent, self.column)
 
     def value(self):
         result = {

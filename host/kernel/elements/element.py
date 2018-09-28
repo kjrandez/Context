@@ -8,8 +8,14 @@ class Element:
         Dataset.singleton.append(self)
         Element.nextId = Element.nextId + 1
 
+    def __deepcopy__(self, memo):
+        return self.duplicate(memo)
+
     def backgroundInit(self):
         pass
+
+    def duplicate(self, memo):
+        return self
     
     def value(self):
         return None
