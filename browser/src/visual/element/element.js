@@ -92,7 +92,12 @@ class Element extends Component
         var app = this.props.app;
         var grabFocus = this.grabFocus;
 
-        switch(fragment.type()) {
+        // Catch errors resulting from null fragment (not found in store)
+        var type = "Undefined"
+        if(this.props.fragment != null)
+            type = fragment.type();
+
+        switch(type) {
             case "Page":
                 return <Page
                     fragment={fragment}
@@ -129,7 +134,7 @@ class Element extends Component
                     grabFocus={grabFocus}
                     app={app} />;
             default:
-                return <p>Undefined element: {fragment.type()}</p>;
+                return <p>Unknown element. Type: {fragment.type()}</p>;
         }
     }
 
