@@ -11,4 +11,8 @@ As of right now only builds/runs on Windows.
 ## Runtime Dependencies
 - Python 3
 
-Python deps: websockets, ipython, matplotlib, and numpy are auto-installed.
+Python deps: websockets, ipython, matplotlib, numpy, aioconsole, janus, and others are installed by setuptools.
+
+## Latest Screenshot
+
+![Latest Screenshot](screenshot.png)

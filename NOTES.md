@@ -55,8 +55,9 @@ Basic Functionality TODO:
     
 =Bugs
 - Padding of parent page element causes glitch when dragging across edge of inner
-- Header for collapsed nested pages doesn't update
+- Header for collapsed nested pages doesn't update instantly
 - Breadcrumb titles don't update when modified externally
+- Recursive pages now cause stack overflow in kernel
 
 THEN,
 1. Snapshot export
