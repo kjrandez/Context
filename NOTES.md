@@ -5,7 +5,6 @@ Priority items preceed disk persistence.
 
 Text View
 
-- **PRIORITY** Update to use contenteditable div
 - Markdown rendering
 - Intuitive transition between modes
 

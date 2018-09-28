@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import Textarea from 'react-textarea-autosize';
+import ContentEditable from 'react-simple-contenteditable';
 
 export default class Text extends Component
 {
@@ -11,11 +11,7 @@ export default class Text extends Component
             content: value.content
         }
 
-        this.textarea = null;
-    }
-
-    onChange(event) {
-        this.props.fragment.invoke("update", [event.target.value]);
+        this.innerRef = React.createRef();
     }
 
     modelChanged() {
@@ -26,13 +22,19 @@ export default class Text extends Component
         });
     }
 
+    onChange(ev, value) {
+        this.props.fragment.invoke("update", [value]);
+    }
+
     render() {
         return (
-            <Textarea
-            inputRef={val => (this.textarea = val)}
+            <ContentEditable
+            html={this.state.content}
             className="text-edit"
-            onChange={(event) => this.onChange(event)}
-            value={this.state.content} />
+            onChange={(ev, val) => this.onChange(ev, val)}
+            contentEditable="plaintext-only"
+            ref={this.innerRef}
+            onKeyPress={() => {}} />
         );
     }
 
@@ -41,8 +43,9 @@ export default class Text extends Component
     }
 
     componentDidMount() {
-        if(this.props.grabFocus && this.textarea != null) {
-            this.textarea.focus();
+        if(this.props.grabFocus && this.innerRef.current != null) {
+            if(this.innerRef.current.elem != null)
+                this.innerRef.current.elem.focus();
         }
     }
 

@@ -91,26 +91,28 @@ class Top extends Component {
             return <span />
     }
 
+    pageHeader() {
+        if(this.state.topFragment != null && this.state.pathFragments != null) {
+            return <PageHeader key="breadcrumb"
+            pathFragments={this.state.pathFragments} app={this.props.app} />
+        }
+        return null;
+    }
+
     pageContent() {
         if(this.state.topFragment != null && this.state.pathFragments != null) {
-            return([
-
-                <PageHeader key="breadcrumb"
-                pathFragments={this.state.pathFragments} app={this.props.app} />,
-
-                elementList(
+            return(elementList(
                     this.state.content,
                     this.state.pathIds.concat([this.state.topFragment.id()]),
                     this.state.selection,
                     this.props.app, 
                     true
-                )]
-            );
+            ));
         } else {
             return <p>Loading...</p>
         }
     }
-
+ 
     render() {
         return (
             <div
@@ -122,7 +124,10 @@ class Top extends Component {
                 <div id="center-column">
                     <div id="page">
                         <div id="top-spacer"></div>
+                        {this.pageHeader()}
+                        <div id="page-elements">
                             {this.pageContent()}
+                        </div>
                         <div id="bottom-spacer"></div>
                     </div>
                 </div>

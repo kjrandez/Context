@@ -3,9 +3,13 @@
 	max-width: 900px;
 	margin: 0 auto;
 	padding: 0;
-	padding-left: 12px;
+	padding-left: 10px;
 	overflow: visible;
 	border-left: 2px solid #BBB;
+}
+
+#page-elements {
+	margin-left: 10px;
 }
 
 #top-spacer {
