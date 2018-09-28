@@ -6,9 +6,9 @@ import tkinter.filedialog as filedialog
 import copy
 
 class Remote:
-    def __init__(self, root, observer, websocket):
+    def __init__(self, root, worker, websocket):
         self.root = root
-        self.observer = observer
+        self.worker = worker
         self.websocket = websocket
         self.ignoreTrans = []
         self.topPage = None
@@ -20,6 +20,7 @@ class Remote:
             "requestRoot" : self.commandRequestRoot,
             "requestPage" : self.commandRequestPage,
             "invoke" : self.commandInvoke,
+            "invokeInBackground" : self.commandInvokeInBackground,
             "addFile" : self.commandAddFile,
             "addImage" : self.commandAddImage
         }
@@ -31,12 +32,19 @@ class Remote:
     async def commandInvoke(self, data):
         target = Dataset.singleton.lookup(data["element"])
         selector = getattr(target, data["selector"])
-        arguments = [resolvedArgument(X) for X in data["arguments"]]
+        arguments = [await self.resolvedArgument(X) for X in data["arguments"]]
 
         resultTrans = selector(*arguments)
         if resultTrans != None:
             if not data["respond"]:
                 self.ignoreTrans.append(resultTrans)
+
+    async def commandInvokeInBackground(self, data):
+        target = Dataset.singleton.lookup(data["element"])
+        selector = getattr(target, data["selector"])
+        arguments = [await self.resolvedArgument(X) for X in data["arguments"]]
+
+        await self.worker(selector, arguments)
 
     async def commandRequestRoot(self, data):
         await self.providePage(self.root, None)
@@ -46,12 +54,11 @@ class Remote:
 
     async def commandAddFile(self, data):
         parent = Dataset.singleton.lookup(data["page"])
-        threading.Thread(target=addFilePrompt, args=(parent,)).start()
+        await self.worker(addFilePrompt, parent)
 
     async def commandAddImage(self, data):
         parent = Dataset.singleton.lookup(data["page"])
-        print("Adding image to parent: " + str(data["page"]))
-        print(str(parent))
+        await self.worker(addImagePrompt, parent)
 
     async def update(self, trans):
         if trans.index in self.ignoreTrans:
@@ -108,18 +115,41 @@ class Remote:
 
         return updatedModels
 
-def addFilePrompt(parent):
-    root = tk.Tk()
-    root.title('root win')
-    # create child window
-    top = tk.Toplevel()
-    top.title('top win')
-    top.lift(aboveThis=root)
+    async def resolvedArgument(self, arg):
+        if arg["type"] == "obj":
+            return Dataset.singleton.lookup(arg["value"])
+        elif arg["type"] == "new":
+            elementClass = arg["value"]["elementType"]
+            constructorArgs = [await self.resolvedArgument(x) for x in arg["value"]["args"]]
+            constructor = constructorFor(elementClass)
+            inst = constructor(*constructorArgs)
+            await self.worker(inst.backgroundInit)
+            return inst
+        elif arg["type"] == "dup":
+            orig = Dataset.singleton.lookup(arg["value"])
+            newInst = copy.deepcopy(orig)
+            await self.worker(newInst.backgroundInit)
+        else:
+            return arg["value"]
 
-    root.mainloop()
+def addFilePrompt(parent):
+    filenames = getFilenames(parent, [("All files", "*")])
+    print(filenames)
+
+def addImagePrompt(parent):
+    filenames = getFilenames(parent, [
+        ("Images", ".png .gif .jpeg .jpg .bmp .tiff .tif"),
+        ("All files", "*")
+    ])
+    print(filenames)
+
+def getFilenames(parent, filetypes=None):
+    root = tk.Tk()
+    root.attributes("-topmost", True)
+    root.withdraw()
+    return list(tk.filedialog.askopenfilenames(filetypes=filetypes))
 
 classList = None
-
 def constructorFor(elementClass):
     global classList
 
@@ -133,17 +163,3 @@ def constructorFor(elementClass):
         }
     
     return classList[elementClass]
-
-def resolvedArgument(arg):
-    if arg["type"] == "obj":
-        return Dataset.singleton.lookup(arg["value"])
-    elif arg["type"] == "new":
-        elementClass = arg["value"]["elementType"]
-        constructorArgs = [resolvedArgument(x) for x in arg["value"]["args"]]
-        constructor = constructorFor(elementClass)
-        return constructor(*constructorArgs)
-    elif arg["type"] == "dup":
-        orig = Dataset.singleton.lookup(arg["value"])
-        return copy.deepcopy(orig)
-    else:
-        return arg["value"]

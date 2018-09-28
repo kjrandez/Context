@@ -26,6 +26,10 @@ export default class Fragment
         this.store.invoke(this, selector, args);
     }
 
+    invokeBackground(selector, args) {
+        this.store.invokeBackground(this, selector, args);
+    }
+
     update() {
         this.visuals.forEach(visual => visual.modelChanged());
     }

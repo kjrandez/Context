@@ -8,9 +8,9 @@ class Element:
         Dataset.singleton.append(self)
         Element.nextId = Element.nextId + 1
 
-    def isPage(self):
-        return False
-
+    def backgroundInit(self):
+        pass
+    
     def value(self):
         return None
 

@@ -52,13 +52,21 @@ export default class Store
     }
 
     invoke(fragment, selector, args) {
+        this.invokeCommon(fragment, selector, args, "invoke");
+    }
+
+    invokeBackground(fragment, selector, args) {
+        this.invokeCommon(fragment, selector, args, "invokeInBackground");
+    }
+
+    invokeCommon(fragment, selector, args, command) {
         var requestUpdate = true;
         var invlocId = fragment.type() + "-" + selector;
         if(invlocId in this.localHandlers) {
             this.localHandlers[invlocId](fragment, args)
             requestUpdate = false;
         }
-        this.app.kernelSend("invoke", {
+        this.app.kernelSend(command, {
             element: fragment.id(),
             selector: selector,
             arguments: args.map(arg => encoded(arg)),

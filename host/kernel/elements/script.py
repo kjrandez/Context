@@ -9,18 +9,9 @@ class Script(Text):
     def typeName(self):
         return "script"
 
-    def execute(self, page, newThread):
-        code = self.content
-
-        if newThread:
-            print("Starting thread")
-            Thread(target = self.runExec, args = (page, code)).start()
-        else:
-            self.runExec(page, code)
-
-    def runExec(self, page, code):
+    def execute(self, page):
         try:
-            exec(code, globals(), locals())
+            exec(self.content, globals(), locals())
         except:
             trace = traceback.format_exc()
             print("Runtime error in script")
