@@ -28,6 +28,9 @@
 	margin-top: 5px;
 	margin-bottom: 10px;
 	border-radius: 6px;
+
+	/* Miraculously discovered as fixing the breadcrumbs */
+	max-width: calc(100% - 0.1px);
 }
 
 .append-button {

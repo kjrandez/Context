@@ -44,6 +44,9 @@ class Page(Element):
         return result
     
     def flatten(self, flattened = None, notPresent = None, maxDepth = None, depth = 0):
+        if self.id in flattened:
+            return
+        
         """ Incorporate my own model and any models under this hierarchy into the dictionary """
         flattened = super().flatten(flattened, notPresent)
         
