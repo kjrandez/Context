@@ -1,11 +1,27 @@
 import React, {Component} from 'react';
 import { GenericInspector, ScriptInspector, PageInspector } from '.';
+import { ButtonGroup, Divider } from '@blueprintjs/core';
 
 export default class Inspector extends Component
 {
     constructor(props) {
         super(props);
         this.contentRef = React.createRef();
+
+        this.state = {
+            selection: this.currentSelection(props)
+        };
+    }
+
+    currentSelection(props) {
+        var selection = props.selection;
+        if(selection == null)
+            selection = []
+        return selection;
+    }
+
+    componentWillReceiveProps(newProps) {
+        this.setState({ selection: this.currentSelection(newProps) })
     }
 
     componentDidUpdate() {
@@ -21,17 +37,9 @@ export default class Inspector extends Component
         }
     }
 
-    currentSelection() {
-        if(this.props.selection.length !== 1)
-            return null;
-        return this.props.selection[0];
-    }
 
-    className(selection) {
-        if(selection != null)
-            return "inspector-visible";
-        else
-            return "inspector-hidden";
+    className() {
+        return "inspector-visible";
     }
 
     inspectorContent(selection) {
@@ -44,38 +52,48 @@ export default class Inspector extends Component
         );
     }
 
-    inspectorContentInner(selection) {    
-        if(selection == null)
-            return null;
-        
-        var fragment = selection.fragment;
+    inspectorContentInner() {
+        var content = [] ;
 
-        switch(fragment.type()) {
-            case "Page":
-                return <PageInspector  
-                    fragment={fragment}
-                    loc={selection.loc}
-                    clip={this.props.clip}
-                    app={this.props.app} />
-            case "Script":
-                return <ScriptInspector
-                    fragment={fragment}
-                    loc={selection.loc}
-                    clip={this.props.clip}
-                    app={this.props.app} />
-            default:
-                return <GenericInspector
-                    fragment={fragment}
-                    loc={selection.loc}
-                    clip={this.props.clip}
-                    app={this.props.app} />
+        if(this.state.selection.length === 1) {
+            var fragment = this.state.selection[0].fragment;
+            var loc = this.state.selection[0].loc;
+            switch(fragment.type()) {
+                case "Page":
+                    content.push(<PageInspector 
+                        key="specialized"
+                        fragment={fragment}
+                        loc={loc}
+                        clip={this.props.clip}
+                        app={this.props.app} />);
+                    content.push(<Divider key="divider" />);
+                    break;
+                case "Script":
+                    content.push(<ScriptInspector
+                        key="specialized"
+                        fragment={fragment}
+                        loc={loc}
+                        clip={this.props.clip}
+                        app={this.props.app} />);
+                    content.push(<Divider key="divider" />);
+                    break;
+            }
         }
+
+        content.push(<GenericInspector
+            key="generic"
+            selection={this.state.selection}
+            clip={this.props.clip}
+            app={this.props.app} />);
+        
+        return <ButtonGroup minimal={false} vertical="true" onMouseEnter={()=>{}}>
+            {content}
+        </ButtonGroup>;
     }
 
-    inspectorLoc(selection) {
-        if(selection == null)
-            return 10;
-        return selection.ref.current.getBoundingClientRect().top;
+    inspectorLoc() {
+        var firstSel = this.state.selection[0];
+        return firstSel.ref.current.getBoundingClientRect().top;
     }
 
     onMouseDown(event) {
@@ -83,13 +101,16 @@ export default class Inspector extends Component
     }
 
     render() {
-        var selection = this.currentSelection();
+        console.log("Selection: " );
+        console.log(this.state.selection);
+        if(this.state.selection.length === 0)
+            return null;
 
         return(
             <div id="inspector"
-            className={this.className(selection)}
+            className={this.className()}
             onMouseDown={(ev) => this.onMouseDown(ev)}>
-                {this.inspectorContent(selection)}
+                {this.inspectorContent()}
             </div>
         )
     }

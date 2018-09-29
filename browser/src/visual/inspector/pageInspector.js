@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Button, ButtonGroup, Divider } from '@blueprintjs/core';
-import { commonInspectorButtons } from './shared';
+import { Button } from '@blueprintjs/core';
 
 export default class PageInspector extends Component
 {
@@ -10,19 +9,12 @@ export default class PageInspector extends Component
     }
 
     render() {
-        return(
-            <ButtonGroup minimal={false} vertical="true" onMouseEnter={()=>{}}>
-                <Button title="Go to page"
+        return([
+                <Button
+                key="1"
+                title="Go to page"
                 icon="document-open"
                 onClick={() => this.enterPage()}></Button>
-                <Divider />
-                {commonInspectorButtons(
-                    this.props.loc,
-                    this.props.fragment,
-                    this.props.clip,
-                    this.props.app
-                )}
-            </ButtonGroup>
-        );
+        ]);
     }
 }

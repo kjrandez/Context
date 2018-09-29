@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Button, ButtonGroup, Divider } from '@blueprintjs/core';
-import { commonInspectorButtons } from './shared';
+import { Button } from '@blueprintjs/core';
 
 export default class ScriptInspector extends Component
 {
@@ -16,18 +15,16 @@ export default class ScriptInspector extends Component
     }
 
     render() {
-        return(
-            <ButtonGroup minimal={false} vertical="true" onMouseEnter={()=>{}}>
-                <Button title="Run script" icon="publish-function" onClick={()=>this.run(false)}></Button>
-                <Button title="Run in thread" icon="derive-column" onClick={()=>this.run(true)}></Button>
-                <Divider />
-                {commonInspectorButtons(
-                    this.props.loc,
-                    this.props.fragment,
-                    this.props.clip,
-                    this.props.app
-                )}
-            </ButtonGroup>
-        );
+        return([
+            <Button key="1"
+            title="Run script"
+            icon="publish-function"
+            onClick={()=>this.run(false)}></Button>,
+
+            <Button key="2"
+            title="Run in thread"
+            icon="derive-column"
+            onClick={()=>this.run(true)}></Button>
+        ]);
     }
 }
