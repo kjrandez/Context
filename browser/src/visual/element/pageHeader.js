@@ -8,7 +8,10 @@ export default class PageHeader extends Component
         var titleElement = this.getTitleElement();
         this.state = {
             titleElement: titleElement,
-            title: (titleElement != null) ? titleElement.value().content : null
+            title: (titleElement != null) ? titleElement.value().content : null,
+            mouseOver: false,
+            shiftDown: false,
+            ctrlDown: false
         };
     }
 
@@ -32,12 +35,26 @@ export default class PageHeader extends Component
         this.props.fragment.connect(this);
         if(this.state.titleElement != null)
             this.state.titleElement.connect(this);
+        this.props.app.connectKeyListener(this);
     }
 
     componentWillUnmount() {
         if(this.state.titleElement != null)
             this.state.titleElement.disconnect(this);
         this.props.fragment.disconnect(this);
+        this.props.app.disconnectKeyListener(this);
+    }
+
+    shiftKey(down) {
+        this.setState({
+            shiftDown: down
+        });
+    }
+
+    ctrlKey(down) {
+        this.setState({
+            ctrlDown: down
+        })
     }
 
     modelChanged(updatedFragment) {
@@ -59,11 +76,42 @@ export default class PageHeader extends Component
             }
             
         }
-    }   
+    }
+
+    onClick(event) {
+        // Prevent default shift-click behavior (new window)
+        if(this.state.shiftDown) {
+            event.preventDefault();
+
+            // Set new top page to this one
+            this.props.app.enterPage(this.props.path, this.props.fragment.id());
+        }
+    }
+
+    pathHash() {
+        var hash = "#";
+        this.props.path.forEach(id => {hash += (id + ",")});
+        hash += this.props.fragment.id();
+        return hash;
+    }
+
+    pageHeaderClass() {
+        if(this.state.shiftDown || this.state.ctrlDown)
+            return "page-header link";
+        return "page-header";
+    }
+
+    pageHeaderLabel() {
+        if(this.state.shiftDown || this.state.ctrlDown)
+            return <a href={this.pathHash()} onClick={ev => this.onClick(ev)}>{this.state.title}</a>;
+        return this.state.title;
+    }
 
     render() {
         if(this.state.titleElement == null)
             return <div className="page-header-rule"></div>
-        return <p className="page-header">{this.state.title}</p>
+        return <p className={this.pageHeaderClass()}>
+            {this.pageHeaderLabel()}
+        </p>
     }
 }

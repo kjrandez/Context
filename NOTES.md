@@ -10,7 +10,6 @@ Text View
 
 Nested Pages
 
-- **PRIORITY** Intuitive method of navigating to a nested page
 - Possible option to render only as a link (never nested)
 - **PRIORITY** Indent to create nested page from selected elements
 
@@ -97,6 +96,7 @@ Then,
 - Columns w/in columns shouldn't be allowed, render as collapsed page
 - Pages which are recursive should have any iteration after the first
     instance automatically collapsed regardless of saved state
+- Pages display as nested by default unless recursive... (alt-click or ctrl-click the title to follow link). In meta settings they can be set to display as links only (single-click or ctrl-click to follow)
 
 ### QUESTIONS
 

@@ -12,19 +12,62 @@ export default class App
         this.selection = [];
         this.grabPath = null;
         this.top = null;
+        this.shiftDown = false;
+        this.ctrlDown = false;
+        this.keyListeners = []
+    }
+
+    connectKeyListener(listener) {
+        this.keyListeners.push(listener);
+    }
+
+    disconnectKeyListener(listener) {
+        var index = this.keyListeners.indexOf(listener);
+        this.keyListeners.splice(index, 1);
     }
 
     startup(component) {
         this.top = component;
-        this.kernel.onmessage = (event) => this.kernelMessage(event);
+        this.kernel.onmessage = event => this.kernelMessage(event);
+        document.onkeydown = event => this.documentKeyDown(event);
+        document.onkeyup = event => this.documentKeyUp(event);
+    } 
 
-        document.onkeyup = (event) => this.documentKeyUp(event);
-    }  
+    notifyShiftKey(down) {
+        this.keyListeners.forEach(listener => listener.shiftKey(down));
+    }
+
+    notifyCtrlKey(down) {
+        this.keyListeners.forEach(listener => listener.ctrlKey(down));
+    }
     
-    documentKeyUp(event) {
-        event = event || window.event;
-        if(event.keyCode === 27)
+    documentKeyDown(event) {
+        event = event;
+
+        if(event.keyCode == 16 && !this.shiftDown) {
+            this.shiftDown = true;
+            this.notifyShiftKey(true);
+        }
+        else if(event.keyCode == 17 && !this.ctrlDown) {
+            this.ctrlDown = true;
+            this.notifyCtrlKey(true);
+        }
+        if(event.keyCode === 27) {
             this.selected(null, false);
+        }
+    }
+
+    documentKeyUp(event) {
+        event = event;
+
+        if(event.keyCode == 16 && this.shiftDown) {
+            this.shiftDown = false;
+            this.notifyShiftKey(false);
+        }
+        else if(event.keyCode == 17 && this.ctrlDown) {
+            this.ctrlDown = false;
+            this.notifyCtrlKey(false);
+        }
     }
 
     enterRoot() {

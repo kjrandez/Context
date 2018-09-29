@@ -91,7 +91,7 @@ export default class Page extends Component
                 </div>
                 <div className="page-body">
                     <Collapse isOpen={!this.state.isOpen}>
-                        <PageHeader fragment={this.props.fragment} app={this.props.app} />
+                        <PageHeader fragment={this.props.fragment} path={this.props.loc.path} app={this.props.app} />
                     </Collapse>
                     <Collapse isOpen={this.state.isOpen}>
                         {this.revealContent()}

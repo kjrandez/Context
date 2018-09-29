@@ -93,6 +93,10 @@
 	margin-top: 3px;
 }
 
+.page-header a {
+	color: black;
+}
+
 .page-header-rule {
 	margin-top: 12px;
 	max-width: 500px;
