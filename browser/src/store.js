@@ -2,6 +2,13 @@ import Fragment from './fragment.js';
 import NewElement from './newElement.js';
 import DuplicateElement from './duplicateElement.js';
 
+class StoreError
+{
+    constructor(message) {
+        this.message = message;
+    }
+}
+
 export default class Store
 {
     constructor(app) {
@@ -49,6 +56,8 @@ export default class Store
     }
 
     fragment(id) {
+        if(!(id in this.fragmentDict))
+            throw StoreError("Attempt to access non-present element: " + id);
         return this.fragmentDict[id];
     }
 
@@ -82,6 +91,8 @@ export default class Store
     }
 
     value(id) {
+        if(!(id in this.modelDict))
+            throw StoreError("Attempt to read non-present element: " + id);
         return this.modelDict[id].value;
     }
 }

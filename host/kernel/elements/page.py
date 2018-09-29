@@ -43,14 +43,18 @@ class Page(Element):
         }
         return result
     
-    def flatten(self, modelsSoFar = None, notAlreadyPresent = None):
+    def flatten(self, flattened = None, notPresent = None, maxDepth = None, depth = 0):
         """ Incorporate my own model and any models under this hierarchy into the dictionary """
-        modelsSoFar = super().flatten(modelsSoFar, notAlreadyPresent)
+        flattened = super().flatten(flattened, notPresent)
         
+        # Do not go deeper if this is the max depth
+        if (maxDepth != None) and (depth == maxDepth):
+            return flattened
+
         for entry in self.content:
-            entry.element.flatten(modelsSoFar, notAlreadyPresent)
+            entry.element.flatten(flattened, notPresent, maxDepth, depth + 1)
         
-        return modelsSoFar
+        return flattened
 
     def elements(self):
         """ Returns a list of elements corresponding to the page's entries. """
@@ -84,7 +88,7 @@ class Page(Element):
             entry = PageEntry(inst)
             self.content.insert(offset, entry)
             if(noteEntry):
-                self.latestEntry = entry;
+                self.latestEntry = entry
             
             trans.reverseOp = self.remove
             trans.reverseArgs = [entry]

@@ -44,7 +44,6 @@ Weblinks
 
 Navigation between pages
 
-- **PRIORITY** Kernel needs to send truncated model for path pages
 - **PRIORITY** Open specific path based on hash url window.location.hash
 
 History viewer w/ time travel
@@ -87,7 +86,6 @@ Then,
 ### BUGS
 
 - Padding of parent page element causes glitch when dragging across edge of inner
-- Header for collapsed nested pages doesn't update instantly
 - Breadcrumb titles don't update when modified externally
 - Recursive pages now cause stack overflow in kernel
 

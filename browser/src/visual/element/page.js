@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {elementList} from '../shared.js';
 import { Collapse } from "@blueprintjs/core";
+import PageHeader from './pageHeader';
 
 export default class Page extends Component
 {
@@ -39,42 +40,10 @@ export default class Page extends Component
         return this.props.loc.path.indexOf(this.props.fragment.id()) >= 0;
     }
 
-    firstTextEntry() {
-        if(this.state.content.length < 2)
-            return null;
-        
-        var firstEntry = this.state.content[0];
-        if(firstEntry.fragment.type() !== "Text")
-            return null;
-        
-        return firstEntry;
-    }
-
-    headerContent(headerElement) {
-        if(headerElement == null)
-            return <div className="page-header-rule"></div>
-
-        /*return elementList(
-            [headerElement],
-            this.props.loc.path.concat(this.props.fragment.id()),
-            this.props.selection,
-            this.props.app,
-            false
-        )*/
-
-        return <p className="page-header">{headerElement.fragment.value().content}</p>
-    }
-
-    revealContent(headerElement) {
-        var pageContent;
-        //if(headerElement == null)
-            pageContent = this.state.content;
-        //else
-        //    pageContent = this.state.content.slice(1);
-        
+    revealContent() {
         if(!this.isRecursivePage()) {
             return elementList(
-                pageContent, 
+                this.state.content, 
                 this.props.loc.path.concat(this.props.fragment.id()),
                 this.props.selection,
                 this.props.app,
@@ -107,8 +76,6 @@ export default class Page extends Component
     }
 
     render() {
-        var headerElement = this.firstTextEntry();
-
         return (
             <div className="page">
                 <div className="page-sidebar">
@@ -124,12 +91,10 @@ export default class Page extends Component
                 </div>
                 <div className="page-body">
                     <Collapse isOpen={!this.state.isOpen}>
-                        <div>
-                            {this.headerContent(headerElement)}
-                        </div>
+                        <PageHeader fragment={this.props.fragment} app={this.props.app} />
                     </Collapse>
                     <Collapse isOpen={this.state.isOpen}>
-                        {this.revealContent(headerElement)}
+                        {this.revealContent()}
                     </Collapse>
                 </div>
             </div>

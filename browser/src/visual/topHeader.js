@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Position, MenuItem, Menu, OverflowList, Boundary, Popover } from '@blueprintjs/core';
 
-export default class PageHeader extends Component
+export default class TopHeader extends Component
 {
     constructor(props) {
         super(props);

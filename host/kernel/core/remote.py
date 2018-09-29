@@ -65,16 +65,22 @@ class Remote:
             self.ignoreTrans.remove(trans.index)
             return
 
-        # IMPLEMENT DEEP VS SHALLOW SENSITIVITY
-        if not trans.element.id in self.senseIds:
+        # Send any models which are relevant to the transaction but which the
+        # remote was not previously sensitive to
+        newModels = {}
+        if trans.element.id in self.senseIds:
+            newModels = self.incorporateElements(trans.others, True)
+        elif trans.element.id in self.shallowSenseIds:
+            newModels = self.incorporateElements(trans.others, False)
+        else:
             return
 
-        updatedModels = self.incorporateOthers(trans.others, True)
-        updatedModels[trans.element.id] = trans.element.model()
+        # Also provide the model of the element updated by the transaction
+        newModels[trans.element.id] = trans.element.model()
 
         await self.websocket.send(json.dumps({
             "selector" : "update",
-            "arguments" : [trans.model(), updatedModels]
+            "arguments" : [trans.model(), newModels]
         }))
 
     async def providePage(self, page, path):
@@ -87,32 +93,40 @@ class Remote:
 
     def setTopPage(self, page, path):
         self.topPage = page
+        self.flattened = {}
+        self.senseIds = []
+        self.shallowSenseIds = []
 
-        # Generate flattened model based on top page
-        self.flattened = self.topPage.flatten()
-        self.senseIds = list(self.flattened.keys())
+        # Generate flattened model based on top page, deep
+        self.incorporateElements([self.topPage], True)
 
-        # Incorporate pasteboard page into model (should be SHALLOW)
-        self.incorporateOthers([self.pasteboard], False)
+        # Incorporate pasteboard page into model, shallow
+        self.incorporateElements([self.pasteboard], False)
 
-        # Incorporate parent path pages into model
+        # Incorporate parent path pages into model, shallow
         if path != None:
             pathPages = [Dataset.singleton.lookup(x) for x in path]
-            self.incorporateOthers(pathPages, False)
+            self.incorporateElements(pathPages, False)
 
-    # IMPLEMENT DEEP vs SHALLOW INCORPORATION
-    def incorporateOthers(self, others, deep):
-        updatedModels = {}
+    def incorporateElements(self, elements, deep):
+        newModelEntries = {}
 
         def noteUpdatedModel(model):
             id = model["id"]
-            updatedModels[id] = model
-            self.senseIds.append(id)
+            newModelEntries[id] = model
+            if deep:
+                self.senseIds.append(id)
+            else:
+                self.shallowSenseIds.append(id)
 
-        for element in others:
-            element.flatten(self.flattened, noteUpdatedModel)
+        # For shallow, maxDepth = 2 for example:
+        # (0) - Pasteboard, (1) - Page in Pasteboard, (2) - Element in Page giving Title
+        # (0) - Path Page, (1) - Element in Page giving Title, (2) - Extraneous data
+        maxDepth = 2 if not deep else None
+        for element in elements:
+            element.flatten(self.flattened, noteUpdatedModel, maxDepth)
 
-        return updatedModels
+        return newModelEntries
 
     async def resolvedArgument(self, arg):
         if arg["type"] == "obj":

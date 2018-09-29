@@ -4,7 +4,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { elementList } from './shared.js';
 import { Inspector } from './inspector';
 import { SidePanel } from './sidepanel';
-import PageHeader from './pageHeader.js';
+import TopHeader from './topHeader.js';
 
 class Top extends Component {
     constructor(props) {
@@ -93,7 +93,7 @@ class Top extends Component {
 
     pageHeader() {
         if(this.state.topFragment != null && this.state.pathFragments != null) {
-            return <PageHeader key="breadcrumb"
+            return <TopHeader key="breadcrumb"
             pathFragments={this.state.pathFragments} app={this.props.app} />
         }
         return null;

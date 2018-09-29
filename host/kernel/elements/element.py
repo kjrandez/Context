@@ -27,18 +27,18 @@ class Element:
             "value" : self.value()
         }
 
-    def flatten(self, modelsSoFar = None, notAlreadyPresent = None):
-        """ Incorporate my own model and any models under this hierarchy into 'modelsSoFar' """
-        if modelsSoFar == None:
-            modelsSoFar = {}
+    def flatten(self, flattened = None, notPresent = None, maxDepth = None, depth = 0):
+        """ Incorporate my own model and any models under this hierarchy into 'flattened' """
+        if flattened == None:
+            flattened = {}
         
-        if self.id not in modelsSoFar:
+        if self.id not in flattened:
             myModel = self.model()
-            modelsSoFar[self.id] = myModel
-            if notAlreadyPresent != None:
-                notAlreadyPresent(myModel)
+            flattened[self.id] = myModel
+            if notPresent != None:
+                notPresent(myModel)
         
-        return modelsSoFar
+        return flattened
     
     def transaction(self, reverse):
         return Transaction(Dataset.singleton.observer, self, reverse)
