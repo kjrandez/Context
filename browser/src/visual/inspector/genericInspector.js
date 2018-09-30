@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Button, Popover, Divider } from '@blueprintjs/core';
-import DuplicateElement from '../../duplicateElement';
 
 export default class GenericInspector extends Component
 {
@@ -14,70 +13,53 @@ export default class GenericInspector extends Component
             </div>
         );
     }
-    
-    doPin(fragment, clip) {
-        clip.invoke("insertAt", [fragment, 0]);
+       
+    perform(selections, call) {
+        selections.forEach(sel => this.props.app.store[call](sel));
     }
-    
-    doDuplicate(fragment, clip) {
-        clip.invoke("insertAt", [new DuplicateElement(fragment), 0]);
-    }
-    
-    doCut(loc, fragment, clip, store) {
-        clip.invoke("insertAt", [fragment, 0]);
-        this.doDelete(loc, store);
-    }
-    
-    doDelete(loc, store) {
-        var parentId = loc.path[loc.path.length - 1];
-        var parent = store.fragment(parentId);
-    
-        // Remove the entry with this key from the parent
-        parent.invoke("remove", [loc.key]);
-    }
-    
-    commonInspectorButtons(loc, fragment, clip, app) {
-        return([
+
+    commonInspectorButtons(selections, app) {
+        var results = [
             <Button title="Pin to clipboard"
             key="c1"
             icon="pin"
-            onClick={() => this.doPin(fragment, clip)}></Button>,
+            onClick={() => this.perform(selections, "actionPin")}></Button>,
     
             <Button title="Duplicate to clipboard"
             key="c2"
             icon="duplicate"
-            onClick={() => this.doDuplicate(fragment, clip)}></Button>,
+            onClick={() => this.perform(selections, "actionDuplicate")}></Button>,
     
             <Button title="Cut to clipboard"
             key="c3"
             icon="cut"
-            onClick={() => this.doCut(loc, fragment, clip, app.store)}></Button>,
+            onClick={() => this.perform(selections, "actionCut")}></Button>,
             
             <Button title="Delete"
             key="c4"
             icon="delete"
-            onClick={() => this.doDelete(loc, app.store)}></Button>,
-            
-            <Divider key="c5" />,
+            onClick={() => this.perform(selections, "actionDelete")}></Button>,
+        ];
 
-            <Popover key="c5"
-            transitionDuration={70}
-            content={this.infoContent(loc.path, loc.key, fragment)}>
-                <Button title="Inspect" icon="info-sign"></Button>
-            </Popover>,
-        ]);
+        if(selections.length === 1) {
+            var fragment = selections[0].fragment;
+            var loc = selections[0].loc;
+            
+            results.push(<Divider key="c5" />);
+
+            results.push(
+                <Popover key="c6"
+                transitionDuration={70}
+                content={this.infoContent(loc.path, loc.key, fragment)}>
+                    <Button title="Inspect" icon="info-sign"></Button>
+                </Popover>
+            );
+        }
+
+        return results;
     }
 
     render() {
-        if(this.props.selection.length !== 1)
-            return null;
-        
-        var sel = this.props.selection[0];
-        return(this.commonInspectorButtons(
-            sel.loc,
-            sel.fragment,
-            this.props.clip,
-            this.props.app
-        ));
+        return(this.commonInspectorButtons(this.props.selection));
     }
 }

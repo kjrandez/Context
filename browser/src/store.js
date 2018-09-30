@@ -57,7 +57,7 @@ export default class Store
 
     fragment(id) {
         if(!(id in this.fragmentDict))
-            throw StoreError("Attempt to access non-present element: " + id);
+            throw new StoreError("Attempt to access non-present element: " + id);
         return this.fragmentDict[id];
     }
 
@@ -92,8 +92,38 @@ export default class Store
 
     value(id) {
         if(!(id in this.modelDict))
-            throw StoreError("Attempt to read non-present element: " + id);
+            throw new StoreError("Attempt to read non-present element: " + id);
         return this.modelDict[id].value;
+    }
+
+    actionPin(selection) {
+        this.clipboard.invoke("insertAt", [selection.fragment, 0]);
+    }
+    
+    actionDuplicate(selection) {
+        this.clipboard.invoke("insertAt", [new DuplicateElement(selection.fragment), 0]);
+    }
+    
+    actionCut(selection) {
+        this.clipboard.invoke("insertAt", [selection.fragment, 0]);
+        this.actionDelete(selection);
+    }
+    
+    actionDelete(selection) {
+        var path = selection.loc.path;
+        var parentId = path[path.length - 1];
+        var parent = this.fragment(parentId);
+    
+        // Remove the entry with this key from the parent
+        parent.invoke("remove", [selection.loc.key]);
+    }
+ 
+    actionIndent(selections) {
+        // Selections are assumed to be neighbors with the same parent page
+    }
+
+    actionDedent(selections) {
+        // Selections are assumed to be neighbors with the same parent page
     }
 }
 

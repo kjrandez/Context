@@ -42,13 +42,11 @@ export default class App
     }
     
     documentKeyDown(event) {
-        event = event;
-
-        if(event.keyCode == 16 && !this.shiftDown) {
+        if(event.keyCode === 16 && !this.shiftDown) {
             this.shiftDown = true;
             this.notifyShiftKey(true);
         }
-        else if(event.keyCode == 17 && !this.ctrlDown) {
+        else if(event.keyCode === 17 && !this.ctrlDown) {
             this.ctrlDown = true;
             this.notifyCtrlKey(true);
         }
@@ -58,13 +56,11 @@ export default class App
     }
 
     documentKeyUp(event) {
-        event = event;
-
-        if(event.keyCode == 16 && this.shiftDown) {
+        if(event.keyCode === 16 && this.shiftDown) {
             this.shiftDown = false;
             this.notifyShiftKey(false);
         }
-        else if(event.keyCode == 17 && this.ctrlDown) {
+        else if(event.keyCode === 17 && this.ctrlDown) {
             this.ctrlDown = false;
             this.notifyCtrlKey(false);
         }

@@ -58,32 +58,35 @@ export default class Inspector extends Component
         if(this.state.selection.length === 1) {
             var fragment = this.state.selection[0].fragment;
             var loc = this.state.selection[0].loc;
-            switch(fragment.type()) {
-                case "Page":
-                    content.push(<PageInspector 
-                        key="specialized"
-                        fragment={fragment}
-                        loc={loc}
-                        clip={this.props.clip}
-                        app={this.props.app} />);
-                    content.push(<Divider key="divider" />);
-                    break;
-                case "Script":
-                    content.push(<ScriptInspector
-                        key="specialized"
-                        fragment={fragment}
-                        loc={loc}
-                        clip={this.props.clip}
-                        app={this.props.app} />);
-                    content.push(<Divider key="divider" />);
-                    break;
+            var type = fragment.type();
+
+            if(type === "Page") {
+                content.push(
+                    <PageInspector 
+                    key="specialized"
+                    fragment={fragment}
+                    loc={loc}
+                    clip={this.props.clip}
+                    app={this.props.app} />
+                );
+                content.push(<Divider key="divider" />);
+            }
+            else if(type === "Script") {
+                content.push(
+                    <ScriptInspector
+                    key="specialized"
+                    fragment={fragment}
+                    loc={loc}
+                    clip={this.props.clip}
+                    app={this.props.app} />
+                );
+                content.push(<Divider key="divider" />);
             }
         }
 
         content.push(<GenericInspector
             key="generic"
             selection={this.state.selection}
-            clip={this.props.clip}
             app={this.props.app} />);
         
         return <ButtonGroup minimal={false} vertical="true" onMouseEnter={()=>{}}>
@@ -101,8 +104,6 @@ export default class Inspector extends Component
     }
 
     render() {
-        console.log("Selection: " );
-        console.log(this.state.selection);
         if(this.state.selection.length === 0)
             return null;
 

@@ -31,7 +31,7 @@ export default class Fragment
     }
 
     update() {
-        this.visuals.forEach(visual => visual.modelChanged(this));
+        this.visuals.forEach(visual => visual.modelChanged(this, this.value()));
     }
 
     connect(visual) {
