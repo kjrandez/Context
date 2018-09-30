@@ -9,6 +9,8 @@
 	left: -3px;
 	font-family: monospace;
 	background-color: #F0F0F0;
+	white-space: pre;
+	tab-size: 4;
 }
 
 .element-content.selected .code-edit {
@@ -126,4 +128,8 @@
 	top: 3px;
 	margin-left: 0px;
 	margin-right: 5px;
+}
+
+.page-header a:hover {
+	color: #106ba3;
 }

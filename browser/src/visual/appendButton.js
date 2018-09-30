@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import NewElement from '../newElement';
-import { Menu, MenuItem, Button, ButtonGroup, Divider, Popover, Icon, Position, ControlGroup, InputGroup } from '@blueprintjs/core';
+import { Button, ButtonGroup, Divider, Popover, Icon, Position, ControlGroup, InputGroup } from '@blueprintjs/core';
 import { DropTarget } from 'react-dnd';
 
 class AppendButton extends Component

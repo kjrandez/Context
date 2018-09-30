@@ -82,7 +82,7 @@ export default class Toolbar extends Component
                 );
                 content.push(<Divider key="divider" />);
             }
-            else if(type == "FileRef" || type == "ImageRef") {
+            else if(type === "FileRef" || type === "ImageRef") {
                 content.push(
                     <FileToolbar
                     key="specialized"

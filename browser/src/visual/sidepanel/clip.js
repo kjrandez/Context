@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Text, Image, Page, Script } from '../element';
 import { DragSource, DropTarget } from 'react-dnd';
-import { Tooltip } from '@blueprintjs/core';
 
 class Clip extends Component
 {

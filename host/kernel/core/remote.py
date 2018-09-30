@@ -86,10 +86,12 @@ class Remote:
     async def providePage(self, page, path):
         self.setTopPage(page, path)
 
-        await self.websocket.send(json.dumps({
+        result = json.dumps({
             "selector" : "renderPage",
             "arguments" : [self.topPage.id, self.clipboard.id, self.flattened]
-        }))
+        }, indent=3)
+        print(result)
+        await self.websocket.send(result)
 
     def setTopPage(self, page, path):
         self.topPage = page
@@ -106,6 +108,8 @@ class Remote:
         # Incorporate parent path pages into model, shallow
         if path != None:
             pathPages = [Dataset.singleton.lookup(x) for x in path]
+            if self.root in pathPages:
+                print("Root not in path pages!!!!");
             self.incorporateElements(pathPages, False)
 
     def incorporateElements(self, elements, deep):

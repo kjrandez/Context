@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Icon, Position, MenuItem, Menu, OverflowList, Boundary, Popover } from '@blueprintjs/core';
+import { Intent, Icon, Position, MenuItem, Menu, OverflowList, Boundary, Popover } from '@blueprintjs/core';
 
 export default class TopHeader extends Component
 {
@@ -96,26 +96,20 @@ export default class TopHeader extends Component
     }
 
     renderBreadcrumb(props, index) {
-        if(props.href != null) {
-            var iconStyle = {position: "relative", top: "2px"};
-            if(props.icon === "symbol-diamond")
-                iconStyle = {position: "relative", marginRight: "5px", top: "2px"};
-            return (
-                <li key={index}>
-                    <a onClick={() => this.navigate(props.target)} className="bp3-breadcrumb" href={props.href}>
-                        <Icon icon={props.icon} style={iconStyle}/>
-                        {props.text}
-                    </a>
-                </li>
-            );
+        var iconStyle = {position: "relative", top: "2px"};
+        var intent = Intent.NONE;
+        if(props.icon === "symbol-diamond") {
+            iconStyle = {position: "relative", marginRight: "5px", top: "2px"};
+            intent = Intent.PRIMARY;
         }
-        else {
-            return (
-                <li className="bp3-breadcrumb bp3-breadcrumb-current" key={index}>
+        return (
+            <li className="bp3-breadcrumb" key={index}>
+                <a onClick={() => this.navigate(props.target)} className="bp3-breadcrumb" href={props.href}>
+                    <Icon intent={intent} icon={props.icon} style={iconStyle}/>
                     {props.text}
-                </li>
-            );
-        }
+                </a>
+            </li>
+        );
     }
 
     renderOverflow(items) {
@@ -139,12 +133,15 @@ export default class TopHeader extends Component
     }
 
     render() {
-        return <div className="header-breadcrumb" onMouseDown={ev => this.onMouseDown(ev)}><OverflowList
-            className="bp3-breadcrumbs"
-            collapseFrom={Boundary.START}
-            items={this.state.items}
-            overflowRenderer={this.renderOverflow.bind(this)}
-            visibleItemRenderer={this.renderBreadcrumb.bind(this)}
-        /></div>
+        return(
+            <div className="header-breadcrumb" onMouseDown={ev => this.onMouseDown(ev)}>
+                <OverflowList
+                className="bp3-breadcrumbs"
+                collapseFrom={Boundary.START}
+                items={this.state.items}
+                overflowRenderer={this.renderOverflow.bind(this)}
+                visibleItemRenderer={this.renderBreadcrumb.bind(this)}/>
+            </div>
+        );
     }
 }

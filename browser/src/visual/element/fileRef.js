@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Icon} from '@blueprintjs/core';
+import { Icon } from '@blueprintjs/core';
 
 export default class FileRef extends Component
 {
@@ -31,7 +31,9 @@ export default class FileRef extends Component
             <div>
             <span className="file-content">
                 <Icon icon="document" />
-                <a href="#" onClick={ev => this.onClick(ev)}>{this.state.filename}</a>
+                <a onClick={ev => this.onClick(ev)}>
+                    {this.state.filename}
+                </a>
             </span>
             </div>
         );

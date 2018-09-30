@@ -39,21 +39,25 @@ class Page(Element):
         result = {
             "content" : [x.model() for x in self.content],
             "latestEntry" : self.latestEntry.model() if (self.latestEntry != None) else None,
-            "column" : self.column
+            "column" : self.column,
+            "traversalDepth" : 0
         }
         return result
     
     def flatten(self, flattened = None, notPresent = None, maxDepth = None, depth = 0):
         if self.id in flattened:
-            return
+            prevDepth = flattened[self.id]["value"]["traversalDepth"]
+            if (prevDepth == None) or (prevDepth >= maxDepth):
+                return
         
         """ Incorporate my own model and any models under this hierarchy into the dictionary """
         flattened = super().flatten(flattened, notPresent)
         
-        # Do not go deeper if this is the max depth
         if (maxDepth != None) and (depth == maxDepth):
             return flattened
-
+        else:
+            flattened[self.id]["value"]["traversalDepth"] = maxDepth
+        
         for entry in self.content:
             entry.element.flatten(flattened, notPresent, maxDepth, depth + 1)
         
