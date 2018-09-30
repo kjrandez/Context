@@ -38,15 +38,18 @@ export default class GenericInspector extends Component
                 <Button title="Indent elements"
                 key="c0"
                 icon="arrow-right"
-                onClick={() => this.perform(selections, "indent")}></Button>
+                onClick={() => this.props.app.store.actionIndent(selections)}></Button>
             );
 
-            results.push(
-                <Button title="Un-indent elements"
-                key="cn2"
-                icon="arrow-left"
-                onClick={() => this.perform(selections, "dedent")}></Button>
-            )
+            // Allow unindent if elements are not on the root page
+            if(selections[0].loc.path.length > 1) {
+                results.push(
+                    <Button title="Un-indent elements"
+                    key="cn2"
+                    icon="arrow-left"
+                    onClick={() => this.props.app.store.actionDedent(selections)}></Button>
+                )
+            }
 
             results.push(<Divider key="cn1" />)
         }

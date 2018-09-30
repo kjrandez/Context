@@ -129,7 +129,9 @@ class Remote:
         return newModelEntries
 
     async def resolvedArgument(self, arg):
-        if arg["type"] == "obj":
+        if isinstance(arg, list):
+            return [await self.resolvedArgument(x) for x in arg]
+        elif arg["type"] == "obj":
             return Dataset.singleton.lookup(arg["value"])
         elif arg["type"] == "new":
             elementClass = arg["value"]["elementType"]

@@ -117,18 +117,47 @@ export default class Store
         // Remove the entry with this key from the parent
         parent.invoke("remove", [selection.loc.key]);
     }
- 
+
     actionIndent(selections) {
-        // Selections are assumed to be neighbors with the same parent page
+        // Create new Page to pass as argument
+        var fragments = selections.map(sel => sel.fragment);
+        var newPage = new NewElement("Page", [fragments]);
+
+        // Invoke insertBefore on parent with the new page
+        var parent = this.fragment(selections[0].parentId());
+        var beforeKey = selections[0].loc.key;
+        this.app.setGrabPath(selections[0].loc.path);
+        parent.invoke("insertBefore", [newPage, beforeKey, true]);
+
+        // Remove each of the elements by key from the parent
+        selections.forEach(sel => this.actionDelete(sel));
     }
 
     actionDedent(selections) {
-        // Selections are assumed to be neighbors with the same parent page
+        // Insert each of the elements after the parent's parent
+        var path = selections[0].loc.path;
+        var grandParentId = path[path.length - 2];
+        var grandParent = this.fragment(grandParentId);
+        var parent = this.fragment(selections[0].parentId());
+
+        // Add each element to the grandparent before the parent page and
+        // remove each element from the parent page.
+        selections.forEach(sel => {
+            grandParent.invoke("insertBefore", [sel.fragment, parent]);
+            parent.invoke("remove", [sel.loc.key]);
+        });
+
+        // Also remove the parent page if it went down to 0 elements
+        if(parent.value().content.length === selections.length) {
+            grandParent.invoke("remove", [parent]);
+        }
     }
 }
 
 function encoded(param) {
-    if(param instanceof Fragment)
+    if(Array.isArray(param))
+        return param.map(entry => encoded(entry))
+    else if(param instanceof Fragment)
         return { type: "obj", value: param.id() }
     else if(param instanceof NewElement)
         return { type: "new", value: {

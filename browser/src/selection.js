@@ -17,4 +17,8 @@ export default class Selection
         return this.loc.path.length === path2.length &&
             this.loc.path.every((item, index) => item === path2[index]);
     }
+
+    parentId() {
+        return this.loc.path[this.loc.path.length - 1];
+    }
 }

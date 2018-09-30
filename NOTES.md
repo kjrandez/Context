@@ -86,7 +86,7 @@ Then,
 
 - Padding of parent page element causes glitch when dragging across edge of inner
 - Breadcrumb titles don't update when modified externally
-- Recursive pages now cause stack overflow in kernel
+- As yet undefined bug with deeply nested page, possibly only after indent operation
 
 ### ANSWERS
 
@@ -97,6 +97,9 @@ Then,
 - Pages which are recursive should have any iteration after the first
     instance automatically collapsed regardless of saved state
 - Pages display as nested by default unless recursive... (alt-click or ctrl-click the title to follow link). In meta settings they can be set to display as links only (single-click or ctrl-click to follow)
+- Need some meta-information indicating whether to have a new page expanded by default,
+    and just to remember expansion state in general
+- Selections should (possibly) be sorted into original order before indent/unindent
 
 ### QUESTIONS
 
