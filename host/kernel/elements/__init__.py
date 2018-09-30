@@ -1,9 +1,11 @@
-from .image import Image
 from .page import Page
+from .clipboard import Clipboard
+
 from .text import Text
 from .script import Script
-from .link import Link
-from .pasteboard import Pasteboard
 
-# Override which modules this package exports
-#__all__ = ["bar"]
+from .fileRef import FileRef
+from .imageRef import ImageRef
+
+from .image import Image
+from .link import Link

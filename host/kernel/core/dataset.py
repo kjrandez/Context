@@ -20,9 +20,9 @@ class Dataset:
         self.objMap[inst.id] = inst
 
     def makeDefault(self):
-        from ..elements import Page, Text, Image, Script, Pasteboard
+        from ..elements import Page, Text, Image, Script, Clipboard
 
-        self.pasteboard = Pasteboard()
+        self.clipboard = Clipboard()
 
         self.root = Page([
             Text('### Hello world'),

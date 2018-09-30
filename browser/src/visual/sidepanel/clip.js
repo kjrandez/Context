@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Text, Image, Page, Script } from '../element';
 import { DragSource, DropTarget } from 'react-dnd';
+import { Tooltip } from '@blueprintjs/core';
 
 class Clip extends Component
 {
@@ -80,6 +81,7 @@ class Clip extends Component
 
         return dropTarget(
             <div className="clipboard-entry">
+                
                 <div className={this.clipboardEntrySpacerClass()}></div>
                 {dragSource(dragPreview(<div className="clipboard-entry-content">
                     <div className="clipboard-entry-content-preview">

@@ -12,7 +12,7 @@ class Remote:
         self.websocket = websocket
         self.ignoreTrans = []
         self.topPage = None
-        self.pasteboard = Dataset.singleton.pasteboard
+        self.clipboard = Dataset.singleton.clipboard
 
         print("Making new remote")
 
@@ -44,7 +44,7 @@ class Remote:
         selector = getattr(target, data["selector"])
         arguments = [await self.resolvedArgument(X) for X in data["arguments"]]
 
-        await self.worker(selector, arguments)
+        await self.worker(selector, *arguments)
 
     async def commandRequestRoot(self, data):
         await self.providePage(self.root, None)
@@ -88,7 +88,7 @@ class Remote:
 
         await self.websocket.send(json.dumps({
             "selector" : "renderPage",
-            "arguments" : [self.topPage.id, self.pasteboard.id, self.flattened]
+            "arguments" : [self.topPage.id, self.clipboard.id, self.flattened]
         }))
 
     def setTopPage(self, page, path):
@@ -100,8 +100,8 @@ class Remote:
         # Generate flattened model based on top page, deep
         self.incorporateElements([self.topPage], True)
 
-        # Incorporate pasteboard page into model, shallow
-        self.incorporateElements([self.pasteboard], False)
+        # Incorporate clipboard page into model, shallow
+        self.incorporateElements([self.clipboard], False)
 
         # Incorporate parent path pages into model, shallow
         if path != None:
@@ -120,7 +120,7 @@ class Remote:
                 self.shallowSenseIds.append(id)
 
         # For shallow, maxDepth = 2 for example:
-        # (0) - Pasteboard, (1) - Page in Pasteboard, (2) - Element in Page giving Title
+        # (0) - Clipboard, (1) - Page in Clipboard, (2) - Element in Page giving Title
         # (0) - Path Page, (1) - Element in Page giving Title, (2) - Extraneous data
         maxDepth = 2 if not deep else None
         for element in elements:
@@ -149,15 +149,22 @@ class Remote:
             return arg["value"]
 
 def addFilePrompt(parent):
+    from ..elements import FileRef
+
     filenames = getFilenames(parent, [("All files", "*")])
-    print(filenames)
+    for filename in filenames:
+        parent.append(FileRef(filename), True)
+
 
 def addImagePrompt(parent):
+    from ..elements import ImageRef
+
     filenames = getFilenames(parent, [
         ("Images", ".png .gif .jpeg .jpg .bmp .tiff .tif"),
         ("All files", "*")
     ])
-    print(filenames)
+    for filename in filenames:
+        parent.append(ImageRef(filename), True)
 
 def getFilenames(parent, filetypes=None):
     root = tk.Tk()

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Selection from '../../selection.js';
-import { Page, Image, Text, Script, Link } from '.';
+import { Page, Image, Text, Script, Link, FileRef } from '.';
 import { DragSource, DropTarget } from 'react-dnd';
 
 class Element extends Component 
@@ -133,6 +133,13 @@ class Element extends Component
                     selection={selection}
                     grabFocus={grabFocus}
                     app={app} />;
+            case "FileRef":
+                return <FileRef
+                    fragment={fragment}
+                    loc={loc}
+                    selection={selection}
+                    grabFocus={grabFocus}
+                    app={app} />
             default:
                 return <p>Unknown element. Type: {fragment.type()}</p>;
         }

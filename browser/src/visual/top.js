@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { elementList } from './shared.js';
-import { Inspector } from './inspector';
+import { Toolbar } from './toolbar';
 import { SidePanel } from './sidepanel';
 import TopHeader from './topHeader.js';
 
@@ -84,9 +84,9 @@ class Top extends Component {
             return <span />
     }
 
-    inspectorContent() {
+    toolbarContent() {
         if(this.state.clipboardFragment != null)
-            return <Inspector clip={this.state.clipboardFragment} selection={this.state.selection} app={this.props.app} />
+            return <Toolbar clip={this.state.clipboardFragment} selection={this.state.selection} app={this.props.app} />
         else
             return <span />
     }
@@ -132,7 +132,7 @@ class Top extends Component {
                     </div>
                 </div>
                 <div id="right-column">
-                    {this.inspectorContent()}
+                    {this.toolbarContent()}
                 </div>
             </div>
         );

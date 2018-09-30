@@ -75,6 +75,7 @@ export default class SidePanel extends Component
                             onChange={newTab => this.onChange(newTab)}
                             selectedTabId={this.state.selectedTab}>
                                 <Tab id="clipboard" title="Clipboard" />
+                                <Tab id="outline" title="Outline" />
                                 <Tab id="history" title="History" />
                             </Tabs>
                         </div>

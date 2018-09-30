@@ -11,7 +11,6 @@ Text View
 Nested Pages
 
 - Possible option to render only as a link (never nested)
-- **PRIORITY** Indent to create nested page from selected elements
 
 Column Pages
 
@@ -20,10 +19,6 @@ Column Pages
 - **PRIORITY** Insert above/below/within columns
 
 Files
-
-- **PRIORITY** Find in Explorer
-- **PRIORITY** Default open action
-- **PRIORITY** Open python file through File element
 
 Images
 
@@ -87,6 +82,7 @@ Then,
 - Padding of parent page element causes glitch when dragging across edge of inner
 - Breadcrumb titles don't update when modified externally
 - As yet undefined bug with deeply nested page, possibly only after indent operation
+- Open in explorer/default new window is in background
 
 ### ANSWERS
 
@@ -99,7 +95,7 @@ Then,
 - Pages display as nested by default unless recursive... (alt-click or ctrl-click the title to follow link). In meta settings they can be set to display as links only (single-click or ctrl-click to follow)
 - Need some meta-information indicating whether to have a new page expanded by default,
     and just to remember expansion state in general
-- Selections should (possibly) be sorted into original order before indent/unindent
+- Selections should be sorted into original order before indent/unindent
 
 ### QUESTIONS
 

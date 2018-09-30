@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import NewElement from '../newElement';
-import { Button, ButtonGroup, Divider, Popover, Icon, Position, ControlGroup, InputGroup } from '@blueprintjs/core';
+import { Menu, MenuItem, Button, ButtonGroup, Divider, Popover, Icon, Position, ControlGroup, InputGroup } from '@blueprintjs/core';
 import { DropTarget } from 'react-dnd';
 
 class AppendButton extends Component
@@ -11,7 +11,8 @@ class AppendButton extends Component
         this.state = {
             defaultActive: false,
             hrefValue: "",
-            linkAddOpen: false
+            linkAddOpen: false,
+            openFileOpen: false
         };
     }
 
@@ -35,6 +36,11 @@ class AppendButton extends Component
     addFile() {
         var parentId = this.props.path[this.props.path.length - 1];
         this.props.app.kernelSend("addFile", { page: parentId });
+    }
+
+    addFolder() {
+        var parentId = this.props.path[this.props.path.length - 1];
+        this.props.app.kernelSend("addFolder", { page: parentId });
     }
 
     addImage() {
@@ -61,6 +67,12 @@ class AppendButton extends Component
     addLinkInputChanged(ev) {
         this.setState({
             hrefValue: ev.target.value
+        });
+    }
+
+    openFile() {
+        this.setState({
+            openFileOpen: true
         });
     }
 
@@ -94,13 +106,16 @@ class AppendButton extends Component
     popoverContent() {
         if(this.state.linkAddOpen)
             return this.addLinkMenu();
+        else if(this.state.openFileOpen)
+            return this.openFileMenu();
         else
             return this.appendMoreMenu();
     }
 
     popoverDismissed() {
         this.setState({
-            linkAddOpen: false
+            linkAddOpen: false,
+            openFileOpen: false,
         });
     }
 
@@ -120,6 +135,34 @@ class AppendButton extends Component
         );
     }
 
+    openFileMenu() {
+        return(
+            <div className="append-more-menu" onMouseDown={ev => this.onMouseDown(ev)}>
+                <ButtonGroup minimal={false} onMouseEnter={()=>{}}>
+
+                <Button icon="folder-close"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addFolder()}>
+                    Folder
+                </Button>
+
+                <Button icon="document"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addFile()}>
+                    File
+                </Button>
+
+                <Button icon="media"
+                className="bp3-popover-dismiss"
+                onClick={()=>this.addImage()}>
+                    Image
+                </Button>
+
+                </ButtonGroup>
+            </div>
+        );
+    }
+
     appendMoreMenu() {
         return(
             <div className="append-more-menu" onMouseDown={ev => this.onMouseDown(ev)}>
@@ -133,28 +176,25 @@ class AppendButton extends Component
                     className="bp3-popover-dismiss"
                     onClick={()=>this.addScript()}></Button>
 
-                    <Button icon="folder-open"
-                    className="bp3-popover-dismiss"
-                    onClick={()=>this.addFile()}></Button>
-
-                    <Button icon="media"
-                    className="bp3-popover-dismiss"
-                    onClick={()=>this.addImage()}></Button>
-
                     <Button icon="link"
                     onClick={()=>this.addLink()}></Button>
 
                     <Divider />
 
-                    <Button icon="document"
-                    className="bp3-popover-dismiss"
-                    onClick={()=>this.addPage()}></Button>
+                    <Button icon="folder-open"
+                    onClick={()=>this.openFile()}><Icon icon="caret-down" /></Button>
 
                     <Divider />
 
+                    <Button icon="widget-header"
+                    className="bp3-popover-dismiss"
+                    onClick={()=>this.addPage()}>New</Button>
+
+                    {/*<Divider />
+
                     <Button active={this.state.defaultActive}
                     onClick={()=>this.defaultToggle()}>Default</Button>
-
+                    */}
                 </ButtonGroup>
             </div>
         )

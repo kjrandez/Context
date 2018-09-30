@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import { GenericInspector, ScriptInspector, PageInspector } from '.';
+import { GenericToolbar, ScriptToolbar, PageToolbar, FileToolbar } from '.';
 import { ButtonGroup, Divider } from '@blueprintjs/core';
 
-export default class Inspector extends Component
+export default class Toolbar extends Component
 {
     constructor(props) {
         super(props);
@@ -39,20 +39,20 @@ export default class Inspector extends Component
 
 
     className() {
-        return "inspector-visible";
+        return "toolbar-visible";
     }
 
-    inspectorContent(selection) {
+    toolbarContent(selection) {
         return (
             <div ref={this.contentRef}
-            className="inspector-content"
-            style={{marginTop: this.inspectorLoc(selection)}}>
-                {this.inspectorContentInner(selection)}
+            className="toolbar-content"
+            style={{marginTop: this.toolbarLoc(selection)}}>
+                {this.toolbarContentInner(selection)}
             </div>
         );
     }
 
-    inspectorContentInner() {
+    toolbarContentInner() {
         var content = [] ;
 
         if(this.state.selection.length === 1) {
@@ -62,7 +62,7 @@ export default class Inspector extends Component
 
             if(type === "Page") {
                 content.push(
-                    <PageInspector 
+                    <PageToolbar 
                     key="specialized"
                     fragment={fragment}
                     loc={loc}
@@ -73,7 +73,7 @@ export default class Inspector extends Component
             }
             else if(type === "Script") {
                 content.push(
-                    <ScriptInspector
+                    <ScriptToolbar
                     key="specialized"
                     fragment={fragment}
                     loc={loc}
@@ -82,9 +82,20 @@ export default class Inspector extends Component
                 );
                 content.push(<Divider key="divider" />);
             }
-        }
+            else if(type == "FileRef" || type == "ImageRef") {
+                content.push(
+                    <FileToolbar
+                    key="specialized"
+                    fragment={fragment}
+                    loc={loc}
+                    clip={this.props.clip}
+                    app={this.props.app} />
+                )
+                content.push(<Divider key="divider" />);
+            }
+        } 
 
-        content.push(<GenericInspector
+        content.push(<GenericToolbar
             key="generic"
             selection={this.state.selection}
             app={this.props.app} />);
@@ -94,7 +105,7 @@ export default class Inspector extends Component
         </ButtonGroup>;
     }
 
-    inspectorLoc() {
+    toolbarLoc() {
         var firstSel = this.state.selection[0];
         return firstSel.ref.current.getBoundingClientRect().top;
     }
@@ -108,10 +119,10 @@ export default class Inspector extends Component
             return null;
 
         return(
-            <div id="inspector"
+            <div id="toolbar"
             className={this.className()}
             onMouseDown={(ev) => this.onMouseDown(ev)}>
-                {this.inspectorContent()}
+                {this.toolbarContent()}
             </div>
         )
     }

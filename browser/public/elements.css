@@ -4,8 +4,9 @@
 
 .code-edit {
 	outline: 0;
-	padding: 3px;
-	padding-left: 5px;
+	padding: 5px;
+	position: relative;
+	left: -3px;
 	font-family: monospace;
 	background-color: #F0F0F0;
 }
@@ -105,4 +106,24 @@
 
 .page-body {
 	flex: 1;
+}
+
+.file-content {
+	display: inline-block;
+	border: 1px solid #DDD;
+	border-radius:3px;
+	padding: 3px;
+}
+
+.element-content.selected .file-content {
+	border: none;
+	padding: 4px;
+}
+
+.element .bp3-icon {
+	opacity: 0.7;
+	position: relative;
+	top: 3px;
+	margin-left: 0px;
+	margin-right: 5px;
 }
