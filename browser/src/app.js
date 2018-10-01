@@ -67,11 +67,18 @@ export default class App
     }
 
     enterRoot() {
+        window.location.hash = "";
         this.nextPath = [];
         this.kernelSend("requestRoot", null);
     }
 
     enterPage(path, pageId) {
+        var newHash = "#" + path.join(",");
+        if(path.length > 0)
+            newHash += ",";
+        newHash += pageId;
+
+        window.location.hash = newHash;
         this.nextPath = path;
         this.kernelSend("requestPage", { page: pageId, path: path });
     }
@@ -138,7 +145,17 @@ export default class App
     }
 
     kernelOpen(event) {
-        this.kernelSend("requestRoot", null);
+        var pathString = window.location.hash.substr(1);
+        var splitPath = pathString.split(",");
+
+        if(pathString.length === 0 || splitPath.length === 0) {
+            this.enterRoot();
+        }
+        else {
+            var path = splitPath.map(segment => parseInt(segment, 10));
+            var pageId = path.pop();
+            this.enterPage(path, pageId);
+        }
     }
     
     kernelClose(event) {

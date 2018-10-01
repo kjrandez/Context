@@ -1,5 +1,6 @@
 .text-edit {
 	outline: 0;
+	white-space: pre-wrap;
 }
 
 .code-edit {
@@ -9,7 +10,7 @@
 	left: -3px;
 	font-family: monospace;
 	background-color: #F0F0F0;
-	white-space: pre;
+	white-space: pre-wrap;
 	tab-size: 4;
 }
 
@@ -115,11 +116,13 @@
 	border: 1px solid #DDD;
 	border-radius:3px;
 	padding: 3px;
+	padding-bottom: 4px;
 }
 
 .element-content.selected .file-content {
 	border: none;
 	padding: 4px;
+	padding-bottom: 5px;
 }
 
 .element .bp3-icon {

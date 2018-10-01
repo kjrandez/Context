@@ -82,6 +82,7 @@ class Top extends Component {
             return <SidePanel clip={this.state.clipboardFragment} app={this.props.app} />
         else 
             return <span />
+    
     }
 
     toolbarContent() {

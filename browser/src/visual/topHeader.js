@@ -12,7 +12,7 @@ export default class TopHeader extends Component
     }
 
     getItems(fragments) {
-        var href = "#";
+        var href = "#" + fragments[0].id();
         var target = [fragments[0].id()];
 
         if(fragments.length === 1)

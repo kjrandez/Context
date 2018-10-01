@@ -27,10 +27,6 @@ Weblinks
 - Looks up website information in background
 - Rendering of Rich Preview
 
-Navigation between pages
-
-- **PRIORITY** Open specific path based on hash url window.location.hash
-
 History viewer w/ time travel
 
 - **PRIORITY** Undo/redo of transactions
@@ -57,7 +53,7 @@ Requiring CEF/Electron
 - Integrate native clipboard with internal clipboard
 - Drag files in and out of external shell
     
-Then,
+### THEN,
 
 1. Snapshot export
 2. CEF/Electron window
