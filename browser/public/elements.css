@@ -68,11 +68,11 @@
 .element-content {
 	margin: 0;
 	padding: 0;
-	cursor: default;
+	cursor: auto;
 }
 
 .element-content.selected {
-	
+	background-color: white;
 }
 
 .page {

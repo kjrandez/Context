@@ -25,7 +25,7 @@ class Dataset:
         self.clipboard = Clipboard()
 
         self.root = Page([
-            Text('### Hello world'),
+            Text('Hello world'),
             Text('How are you doing today?'),
             Text("I'm doing just fine thank you very much."),
             Script("print(\"Hello world!\")"),
