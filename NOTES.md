@@ -69,6 +69,7 @@ Requiring CEF/Electron
 
 - Padding of parent page element causes glitch when dragging across edge of inner
 - Breadcrumb titles don't update when modified externally
+- Elements don't require second click in order to start dragging
 
 ### ANSWERS
 

@@ -13,6 +13,8 @@ class Element extends Component
             props.loc, props.fragment, this.refNode
         );
 
+        this.dragEnabled = true;
+
         this.grabFocus = false;
         if(this.props.loc.latest) {
             var grabPath = this.props.app.getGrabPath();
@@ -70,15 +72,14 @@ class Element extends Component
     }
 
     elementClass() {
-        return (this.props.isDragging || this.state.hide) ? "element dragging" : "element";
-    }
-
-    elementContentClass() {
-        return this.isSelected() ? "element-content selected" : "element-content";
-    }
-
-    elementHandleClass() {
-        return this.isSelected() ? "element-handle selected" : "element-handle";
+        var cl = "element";
+        if(this.isSelected()) {
+            cl += " selected";
+        }
+        if(this.props.isDragging || this.state.hide) {
+            cl += " dragging";
+        }
+        return cl;
     }
 
     elementSpacerClass() {
@@ -145,6 +146,27 @@ class Element extends Component
         }
     }
 
+    onMouseOver(ev) {
+        this.setState({
+            dragEnabled: false
+        });
+    }
+
+    onMouseOut(ev) {
+        this.setState({
+            dragEnabled: true
+        });
+    }
+
+    renderHandle(dragSource) {
+        var handle = <div className="element-box-handle"></div>;
+
+        if(this.isSelected()) 
+            return dragSource(handle);
+
+        return null;
+    }
+
     render() {
         var dropTarget = this.props.dropTarget;
         var dragSource = this.props.dragSource;
@@ -158,14 +180,17 @@ class Element extends Component
 
                 <div className={this.elementSpacerClass()}></div>
 
-                {dragSource(
+                <div className="element-box">
 
-                    <div className={this.elementHandleClass()}>
-                        <div className={this.elementContentClass()}>
-                            {this.specializedElement()}
-                        </div>
+                    {this.renderHandle(dragSource)}
+
+                    <div className="element-box-content">
+
+                        {this.specializedElement()}
+
                     </div>
-                )}
+
+                </div>
 
             </div>
         ));

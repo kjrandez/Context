@@ -6,20 +6,17 @@
 .code-edit {
 	outline: 0;
 	padding: 5px;
-	position: relative;
-	left: -3px;
 	font-family: monospace;
 	background-color: #F0F0F0;
 	white-space: pre-wrap;
 	tab-size: 4;
 }
 
-.element-content.selected .code-edit {
+.element.selected .code-edit {
 	background-color: transparent;
 }
 
 .element {
-	overflow: visible;
 	margin: 0;
 	padding: 0;
 }
@@ -36,6 +33,7 @@
     transition: height 0.08s;
     transition-timing-function: linear;
 }
+
 .element-spacer.expanded {
 	height: 25px;
 	-webkit-transition: height 0.08s; /* Safari */
@@ -43,36 +41,40 @@
 	transition-timing-function: linear;
 }
 
-.element-handle {
+.element-box {
 	margin: 0;
+	border-radius: 6px;
 	padding: 6px;
-	border-radius: 5px;
+	position: relative;
 }
 
-.element-handle.selected {
+.element.selected .element-box {
 	background-color: white;
-	padding: 5px;
-	border: 1px solid #DDD;
-	box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.05);
 }
 
-.element-handle.selected:hover {
+.element-box-handle {
+	position: absolute;
+	width: 100%;
 	cursor: grab;
+	top: 0;
+	left: 0;
+	border-radius: 6px;
+	display: none;
+	height: 0;
 }
 
-.element-handle.selected:active {
-	background-color: #DDD;
-	cursor: grabbing;
+.element.selected .element-box-handle {
+	display: block;
+	height: 100%;
+	border: 1px solid #DDD;
+	box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.03);
 }
 
-.element-content {
+.element-box-content {
+	position: relative;
 	margin: 0;
 	padding: 0;
 	cursor: auto;
-}
-
-.element-content.selected {
-	background-color: white;
 }
 
 .page {
@@ -112,7 +114,7 @@
 
 .page-body-content {
 	position: relative;
-	top: -3px;
+	top: -4px;
 }
 
 .file-content {
