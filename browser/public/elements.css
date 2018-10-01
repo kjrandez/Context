@@ -45,14 +45,15 @@
 
 .element-handle {
 	margin: 0;
-	padding: 1px;
-	height: 10px;
+	padding: 6px;
+	border-radius: 5px;
 }
 
 .element-handle.selected {
+	background-color: white;
+	padding: 5px;
 	border: 1px solid #DDD;
-	border-bottom: 0px;
-	background-color: #EEE;
+	box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.05);
 }
 
 .element-handle.selected:hover {
@@ -66,15 +67,12 @@
 
 .element-content {
 	margin: 0;
-	padding: 1px;
-	position: relative;
+	padding: 0;
+	cursor: default;
 }
 
 .element-content.selected {
-	background-color: white;
-	margin: 0;
-	padding: 0;
-	border: 1px solid #DDD;
+	
 }
 
 .page {
@@ -95,6 +93,7 @@
 .page-header {
 	font-weight: bold;
 	margin-top: 3px;
+	margin-left: 5px;
 }
 
 .page-header a {
@@ -109,6 +108,11 @@
 
 .page-body {
 	flex: 1;
+}
+
+.page-body-content {
+	position: relative;
+	top: -3px;
 }
 
 .file-content {

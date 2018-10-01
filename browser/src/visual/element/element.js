@@ -151,14 +151,22 @@ class Element extends Component
         var dragPreview = this.props.dragPreview;
 
         return dropTarget(dragPreview(
+
             <div className={this.elementClass()}
             onMouseDown={(event) => this.onMouseDown(event)}
             ref={node => this.setRefNode(node)}>
+
                 <div className={this.elementSpacerClass()}></div>
-                {dragSource(<div className={this.elementHandleClass()}></div>)}
-                <div className={this.elementContentClass()}>
-                    {this.specializedElement()}
-                </div>
+
+                {dragSource(
+
+                    <div className={this.elementHandleClass()}>
+                        <div className={this.elementContentClass()}>
+                            {this.specializedElement()}
+                        </div>
+                    </div>
+                )}
+
             </div>
         ));
     }
