@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, Image, Page, Script } from '../element';
+import { Text, Image, Page, Script, FileRef } from '../element';
 import { DragSource, DropTarget } from 'react-dnd';
 
 class Clip extends Component
@@ -54,6 +54,12 @@ class Clip extends Component
                 app={this.props.app} />;
             case "Script":
                 return <Script fragment={this.props.fragment}
+                loc={{path: [], key: 0}}
+                selection={[]}
+                grabFocus={false}
+                app={this.props.app} />;
+            case "FileRef":
+                return <FileRef fragment={this.props.fragment}
                 loc={{path: [], key: 0}}
                 selection={[]}
                 grabFocus={false}

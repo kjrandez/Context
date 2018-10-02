@@ -137,3 +137,7 @@
 .clipboard-append-area.expanded {
 	background-color: #F8F8F8;
 }
+
+.clipboard-entry img {
+	opacity: 0.9;
+}

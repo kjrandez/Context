@@ -7,7 +7,7 @@
 	outline: 0;
 	padding: 5px;
 	font-family: monospace;
-	background-color: #F0F0F0;
+	background-color: rgba(0, 0, 0, 0.03);
 	white-space: pre-wrap;
 	tab-size: 4;
 }
@@ -19,6 +19,7 @@
 .element {
 	margin: 0;
 	padding: 0;
+	height: auto;
 }
 
 .element.dragging {
@@ -70,6 +71,10 @@
 	box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.03);
 }
 
+.element.selected .element-box-handle:active {
+	cursor: grabbing;
+}
+
 .element-box-content {
 	position: relative;
 	margin: 0;
@@ -117,7 +122,7 @@
 	top: -4px;
 }
 
-.file-content {
+.element .file-content {
 	display: inline-block;
 	border: 1px solid #DDD;
 	border-radius:3px;
@@ -131,7 +136,7 @@
 	padding-bottom: 5px;
 }
 
-.element .bp3-icon {
+.file-content .bp3-icon {
 	opacity: 0.7;
 	position: relative;
 	top: 3px;
@@ -141,4 +146,8 @@
 
 .page-header a:hover {
 	color: #106ba3;
+}
+
+#page-elements .page-body .append-button {
+	margin-top: 3px;
 }

@@ -30,14 +30,17 @@
 
 .append-button {
 	display: inline-block;
-	margin-top: 8px;
 	margin-left: 5px;
 	width: 50px;
 	height: 14px;
 	background-color: #EAEAEA;
 	border: none;
 	position: relative;
-	top: 3px;
+	top: 6px;
+}
+
+#page-elements .append-button {
+	margin-top: 8px;
 }
 
 .append-button:hover {
@@ -54,7 +57,7 @@
 	opacity: 0.1;
 	background-color: transparent;
 	position: relative;
-	top: 1px;
+	top: 7px;
 	margin-left: 10px;
 }
 

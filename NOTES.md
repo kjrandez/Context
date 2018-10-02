@@ -70,6 +70,7 @@ Requiring CEF/Electron
 - Padding of parent page element causes glitch when dragging across edge of inner
 - Breadcrumb titles don't update when modified externally
 - Elements don't require second click in order to start dragging
+- Elements on page not connected after navigation to subpage and then back again.
 
 ### ANSWERS
 
@@ -82,6 +83,7 @@ Requiring CEF/Electron
 - Selections should be sorted into original order before indent/unindent
 - Display-related meta information needs to be associated with page entry, not with element itself
 - Parent path information also needs to include keys for rare situations where, un-indent has an ambiguous placement location in the grandparent
+- Elements should just set opacity to 0 and disable drop in order to avoid jerking around on lift
 
 ### QUESTIONS
 

@@ -20,6 +20,9 @@ class Element:
     def value(self):
         return None
 
+    def type(self):
+        return type(self).__name__
+
     def model(self):
         return {
             "id" : self.id,
