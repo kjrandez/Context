@@ -23,7 +23,7 @@ class Text(Element):
         trans.reverseArgs = [prev]
         return trans.complete()
 
-    def insert(self, value, start, reverse = None):
+    def insert(self, start, value, reverse = None):
         trans = self.transaction(reverse)
         
         try:
@@ -33,14 +33,15 @@ class Text(Element):
             prev = self.content
             self.content = prev[:start] + value + prev[start:]
 
-            trans.reverseOp = self.remove
+            trans.reverseOp = self.delete
             trans.reverseArgs = [start, start + len(value)]
             return trans.complete()
         except IndexError:
             trans.cancel()
             raise
 
-    def remove(self, start, stop, reverse = None):
+    def delete(self, start, length, reverse = None):
+        stop = start + length
         trans = self.transaction(reverse)
 
         try:

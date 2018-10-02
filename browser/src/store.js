@@ -20,7 +20,11 @@ export default class Store
 
         this.localHandlers = {
             "Text-update": this.invlocContentUpdate.bind(this),
-            "Script-update": this.invlocContentUpdate.bind(this)
+            "Text-insert": this.invlocContentInsert.bind(this),
+            "Text-delete": this.invlocContentDelete.bind(this),
+            "Script-update": this.invlocContentUpdate.bind(this),
+            "Script-insert": this.invlocContentInsert.bind(this),
+            "Script-delete": this.invlocContentDelete.bind(this)
         };
     }
 
@@ -82,6 +86,24 @@ export default class Store
             arguments: args.map(arg => encoded(arg)),
             respond: requestUpdate
         });
+    }
+
+    invlocContentInsert(fragment, args) {
+        const model = this.modelDict[fragment.id()];
+        const prev = model.value.content;
+        const offset = args[0];
+        const insertion = args[1];
+        model.value.content = strSplice(prev, offset, 0, insertion);
+        fragment.update();
+    }
+
+    invlocContentDelete(fragment, args) {
+        const model = this.modelDict[fragment.id()];
+        const prev = model.value.content;
+        const offset = args[0];
+        const deletionLength = args[1];
+        model.value.content = strSplice(prev, offset, deletionLength, "");
+        fragment.update();
     }
 
     invlocContentUpdate(fragment, args) {
@@ -168,4 +190,10 @@ function encoded(param) {
         return { type: "dup", value: param.fragment.id() }
     else
         return { type: "std", value: param };
+}
+
+function strSplice(str, index, amount, add) {
+    const res = str.substring(0, index) + add + str.substring(index + amount);
+    console.log("[" + res + "]");
+    return res;
 }

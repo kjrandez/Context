@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import ContentEditable from 'react-simple-contenteditable';
+import PlainText from '../plaintext';
 
 export default class Script extends Component
 {
@@ -22,46 +22,31 @@ export default class Script extends Component
         });
     }
 
-    onChange(ev, value) {
+    onTextInsert(start, insertion, value) {
+        console.log("Insert at " + start + "[" + insertion + "]");
+
+        this.props.fragment.invoke("insert", [start, insertion]);
+    }
+
+    onTextDelete(start, deletion, value) {
+        console.log("Delete at " + start + "[" + deletion + "]");
+
+        this.props.fragment.invoke("delete", [start, deletion.length]);
+    }
+
+    onTextChange(value) {
+        console.log("Changed to [" + value + "]");
+
         this.props.fragment.invoke("update", [value]);
-    }
-
-    // Author: Martin Wantke
-    // https://stackoverflow.com/questions/2920150/insert-text-at-cursor-in-a-content-editable-div
-    insertTextAtCursor(text)
-    {
-        let selection = window.getSelection();
-        let range = selection.getRangeAt(0);
-        range.deleteContents();
-        let node = document.createTextNode(text);
-        range.insertNode(node);
-
-        for(let position = 0; position !== text.length; position++) {
-            selection.modify("move", "right", "character");
-        }
-    }
-
-    down(ev) {
-        if(ev.keyCode === 9) {
-            if(this.innerRef.current != null) {
-                // Easily broken by changes to react-simple-contenteditable
-                this.insertTextAtCursor("\t");
-                this.innerRef.current._onChange(ev);
-            }
-            ev.preventDefault();
-        }
     }
 
     render() {
         return (
-            <ContentEditable
-            html={this.state.content}
-            className="code-edit"
-            onChange={(ev, val) => this.onChange(ev, val)}
-            contentEditable="plaintext-only"
-            ref={this.innerRef}
-            onKeyPress={() => {}} 
-            onKeyDown={ev => this.down(ev)} />
+            <PlainText className="code-edit"
+            content={this.state.content}
+            onTextChange={val => this.onTextChange(val)}
+            onTextInsert={(start, ins, val) => this.onTextInsert(start, ins, val)}
+            onTextDelete={(start, del, val) => this.onTextDelete(start, del, val)} />
         );
     }
 
