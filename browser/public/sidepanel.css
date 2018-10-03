@@ -75,7 +75,7 @@
 }
 
 .sidepanel-tab-content {
-	border: 1px solid #DDD;
+	border: 1px solid rgba(6, 26, 36, 0.2);
 	background-color: #FFF;
 	border-radius: 6px;
 	flex: 1;
@@ -108,7 +108,7 @@
 	overflow: hidden;
 	background-image: linear-gradient(rgb(253, 253, 254), rgb(245, 248, 250));
 	padding: 5px;
-	border: 1px solid #CCC;
+	border: 1px solid rgba(6, 26, 36, 0.2);
 }
 
 .clipboard-entry-content-preview {
@@ -135,7 +135,7 @@
 }
 
 .clipboard-append-area.expanded {
-	background-color: #F8F8F8;
+	background-color: rgba(6, 26, 36, 0.05);
 }
 
 .clipboard-entry img {

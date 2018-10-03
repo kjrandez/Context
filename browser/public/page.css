@@ -5,7 +5,7 @@
 	padding: 0;
 	padding-left: 10px;
 	overflow: visible;
-	border-left: 2px solid rgba(0, 0, 0, 0.2);
+	border-left: 2px solid rgba(6, 26, 36, 0.2);
 }
 
 #top-spacer {
@@ -17,7 +17,7 @@
 }
 
 .header-breadcrumb {
-	border: 1px solid #DDD;
+	border: 1px solid rgba(6, 26, 36, 0.2);
 	padding: 5px;
 	padding-left: 10px;
 	margin-top: 5px;
@@ -33,7 +33,7 @@
 	margin-left: 5px;
 	width: 50px;
 	height: 14px;
-	background-color: rgba(0, 0, 0, 0.06);
+	background-color: rgba(6, 26, 36, 0.07);
 	border: none;
 	position: relative;
 	top: 7px;
@@ -45,11 +45,11 @@
 
 .append-button:hover {
 	cursor: pointer;
-	background-color: rgba(0, 0, 0, 0.10);
+	background-color: rgba(6, 26, 36, 0.10);
 }
 
 .append-button:active {
-	background-color: rgba(0, 0, 0, 0.14);
+	background-color: rgba(6, 26, 36, 0.14);
 }
 
 .append-more-button {
