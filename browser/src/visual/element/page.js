@@ -40,15 +40,36 @@ export default class Page extends Component
         return this.props.loc.path.indexOf(this.props.fragment.id()) >= 0;
     }
 
+    firstElementIsHeader() {
+        if(this.state.content.length > 1) {
+            if(this.state.content[0].fragment.type() === "Text")
+                return true;
+        }
+
+        return false;
+    }
+
     revealContent() {
         if(!this.isRecursivePage()) {
-            return elementList(
+            var pageElements = elementList(
                 this.state.content, 
                 this.props.loc.path.concat(this.props.fragment.id()),
                 this.props.selection,
                 this.props.app,
                 true
-            )
+            );
+
+            // Boldify first element, if it's the header
+            if(this.firstElementIsHeader()) {
+                pageElements[0] = (
+                    <span style={{fontWeight: "bold"}}>
+                        {pageElements[0]}
+                    </span>
+                );
+                console.log("is header");
+            }
+
+            return pageElements;
         } else {
             return <p>Recursive page {this.props.fragment.id()}</p>
         }

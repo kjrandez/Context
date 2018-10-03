@@ -5,7 +5,7 @@
 	padding: 0;
 	padding-left: 10px;
 	overflow: visible;
-	border-left: 2px solid #BBB;
+	border-left: 2px solid rgba(0, 0, 0, 0.2);
 }
 
 #top-spacer {
@@ -33,7 +33,7 @@
 	margin-left: 5px;
 	width: 50px;
 	height: 14px;
-	background-color: #EAEAEA;
+	background-color: rgba(0, 0, 0, 0.06);
 	border: none;
 	position: relative;
 	top: 7px;
@@ -45,11 +45,11 @@
 
 .append-button:hover {
 	cursor: pointer;
-	background-color: #DDD;
+	background-color: rgba(0, 0, 0, 0.10);
 }
 
 .append-button:active {
-	background-color: #CCC;
+	background-color: rgba(0, 0, 0, 0.14);
 }
 
 .append-more-button {

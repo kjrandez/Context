@@ -2,7 +2,7 @@
 	outline: 0;
 	white-space: pre-wrap;
 	padding-top: 3px;
-	padding-bottom: 4px;
+	padding-bottom: 3px;
 }
 
 .code-edit {
@@ -107,7 +107,7 @@
 .page-header {
 	font-weight: bold;
 	margin-top: 3px;
-	margin-left: 5px;
+	margin-left: 6px;
 }
 
 .page-header a {
@@ -133,14 +133,16 @@
 	display: inline-block;
 	border: 1px solid #DDD;
 	border-radius:3px;
-	padding: 3px;
-	padding-bottom: 4px;
+	padding: 4px;
+	padding-bottom: 5px;
+	padding-right: 5px;
 }
 
 .element.selected .file-content {
 	border: none;
-	padding: 4px;
-	padding-bottom: 5px;
+	padding: 5px;
+	padding-bottom: 6px;
+	padding-right: 6px;
 }
 
 .file-content .bp3-icon {

@@ -96,6 +96,7 @@ Requiring CEF/Electron
 - Select cursor past end of text is only when div is content-editable, so transforming to a paragraph
 when not selected will eliminate the cursor. Adjacent text can also easily be selected when
 content-editable is not active.
+- Page Header (first text element) should be a component with special behavior like bold text, and shift-click link, but should not be a separate component when expanded. Behavior might just be slightly different when expanded (i.e. becomes editable)
 
 ### QUESTIONS
 

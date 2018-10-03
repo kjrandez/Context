@@ -41,7 +41,7 @@ html, body, #root {
 	height: 100%;
 	margin: 0;
 	padding: 0;
-	background-color: #FCFCFC;
+	background-color: rgb(251, 252, 253);
 	font-family: Arial;
 	font-size: 14px;
 	font-style: normal;
