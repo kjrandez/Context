@@ -1,6 +1,8 @@
 .text-edit {
 	outline: 0;
 	white-space: pre-wrap;
+	padding-top: 3px;
+	padding-bottom: 4px;
 }
 
 .code-edit {
@@ -49,7 +51,7 @@
 	position: relative;
 }
 
-.element.selected .element-box {
+.element.selected .element-box:first-child {
 	background-color: white;
 }
 
@@ -119,7 +121,7 @@
 
 .page-body-content {
 	position: relative;
-	top: -4px;
+	top: -6px;
 }
 
 .element .file-content {
@@ -130,7 +132,7 @@
 	padding-bottom: 4px;
 }
 
-.element-content.selected .file-content {
+.element.selected .file-content {
 	border: none;
 	padding: 4px;
 	padding-bottom: 5px;

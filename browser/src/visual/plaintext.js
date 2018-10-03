@@ -26,10 +26,6 @@ export default class PlainText extends Component
         }
     }
 
-    handleRef(newRef) {
-
-    }
-
     onSelect(ev) {
         console.log(ev);
     }
@@ -122,7 +118,7 @@ export default class PlainText extends Component
 
         return (
             <ContentEditable
-            ref={ref => this.handleRef(ref)}
+            ref={this.ref}
             html={this.props.content}
             contentEditable="plaintext-only"
             onChange={(ev, val) => this.onChange(ev, val)}

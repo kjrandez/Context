@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import ContentEditable from 'react-simple-contenteditable';
+import PlainText from '../plaintext';
 
 export default class Text extends Component
 {
@@ -22,26 +22,27 @@ export default class Text extends Component
         });
     }
 
-    onChange(ev, value) {
+    onTextSplice(start, stop, insertion) {
+        this.props.fragment.invoke("splice", [start, stop, insertion]);
+    }
+
+    onTextChange(value) {
         this.props.fragment.invoke("update", [value]);
     }
 
     render() {
         return (
-            <ContentEditable
-            html={this.state.content}
-            className="text-edit"
-            onChange={(ev, val) => this.onChange(ev, val)}
-            contentEditable="plaintext-only"
-            ref={this.innerRef}
-            onKeyPress={() => {}} />
+            <PlainText className="text-edit"
+            content={this.state.content}
+            onTextChange={val => this.onTextChange(val)}
+            onTextSplice={(start, stop, add) => this.onTextSplice(start, stop, add)} />
         );
     }
 
     componentWillMount() {
         this.props.fragment.connect(this);
     }
-
+    
     componentDidMount() {
         if(this.props.grabFocus && this.innerRef.current != null) {
             if(this.innerRef.current.elem != null)

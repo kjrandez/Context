@@ -65,3 +65,6 @@ html, body, #root {
 	min-width: 55px;
 }
 
+br {
+	line-height: 150%;
+ }
