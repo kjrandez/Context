@@ -96,12 +96,11 @@ export default class Store
         const expected = args[3];
 
         // Perform the specified splice
-        console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
         var spliced = strSplice(prev, start, stop - start, addition);
         
         // Compare result with modified value
         if(spliced !== expected) {
-            console.log("Doesn't match");
+            console.log("ERROR: Doesn't match");
             console.log("Real:");
             console.log(expected);
             console.log("Spliced:");

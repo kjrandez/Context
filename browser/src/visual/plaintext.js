@@ -107,7 +107,7 @@ export default class PlainText extends Component
         }
 
         // Perform the specified splice
-        console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
+        //console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
         this.props.onTextSplice(start, stop, addition, value);
     }
 

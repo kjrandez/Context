@@ -28,16 +28,7 @@ export default class Script extends Component
     }
 
     onTextSplice(start, stop, insertion, expected) {
-        var newContent = strSplice(this.state.content, start, stop - start, insertion);
-
-        if(newContent !== expected) {
-            console.log("Erroneous result");
-        }
-
-        this.setState({
-            content: expected
-        });
-        //this.props.fragment.invoke("splice", [start, stop, insertion, expected]);
+        this.props.fragment.invoke("splice", [start, stop, insertion, expected]);
     }
 
     onTextChange(value) {
