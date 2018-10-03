@@ -51,8 +51,12 @@
 	position: relative;
 }
 
-.element.selected .element-box:first-child {
+.element.selected .element-box {
 	background-color: white;
+}
+
+.element.selected .element .element-box {
+	background-color: transparent;
 }
 
 .element-box-handle {
@@ -91,12 +95,13 @@
 .page-sidebar {
 	margin-top: 0px;
 	overflow: hidden;
+	padding: 1px;
 }
 
 .page-sidebar-line {
 	border-left: 1px solid #BBB;
 	height: 100%;
-	margin-left: 11px;
+	margin-left: 12px;
 }
 
 .page-header {

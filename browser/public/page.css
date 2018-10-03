@@ -36,11 +36,11 @@
 	background-color: #EAEAEA;
 	border: none;
 	position: relative;
-	top: 6px;
+	top: 7px;
 }
 
 #page-elements .append-button {
-	margin-top: 8px;
+	margin-top: 7px;
 }
 
 .append-button:hover {
@@ -57,7 +57,7 @@
 	opacity: 0.1;
 	background-color: transparent;
 	position: relative;
-	top: 7px;
+	top: 8px;
 	margin-left: 10px;
 }
 

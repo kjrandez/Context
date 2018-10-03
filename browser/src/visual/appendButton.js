@@ -204,7 +204,7 @@ class AppendButton extends Component
         var dropTarget = this.props.dropTarget;
 
         return dropTarget(
-            <div className="element" onMouseDown={ev => this.onMouseDown(ev)}>
+            <div className="element">
                 <div className={this.elementSpacerClass()}></div>
                 <div className="element-content">
 
