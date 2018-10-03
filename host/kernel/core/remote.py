@@ -10,15 +10,16 @@ class Remote:
         self.root = root
         self.worker = worker
         self.websocket = websocket
-        self.ignoreTrans = []
-        self.topPage = None
         self.clipboard = Dataset.singleton.clipboard
+        self.ignoreTrans = []
+        self.attachedIds = []
 
         print("Making new remote")
 
         self.commands = {
             "requestRoot" : self.commandRequestRoot,
-            "requestPage" : self.commandRequestPage,
+            "attachElement" : self.commandAttachElement,
+            "detachElement" : self.commandDetachElement,
             "invoke" : self.commandInvoke,
             "invokeInBackground" : self.commandInvokeInBackground,
             "addFile" : self.commandAddFile,
@@ -47,10 +48,21 @@ class Remote:
         await self.worker(selector, *arguments)
 
     async def commandRequestRoot(self, data):
-        await self.providePage(self.root, None)
+        await self.websocket.send(json.dumps({
+            "selector" : "root",
+            "arguments" : [self.root.id, self.clipboard.id]
+        }))
 
-    async def commandRequestPage(self, data):
-        await self.providePage(Dataset.singleton.lookup(data["page"]), data["path"])
+    async def commandAttachElement(self, data):
+        self.attachedIds.append(data)
+
+        await self.websocket.send(json.dumps({
+            "selector" : "model",
+            "arguments" : [Dataset.singleton.lookup(data).model()]
+        }))
+
+    async def commandDetachElement(self, data):
+        self.attachedIds.remove(data)
 
     async def commandAddFile(self, data):
         parent = Dataset.singleton.lookup(data["page"])
@@ -65,72 +77,13 @@ class Remote:
             self.ignoreTrans.remove(trans.index)
             return
 
-        # Send any models which are relevant to the transaction but which the
-        # remote was not previously sensitive to
-        newModels = {}
-        if trans.element.id in self.senseIds:
-            newModels = self.incorporateElements(trans.others, True)
-        elif trans.element.id in self.shallowSenseIds:
-            newModels = self.incorporateElements(trans.others, False)
-        else:
+        if trans.element.id not in self.attachedIds:
             return
-
-        # Also provide the model of the element updated by the transaction
-        newModels[trans.element.id] = trans.element.model()
 
         await self.websocket.send(json.dumps({
             "selector" : "update",
-            "arguments" : [trans.model(), newModels]
+            "arguments" : [trans.model(), trans.element.model()]
         }))
-
-    async def providePage(self, page, path):
-        self.setTopPage(page, path)
-
-        result = json.dumps({
-            "selector" : "renderPage",
-            "arguments" : [self.topPage.id, self.clipboard.id, self.flattened]
-        }, indent=3)
-        print(result)
-        await self.websocket.send(result)
-
-    def setTopPage(self, page, path):
-        self.topPage = page
-        self.flattened = {}
-        self.senseIds = []
-        self.shallowSenseIds = []
-
-        # Generate flattened model based on top page, deep
-        self.incorporateElements([self.topPage], True)
-
-        # Incorporate clipboard page into model, shallow
-        self.incorporateElements([self.clipboard], False)
-
-        # Incorporate parent path pages into model, shallow
-        if path != None:
-            pathPages = [Dataset.singleton.lookup(x) for x in path]
-            if self.root in pathPages:
-                print("Root not in path pages!!!!");
-            self.incorporateElements(pathPages, False)
-
-    def incorporateElements(self, elements, deep):
-        newModelEntries = {}
-
-        def noteUpdatedModel(model):
-            id = model["id"]
-            newModelEntries[id] = model
-            if deep:
-                self.senseIds.append(id)
-            else:
-                self.shallowSenseIds.append(id)
-
-        # For shallow, maxDepth = 2 for example:
-        # (0) - Clipboard, (1) - Page in Clipboard, (2) - Element in Page giving Title
-        # (0) - Path Page, (1) - Element in Page giving Title, (2) - Extraneous data
-        maxDepth = 2 if not deep else None
-        for element in elements:
-            element.flatten(self.flattened, noteUpdatedModel, maxDepth)
-
-        return newModelEntries
 
     async def resolvedArgument(self, arg):
         if isinstance(arg, list):
