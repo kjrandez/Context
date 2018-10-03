@@ -3,11 +3,6 @@ import ContentEditable from 'react-simple-contenteditable';
 
 var diff = require('fast-diff');
 
-function strSplice(str, index, amount, add) {
-    const res = str.substring(0, index) + add + str.substring(index + amount);
-    return res;
-}
-
 export default class PlainText extends Component
 {
     constructor(props) {
@@ -108,7 +103,7 @@ export default class PlainText extends Component
 
         // Perform the specified splice
         //console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
-        this.props.onTextSplice(start, stop, addition, value);
+        this.props.onTextSplice(start, stop, addition);
     }
 
     onKeyDown(ev) {

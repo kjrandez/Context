@@ -78,12 +78,12 @@ export default class Store
             this.localHandlers[invlocId](fragment, args)
             requestUpdate = false;
         }
-        /*this.app.kernelSend(command, {
+        this.app.kernelSend(command, {
             element: fragment.id(),
             selector: selector,
             arguments: args.map(arg => encoded(arg)),
             respond: requestUpdate
-        });*/
+        });
     }
 
     invlocContentSplice(fragment, args) {
@@ -93,21 +93,9 @@ export default class Store
         const start = args[0];
         const stop = args[1];
         const addition = args[2];
-        const expected = args[3];
 
         // Perform the specified splice
-        var spliced = strSplice(prev, start, stop - start, addition);
-        
-        // Compare result with modified value
-        if(spliced !== expected) {
-            console.log("ERROR: Doesn't match");
-            console.log("Real:");
-            console.log(expected);
-            console.log("Spliced:");
-            console.log(spliced);
-        }
-
-        model.value.content = spliced;
+        model.value.content = strSplice(prev, start, stop - start, addition);
         fragment.update();
     }
 

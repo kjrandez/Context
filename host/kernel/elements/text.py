@@ -23,25 +23,7 @@ class Text(Element):
         trans.reverseArgs = [prev]
         return trans.complete()
 
-    def insert(self, start, value, reverse = None):
-        trans = self.transaction(reverse)
-        
-        try:
-            if (start < 0) or (start > len(self.content)):
-                raise IndexError("Insertion starts out of range")
-
-            prev = self.content
-            self.content = prev[:start] + value + prev[start:]
-
-            trans.reverseOp = self.delete
-            trans.reverseArgs = [start, start + len(value)]
-            return trans.complete()
-        except IndexError:
-            trans.cancel()
-            raise
-
-    def delete(self, start, length, reverse = None):
-        stop = start + length
+    def splice(self, start, stop, addition, reverse = None):
         trans = self.transaction(reverse)
 
         try:
@@ -53,11 +35,11 @@ class Text(Element):
                 raise IndexError("Removal start and stop are reversed")
             
             prev = self.content
-            self.content = prev[:start] + prev[stop:]
+            self.content = prev[:start] + addition + prev[stop:]
 
             removed = prev[start:stop]
-            trans.reverseOp = self.insert
-            trans.reverseArgs = [removed, start]
+            trans.reverseOp = self.splice
+            trans.reverseArgs = [start, start + len(addition), removed]
             return trans.complete()
         except IndexError:
             trans.cancel()

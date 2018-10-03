@@ -1,11 +1,6 @@
 import React, {Component} from 'react';
 import PlainText from '../plaintext';
 
-function strSplice(str, index, amount, add) {
-    const res = str.substring(0, index) + add + str.substring(index + amount);
-    return res;
-}
-
 export default class Script extends Component
 {
     constructor(props) {
@@ -27,8 +22,8 @@ export default class Script extends Component
         });
     }
 
-    onTextSplice(start, stop, insertion, expected) {
-        this.props.fragment.invoke("splice", [start, stop, insertion, expected]);
+    onTextSplice(start, stop, insertion) {
+        this.props.fragment.invoke("splice", [start, stop, insertion]);
     }
 
     onTextChange(value) {
@@ -40,7 +35,7 @@ export default class Script extends Component
             <PlainText className="code-edit"
             content={this.state.content}
             onTextChange={val => this.onTextChange(val)}
-            onTextSplice={(start, stop, add, expected) => this.onTextSplice(start, stop, add, expected)} />
+            onTextSplice={(start, stop, add) => this.onTextSplice(start, stop, add)} />
         );
     }
 
