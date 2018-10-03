@@ -22,21 +22,11 @@ export default class Script extends Component
         });
     }
 
-    onTextInsert(start, insertion, value) {
-        console.log("Insert at " + start + "[" + insertion + "]");
-
-        this.props.fragment.invoke("insert", [start, insertion]);
-    }
-
-    onTextDelete(start, deletion, value) {
-        console.log("Delete at " + start + "[" + deletion + "]");
-
-        this.props.fragment.invoke("delete", [start, deletion.length]);
+    onTextSplice(start, stop, insertion) {
+        this.props.fragment.invoke("splice", [start, stop, insertion]);
     }
 
     onTextChange(value) {
-        console.log("Changed to [" + value + "]");
-
         this.props.fragment.invoke("update", [value]);
     }
 

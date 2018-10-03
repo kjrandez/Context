@@ -3,6 +3,11 @@ import ContentEditable from 'react-simple-contenteditable';
 
 var diff = require('fast-diff');
 
+function strSplice(str, index, amount, add) {
+    const res = str.substring(0, index) + add + str.substring(index + amount);
+    return res;
+}
+
 export default class PlainText extends Component
 {
     constructor(props) {
@@ -35,31 +40,78 @@ export default class PlainText extends Component
 
     onChange(ev, value) {
         var result = diff(this.props.content, value);
-        console.log(result);
 
         var position = 0;
+        var start = null;
+        var stop = null;
+        var addition = "";
 
-        // So far, actual typing only seems to produce at most 5 sections (with 2 changes)
-        if(result.length <= 5) {
-            for(var i = 0; i < result.length; i++) {
-                const type = result[i][0];
-                const text = result[i][1];
+        // Convert insertions and deletions into a single splice
 
-                if(type === 1) {
-                    this.props.onTextInsert(position, text, value);
-                    position += text.length;
+        for(var i = 0; i < result.length; i++) {
+            const type = result[i][0];
+            const text = result[i][1];
+
+            if(type === 1) {
+                // Insertion (this text is not present in original)
+                if(start == null) {
+                    // This becomes the starting position of the splice
+                    start = position;
                 }
-                else if(type === -1) {
-                    this.props.onTextDelete(position, text, value);
+
+                // Addition is noted to be spliced in
+                addition += text;
+
+                // Position is not advanced
+            }
+            else if(type === -1) {
+                // Deletion (this text IS present in original)
+                if(start == null) {
+                    // This becomes the starting position of the splice
+                    start = position;
                 }
-                else {
+
+                // Advance position in original string
+                position += text.length;
+            }
+            else {
+                // Unchanged, advance unless there are no more insertions/deletions
+                if(i < result.length - 1) {
+                    if(start != null) {
+                        // If the splice has already started, this text goes into it
+                        addition += text;
+                    }
+
+                    // Advance position in original string
                     position += text.length;
                 }
             }
         }
-        else {
-            this.props.onTextChange(value);
+
+        if(start == null) {
+            start = 0;
+            stop = 0;
         }
+        else {
+            // Ending point of the splice is the last position we advanced to
+            stop = position;
+        }
+
+        // Perform the specified splice
+        console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
+        var spliced = strSplice(this.props.content, start, stop - start, addition);
+
+        // Compare result with modified value
+        if(spliced !== value) {
+            console.log("Doesn't match");
+            console.log(result);
+            console.log("Real:");
+            console.log(value);
+            console.log("Spliced:");
+            console.log(spliced);
+        }
+
+        this.props.onTextChange(value);
     }
 
     onKeyDown(ev) {
