@@ -20,11 +20,9 @@ export default class Store
 
         this.localHandlers = {
             "Text-update": this.invlocContentUpdate.bind(this),
-            "Text-insert": this.invlocContentInsert.bind(this),
-            "Text-delete": this.invlocContentDelete.bind(this),
+            "Text-splice": this.invlocContentSplice.bind(this),
             "Script-update": this.invlocContentUpdate.bind(this),
-            "Script-insert": this.invlocContentInsert.bind(this),
-            "Script-delete": this.invlocContentDelete.bind(this)
+            "Script-splice": this.invlocContentSplice.bind(this),
         };
     }
 
@@ -80,29 +78,37 @@ export default class Store
             this.localHandlers[invlocId](fragment, args)
             requestUpdate = false;
         }
-        this.app.kernelSend(command, {
+        /*this.app.kernelSend(command, {
             element: fragment.id(),
             selector: selector,
             arguments: args.map(arg => encoded(arg)),
             respond: requestUpdate
-        });
+        });*/
     }
 
-    invlocContentInsert(fragment, args) {
+    invlocContentSplice(fragment, args) {
         const model = this.modelDict[fragment.id()];
         const prev = model.value.content;
-        const offset = args[0];
-        const insertion = args[1];
-        model.value.content = strSplice(prev, offset, 0, insertion);
-        fragment.update();
-    }
 
-    invlocContentDelete(fragment, args) {
-        const model = this.modelDict[fragment.id()];
-        const prev = model.value.content;
-        const offset = args[0];
-        const deletionLength = args[1];
-        model.value.content = strSplice(prev, offset, deletionLength, "");
+        const start = args[0];
+        const stop = args[1];
+        const addition = args[2];
+        const expected = args[3];
+
+        // Perform the specified splice
+        console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
+        var spliced = strSplice(prev, start, stop - start, addition);
+        
+        // Compare result with modified value
+        if(spliced !== expected) {
+            console.log("Doesn't match");
+            console.log("Real:");
+            console.log(expected);
+            console.log("Spliced:");
+            console.log(spliced);
+        }
+
+        model.value.content = spliced;
         fragment.update();
     }
 
@@ -194,6 +200,5 @@ function encoded(param) {
 
 function strSplice(str, index, amount, add) {
     const res = str.substring(0, index) + add + str.substring(index + amount);
-    console.log("[" + res + "]");
     return res;
 }

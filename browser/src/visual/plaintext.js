@@ -13,6 +13,7 @@ export default class PlainText extends Component
     constructor(props) {
         super(props);
         this.ref = React.createRef();
+        this.prevOnChangeValue = null;
     }
 
     // Author: Martin Wantke
@@ -39,6 +40,14 @@ export default class PlainText extends Component
     }
 
     onChange(ev, value) {
+        if(value === this.prevOnChangeValue) {
+            // Prevent firing of multiple onChange events
+            return;
+        }
+
+        this.prevOnChangeValue = value;
+
+        console.log("Change event");
         var result = diff(this.props.content, value);
 
         var position = 0;
@@ -99,19 +108,7 @@ export default class PlainText extends Component
 
         // Perform the specified splice
         console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
-        var spliced = strSplice(this.props.content, start, stop - start, addition);
-
-        // Compare result with modified value
-        if(spliced !== value) {
-            console.log("Doesn't match");
-            console.log(result);
-            console.log("Real:");
-            console.log(value);
-            console.log("Spliced:");
-            console.log(spliced);
-        }
-
-        this.props.onTextChange(value);
+        this.props.onTextSplice(start, stop, addition, value);
     }
 
     onKeyDown(ev) {
@@ -126,7 +123,7 @@ export default class PlainText extends Component
     }
 
     render() {
-        const { content, onTextChange, onTextInsert, onTextDelete, ...props } = this.props;
+        const { content, onTextChange, onTextSplice, ...props } = this.props;
 
         return (
             <ContentEditable
