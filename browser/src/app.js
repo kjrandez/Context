@@ -40,9 +40,25 @@ export default class App
     notifyCtrlKey(down) {
         this.keyListeners.forEach(listener => listener.ctrlKey(down));
     }
+
+    actionUndo() {
+        this.kernelSend("undo", null);
+    }
+
+    actionRedo() {
+        this.kernelSend("redo", null);
+    }
     
     documentKeyDown(event) {
-        if(event.keyCode === 16 && !this.shiftDown) {
+        if(event.keyCode === 89 && this.ctrlDown) {
+            this.actionRedo();
+            event.preventDefault();
+        } 
+        else if(event.keyCode === 90 && this.ctrlDown) {
+            this.actionUndo();
+            event.preventDefault();
+        }
+        else if(event.keyCode === 16 && !this.shiftDown) {
             this.shiftDown = true;
             this.notifyShiftKey(true);
         }

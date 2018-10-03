@@ -34,6 +34,14 @@ History viewer w/ time travel
 
 Misc
 
+- **PRIORITY** Re-examine function of store. Elements might just load value
+from model directly via websocket, rather than keeping a full copy of the model in
+local memory for each render tab. Then, sensitivity list is just trivially, whichever
+components are currently mounted. No need to pay attention to which elements you need
+to send models for, the browser just asks when it needs them. Trade-off network pipe usage
+instead of repeated copies of dataset in memory. Eliminates possible bugs with state
+incoherence. Experiment with effects of increased latency. UI blocks on websocket.
+
 - Errors when dispatching an RPC need to be caught, reported
     and remote/browser need to be updated to a sanitized state
 - Show modified or user-specified date at right side of header

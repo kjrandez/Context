@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ContentEditable from 'react-simple-contenteditable';
 
-var diff = require('fast-diff');
+import diff from 'fast-diff';
 
 export default class PlainText extends Component
 {
@@ -26,19 +26,12 @@ export default class PlainText extends Component
         }
     }
 
-    onSelect(ev) {
-        console.log(ev);
-    }
-
     onChange(ev, value) {
-        if(value === this.prevOnChangeValue) {
-            // Prevent firing of multiple onChange events
+        // Prevent firing of multiple onChange events
+        if(value === this.prevOnChangeValue)
             return;
-        }
-
         this.prevOnChangeValue = value;
 
-        console.log("Change event");
         var result = diff(this.props.content, value);
 
         var position = 0;

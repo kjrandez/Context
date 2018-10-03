@@ -64,7 +64,3 @@ html, body, #root {
 #right-column {
 	min-width: 55px;
 }
-
-br {
-	line-height: 150%;
- }
