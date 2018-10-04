@@ -12,10 +12,11 @@ class Top extends Component {
 
         this.state = {
             topFragment: null,
-            content: [],
-            selection: [],
+            clipboardFragment: null,
+            pathFragments: [],
             pathIds: [],
-            pathFragments: []
+            selection: [],
+            content: []
         }
 
         this.topFragment = null;
@@ -29,37 +30,40 @@ class Top extends Component {
         this.props.app.selected(null, false);
     }
 
-    setTopLevel(newTopFragment, newClipboardFragment, pathIds) {
+    setPage(newTopFragment, newClipboardFragment, pathIds) {
         // Update fragment connection
         if(this.state.topFragment != null)
-            this.state.topFragment.disconnect(this);
-        
-        // Race condition: Shouldn't do this until the state has
-        // actually changed...
-        newTopFragment.connect(this)
+            this.state.topFragment.detach(this);
 
         // If on a sub-page, remove root and add current to the breadcrumbs
         var breadcrumbIds = pathIds.slice()
         breadcrumbIds.push(newTopFragment.id());
         var pathFragments = breadcrumbIds.map(id => this.props.app.store.fragment(id));
 
+        // Set state to initial prior to content load
         this.setState({
             topFragment: newTopFragment,
             clipboardFragment: newClipboardFragment,
-            content: this.contentFromFragment(newTopFragment),
+            pathFragments: pathFragments,
             pathIds: pathIds,
-            pathFragments: pathFragments
+            content: []
         });
+
+        // Connect data model to value handlers
+        newTopFragment.attach(this, value => this.modelValue(value));
     }
 
-    modelChanged() {
-        this.setState({
-            content: this.contentFromFragment(this.state.topFragment)
-        });
+    modelValue(newValue) {
+        console.log("Top received value from fragment");
+        console.log(newValue);
+
+        // Stop here for now
+        /*this.setState({
+            content: this.contentFromValue(newValue)
+        })*/
     }
 
-    contentFromFragment(fragment) {
-        var value = fragment.value();
+    contentFromValue(value) {
         var latestEntryKey = (value.latestEntry == null) ? null : value.latestEntry.key;
 
         return value.content.map(pageEntry => {

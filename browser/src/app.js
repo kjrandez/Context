@@ -4,17 +4,16 @@ export default class App
 {
     constructor()
     {
-        this.store = new Store(this);
         this.kernel = new WebSocket("ws://localhost:8085/broadcast");
         this.kernel.onopen = (event) => this.kernelOpen(event);
         this.kernel.onclose = (event) => this.kernelClose(event);
-        this.nextPath = [];
+
+        this.top = null;
         this.selection = [];
         this.grabPath = null;
-        this.top = null;
+        this.keyListeners = []
         this.shiftDown = false;
         this.ctrlDown = false;
-        this.keyListeners = []
     }
 
     connectKeyListener(listener) {
@@ -84,8 +83,7 @@ export default class App
 
     enterRoot() {
         window.location.hash = "";
-        this.nextPath = [];
-        this.kernelSend("requestRoot", null);
+        this.top.setPage(this.rootPage, this.clipboard, []);
     }
 
     enterPage(path, pageId) {
@@ -95,8 +93,7 @@ export default class App
         newHash += pageId;
 
         window.location.hash = newHash;
-        this.nextPath = path;
-        this.kernelSend("requestPage", { page: pageId, path: path });
+        this.top.setPage(this.store.fragment(pageId), this.clipboard, path);
     }
 
     setGrabPath(path) {
@@ -104,7 +101,7 @@ export default class App
         this.grabPath = path;
     }
 
-    getGrabPath(path) {
+    getGrabPath() {
         return this.grabPath;
     }
 
@@ -165,13 +162,17 @@ export default class App
         var splitPath = pathString.split(",");
 
         if(pathString.length === 0 || splitPath.length === 0) {
-            this.enterRoot();
+            this.openingPage = null;
+            this.openingPath = [];
         }
         else {
             var path = splitPath.map(segment => parseInt(segment, 10));
             var pageId = path.pop();
-            this.enterPage(path, pageId);
+            this.openingPage = pageId;
+            this.openingPath = path;
         }
+
+        this.kernelSend("requestRoot", null);
     }
     
     kernelClose(event) {
@@ -182,19 +183,29 @@ export default class App
         var message = JSON.parse(event.data);
         console.log("Received message: ");
         console.log(message);
-        
-        var args = message.arguments
+
         switch(message.selector) {
-            case 'renderPage':
-                this.store.setModel(args[0], args[1], args[2]);
-                this.top.setTopLevel(
-                    this.store.topLevelFragment(),
-                    this.store.clipboardFragment(),
-                    this.nextPath
-                );
+            case 'root':
+                var rootPageId = message.arguments[0];
+                var clipboardId = message.arguments[1];
+
+                this.store = new Store(this);
+                this.rootPage = this.store.fragment(rootPageId);
+                this.clipboard = this.store.fragment(clipboardId);
+
+                var page = null;
+                if(this.openingPage != null)
+                    page = this.store.fragment(this.openingPage);
+                else   
+                    page = this.rootPage;
+                
+                this.top.setPage(page, this.clipboard, this.openingPath);
+                break;
+            case 'model':
+                this.store.model(...message.arguments);
                 break;
             case 'update':
-                this.store.update(message.arguments[0], message.arguments[1]);
+                this.store.update(...message.arguments);
                 break;
             default:
                 console.log("Unhandled message");

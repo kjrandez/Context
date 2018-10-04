@@ -29,6 +29,8 @@ class Remote:
     async def dispatch(self, msg):
         if msg["selector"] in self.commands:
             await self.commands[msg["selector"]](msg["data"])
+        else:
+            print("Invalid remote selector: " + msg["selector"])
 
     async def commandInvoke(self, data):
         target = Dataset.singleton.lookup(data["element"])
@@ -47,29 +49,30 @@ class Remote:
 
         await self.worker(selector, *arguments)
 
-    async def commandRequestRoot(self, data):
+    async def commandRequestRoot(self, nil):
         await self.websocket.send(json.dumps({
             "selector" : "root",
             "arguments" : [self.root.id, self.clipboard.id]
         }))
 
-    async def commandAttachElement(self, data):
-        self.attachedIds.append(data)
+    async def commandAttachElement(self, elementId):
+        if elementId not in self.attachedIds:
+            self.attachedIds.append(elementId)
 
         await self.websocket.send(json.dumps({
             "selector" : "model",
-            "arguments" : [Dataset.singleton.lookup(data).model()]
+            "arguments" : [Dataset.singleton.lookup(elementId).model()]
         }))
 
-    async def commandDetachElement(self, data):
-        self.attachedIds.remove(data)
+    async def commandDetachElement(self, elementId):
+        self.attachedIds.remove(elementId)
 
-    async def commandAddFile(self, data):
-        parent = Dataset.singleton.lookup(data["page"])
+    async def commandAddFile(self, parentId):
+        parent = Dataset.singleton.lookup(parentId)
         await self.worker(addFilePrompt, parent)
 
-    async def commandAddImage(self, data):
-        parent = Dataset.singleton.lookup(data["page"])
+    async def commandAddImage(self, parentId):
+        parent = Dataset.singleton.lookup(parentId)
         await self.worker(addImagePrompt, parent)
 
     async def update(self, trans):

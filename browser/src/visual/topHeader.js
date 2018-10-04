@@ -6,9 +6,9 @@ export default class TopHeader extends Component
     constructor(props) {
         super(props);
 
-        this.state = {
+        /*this.state = {
             items: this.getItems(props.pathFragments)
-        }
+        }*/
     }
 
     getItems(fragments) {
@@ -50,20 +50,20 @@ export default class TopHeader extends Component
     }
 
     componentWillReceiveProps(nextProps) {
-        this.disconnectFromPathFragments(this.props.pathFragments);
+        /*this.disconnectFromPathFragments(this.props.pathFragments);
         this.connectToPathFragments(nextProps.pathFragments);
 
         this.setState({
             items: this.getItems(nextProps.pathFragments)
-        });
+        });*/
     }
 
     componentWillMount() {
-        this.connectToPathFragments(this.props.pathFragments);
+        //this.connectToPathFragments(this.props.pathFragments);
     }
 
     componentWillUnmount() {
-        this.disconnectFromPathFragments(this.props.pathFragments);
+        //this.disconnectFromPathFragments(this.props.pathFragments);
     }
 
     connectToPathFragments(fragments) {
@@ -134,6 +134,9 @@ export default class TopHeader extends Component
 
     render() {
         return(
+            <div className="header-breadcrumb">Unimplemented</div>
+        );
+        /*return(
             <div className="header-breadcrumb" onMouseDown={ev => this.onMouseDown(ev)}>
                 <OverflowList
                 className="bp3-breadcrumbs"
@@ -142,6 +145,6 @@ export default class TopHeader extends Component
                 overflowRenderer={this.renderOverflow.bind(this)}
                 visibleItemRenderer={this.renderBreadcrumb.bind(this)}/>
             </div>
-        );
+        );*/
     }
 }

@@ -2,65 +2,56 @@ import Fragment from './fragment.js';
 import NewElement from './newElement.js';
 import DuplicateElement from './duplicateElement.js';
 
-class StoreError
-{
-    constructor(message) {
-        this.message = message;
-    }
-}
-
 export default class Store
 {
     constructor(app) {
         this.app = app;
         this.fragmentDict = {};
-        this.modelDict = {};
-        this.topLevel = null;
+        this.rootPage = null;
         this.clipboard = null;
 
-        this.localHandlers = {
+        /*this.localHandlers = {
             "Text-update": this.invlocContentUpdate.bind(this),
             "Text-splice": this.invlocContentSplice.bind(this),
             "Script-update": this.invlocContentUpdate.bind(this),
             "Script-splice": this.invlocContentSplice.bind(this),
-        };
+        };*/
     }
 
-    topLevelFragment() {
-        return this.topLevel;
-    }
-
-    clipboardFragment() {
-        return this.clipboard;
-    }
-
-    setModel(topPageId, clipboardId, elements) {
-        this.modelDict = {}
+    clear() {
         this.fragmentDict = {}
-        this.loadModelDict(elements);
-        this.topLevel = this.fragmentDict[topPageId];
-        this.clipboard = this.fragmentDict[clipboardId];
     }
 
-    update(trans, elementModels) {
-        this.loadModelDict(elementModels);
-        var updatedFragment = this.fragmentDict[trans.id];
-        updatedFragment.update();
+    model(elementModel) {
+        var fragment = this.fragmentDict[elementModel.id];
+        fragment.model(elementModel.value, elementModel.type);
     }
 
-    loadModelDict(newModelDict) {
-        for(var id in newModelDict) {
-            if(!(id in this.fragmentDict)) {
-                this.fragmentDict[id] = new Fragment(this, newModelDict[id])
-            }
-            this.modelDict[id] = newModelDict[id]
-        }
+    update(transModel, elementModel) {
+        var updatedFragment = this.fragmentDict[elementModel.id];
+        updatedFragment.update(elementModel.value, elementModel.type);
     }
 
     fragment(id) {
-        if(!(id in this.fragmentDict))
-            throw new StoreError("Attempt to access non-present element: " + id);
-        return this.fragmentDict[id];
+        var fragment = null;
+
+        if(!(id in this.fragmentDict)) {
+            fragment = new Fragment(id, this);
+            this.fragmentDict[id] = fragment;
+        }
+        else {
+            fragment = this.fragmentDict[id];
+        }
+
+        return fragment;
+    }
+
+    attach(fragment) {
+        this.app.kernelSend("attachElement", fragment.id());
+    }
+
+    detach(fragment) {
+        this.app.kernelSend("detachElement", fragment.id());
     }
 
     invoke(fragment, selector, args) {
@@ -74,10 +65,10 @@ export default class Store
     invokeCommon(fragment, selector, args, command) {
         var requestUpdate = true;
         var invlocId = fragment.type() + "-" + selector;
-        if(invlocId in this.localHandlers) {
+        /*if(invlocId in this.localHandlers) {
             this.localHandlers[invlocId](fragment, args)
             requestUpdate = false;
-        }
+        }*/
         this.app.kernelSend(command, {
             element: fragment.id(),
             selector: selector,
@@ -86,7 +77,7 @@ export default class Store
         });
     }
 
-    invlocContentSplice(fragment, args) {
+    /*invlocContentSplice(fragment, args) {
         const model = this.modelDict[fragment.id()];
         const prev = model.value.content;
 
@@ -103,13 +94,7 @@ export default class Store
         var model = this.modelDict[fragment.id()];
         model.value.content = args[0];
         fragment.update();
-    }
-
-    value(id) {
-        if(!(id in this.modelDict))
-            throw new StoreError("Attempt to read non-present element: " + id);
-        return this.modelDict[id].value;
-    }
+    }*/
 
     actionPin(selection) {
         this.clipboard.invoke("insertAt", [selection.fragment, 0]);
@@ -185,7 +170,7 @@ function encoded(param) {
         return { type: "std", value: param };
 }
 
-function strSplice(str, index, amount, add) {
+/*function strSplice(str, index, amount, add) {
     const res = str.substring(0, index) + add + str.substring(index + amount);
     return res;
-}
+}*/

@@ -35,17 +35,17 @@ class AppendButton extends Component
 
     addFile() {
         var parentId = this.props.path[this.props.path.length - 1];
-        this.props.app.kernelSend("addFile", { page: parentId });
+        this.props.app.kernelSend("addFile", parentId);
     }
 
     addFolder() {
         var parentId = this.props.path[this.props.path.length - 1];
-        this.props.app.kernelSend("addFolder", { page: parentId });
+        this.props.app.kernelSend("addFolder", parentId);
     }
 
     addImage() {
         var parentId = this.props.path[this.props.path.length - 1];
-        this.props.app.kernelSend("addImage", { page: parentId });
+        this.props.app.kernelSend("addImage", parentId);
     }
 
     addLink() {

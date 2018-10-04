@@ -122,7 +122,7 @@ export default class Toolbar extends Component
             <div id="toolbar"
             className={this.className()}
             onMouseDown={(ev) => this.onMouseDown(ev)}>
-                {this.toolbarContent()}
+                {/*this.toolbarContent()*/}
             </div>
         )
     }

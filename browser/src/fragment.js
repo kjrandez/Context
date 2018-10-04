@@ -3,23 +3,14 @@ export default class Fragment
     // This class should probably not store the element's value data directly,
     // but should connect the visual to the model where the data actually is.
 
-    constructor(store, model) {
+    constructor(id, store) {
         this.store = store;
-        this.immId = model.id;
-        this.immType = model.type;
+        this.immId = id;
         this.visuals = [];
     }
 
     id() {
         return this.immId;
-    }
-
-    type() {
-        return this.immType;
-    }
-
-    value() {
-        return this.store.value(this.immId);
     }
 
     invoke(selector, args) {
@@ -30,15 +21,33 @@ export default class Fragment
         this.store.invokeBackground(this, selector, args);
     }
 
-    update() {
-        this.visuals.forEach(visual => visual.modelChanged(this, this.value()));
+    model(value, type) {
+        this.visuals.forEach(entry => entry.initialValueHandler(value, type, this));
     }
 
-    connect(visual) {
-        this.visuals.push(visual);
+    update(value, type) {
+        this.visuals.forEach(entry => entry.updatedValueHandler(value, type, this));
     }
 
-    disconnect(visual) {
-        this.visuals.splice(this.visuals.indexOf(visual), 1);
+    attach(visual, initialValueHandler, updatedValueHandler) {
+        if(updatedValueHandler === undefined)
+            updatedValueHandler = initialValueHandler;
+
+        this.visuals.push({
+            visual: visual,
+            initialValueHandler: initialValueHandler,
+            updatedValueHandler: updatedValueHandler
+        });
+
+        this.store.attach(this);
+    }
+
+    detach(visual) {
+        var index = this.visuals.findIndex(entry => entry.visual === visual);
+        if(index >= 0)
+            this.visuals.splice(index, 1);
+
+        if(this.visuals.length === 0)
+            this.store.detach(this);
     }
 }
