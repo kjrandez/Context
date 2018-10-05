@@ -5,24 +5,11 @@ export default class FileRef extends Component
 {
     constructor(props) {
         super(props);
-
-        var value = this.props.fragment.value();
-        this.state = {
-            path: value.path,
-            filename: value.filename
-        }
-    }
-
-    modelChanged() {
-        var value = this.props.fragment.value();
-
-        this.setState({
-            href: value.href
-        });
+        this.onClick = this.onClick.bind(this);
     }
 
     onClick(ev) {
-        this.props.fragment.invokeBackground("openInDefault", []);
+        this.props.action.openInDefault();
         ev.preventDefault();
     }
 
@@ -31,19 +18,11 @@ export default class FileRef extends Component
             <div>
             <span className="file-content">
                 <Icon icon="document" />
-                <a onClick={ev => this.onClick(ev)}>
-                    {this.state.filename}
+                <a onClick={this.onClick}>
+                    {this.props.value.filename}
                 </a>
             </span>
             </div>
         );
-    }
-
-    componentWillMount() {
-        this.props.fragment.connect(this);
-    }
-
-    componentWillUnmount() {
-        this.props.fragment.disconnect(this);
     }
 }

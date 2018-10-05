@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Selection from '../../selection.js';
 import { Page, Image, Text, Script, Link, FileRef } from '.';
 import { DragSource, DropTarget } from 'react-dnd';
-import { TextAction } from '../../action/index.js';
+import { TextAction, FileAction } from '../../action/index.js';
 
 class Element extends Component 
 {
@@ -127,36 +127,40 @@ class Element extends Component
                     tag={tag}
                     selection={selection}
                     grabFocus={grabFocus}
-                    action={new TextAction(this.fragment, value)}
+                    action={new TextAction(this.fragment, value, type)}
                     app={app} />;
-            /*case "Image":
+            case "Image":
                 return <Image
                     value={value}
-                    loc={loc}
+                    tag={tag}
                     selection={selection}
                     grabFocus={grabFocus}
+                    action={null}
                     app={app} />;
             case "Script":
                 return <Script
                     value={value}
-                    loc={loc}
+                    tag={tag}
                     selection={selection}
                     grabFocus={grabFocus}
+                    action={new TextAction(this.fragment, value, type)}
                     app={app} />;
             case "Link":
                 return <Link
                     value={value}
-                    loc={loc}
+                    tag={tag}
                     selection={selection}
                     grabFocus={grabFocus}
+                    action={null}
                     app={app} />;
             case "FileRef":
                 return <FileRef
                     value={value}
-                    loc={loc}
+                    tag={tag}
                     selection={selection}
                     grabFocus={grabFocus}
-                    app={app} />*/
+                    action={new FileAction(this.fragment, value, type)}
+                    app={app} />
             default:
                 return <p>Unknown element. Type: {type}</p>;
         }

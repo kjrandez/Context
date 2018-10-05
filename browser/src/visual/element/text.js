@@ -9,11 +9,13 @@ export default class Text extends Component
     }
 
     render() {
+        const { value, action } = this.props;
+
         return (
             <PlainText className="text-edit"
-            content={this.props.value.content}
-            onTextChange={this.props.action.change}
-            onTextSplice={this.props.action.splice} />
+            content={ value.content }
+            onTextChange={ action.change }
+            onTextSplice={ action.splice } />
         );
     }
     

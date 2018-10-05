@@ -83,7 +83,7 @@ class AppendButton extends Component
         fragment.invoke("append", [
             newElement,
             true
-        ])
+        ], true)
 
         // The app will store this path
         this.props.app.setGrabPath(this.props.path);

@@ -4,22 +4,7 @@ export default class Image extends Component
 {
     constructor(props) {
         super(props);
-
-        var value = this.props.fragment.value();
-
-        this.state = {
-            src: value.src,
-            alt: value.alt
-        }
-    }
-
-    modelChanged() {
-        var value = this.props.fragment.value();
-
-        this.setState({
-            src: value.src,
-            alt: value.alt
-        });
+        this.onDragStart = this.onDragStart.bind(this);
     }
 
     onDragStart(ev) {
@@ -27,18 +12,7 @@ export default class Image extends Component
     }
 
     render() {
-        return (
-            <img onDragStart={ev => this.onDragStart(ev)}
-            src={this.state.src}
-            alt={this.state.alt} />
-        );
-    }
-
-    componentWillMount() {
-        this.props.fragment.connect(this);
-    }
-
-    componentWillUnmount() {
-        this.props.fragment.disconnect(this);
+        const { src, alt } = this.props.value;
+        return <img onDragStart={this.onDragStart} src={src} alt={alt} />
     }
 }

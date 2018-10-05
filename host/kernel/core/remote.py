@@ -6,15 +6,13 @@ import tkinter.filedialog as filedialog
 import copy
 
 class Remote:
-    def __init__(self, root, worker, websocket):
+    def __init__(self, root, worker, send):
         self.root = root
         self.worker = worker
-        self.websocket = websocket
+        self.send = send
         self.clipboard = Dataset.singleton.clipboard
         self.ignoreTrans = []
         self.attachedIds = []
-
-        print("Making new remote")
 
         self.commands = {
             "requestRoot" : self.commandRequestRoot,
@@ -50,19 +48,19 @@ class Remote:
         await self.worker(selector, *arguments)
 
     async def commandRequestRoot(self, nil):
-        await self.websocket.send(json.dumps({
+        await self.send({
             "selector" : "root",
             "arguments" : [self.root.id, self.clipboard.id]
-        }))
+        })
 
     async def commandAttachElement(self, elementId):
         if elementId not in self.attachedIds:
             self.attachedIds.append(elementId)
 
-        await self.websocket.send(json.dumps({
+        await self.send({
             "selector" : "model",
             "arguments" : [Dataset.singleton.lookup(elementId).model()]
-        }))
+        })
 
     async def commandDetachElement(self, elementId):
         self.attachedIds.remove(elementId)
@@ -83,10 +81,10 @@ class Remote:
         if trans.element.id not in self.attachedIds:
             return
 
-        await self.websocket.send(json.dumps({
+        await self.send({
             "selector" : "update",
             "arguments" : [trans.model(), trans.element.model()]
-        }))
+        })
 
     async def resolvedArgument(self, arg):
         if isinstance(arg, list):

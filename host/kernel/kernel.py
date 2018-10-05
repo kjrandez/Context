@@ -53,12 +53,16 @@ class Kernel:
         if not path == "/broadcast":
             return
 
-        handler = Remote(self.root, self.runInWorkThread, websocket)
+        async def send(value):
+            print(">> ---------- SEND ---------- >> " + json.dumps(value, indent=2))
+            await websocket.send(json.dumps(value))
+
+        handler = Remote(self.root, self.runInWorkThread, send)
         self.remotes.append(handler)
         try:
             while True:
                 message = json.loads(await websocket.recv())
-                print("Received: " + json.dumps(message, indent=4))
+                print("<< ---------- RECV ---------- << " + json.dumps(message, indent=2))
                 await handler.dispatch(message)
         except websockets.exceptions.ConnectionClosed:
             print("Connection closed")
