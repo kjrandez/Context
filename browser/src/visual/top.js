@@ -58,9 +58,9 @@ class Top extends Component {
         console.log(newValue);
 
         // Stop here for now
-        /*this.setState({
+        this.setState({
             content: this.contentFromValue(newValue)
-        })*/
+        })
     }
 
     contentFromValue(value) {
@@ -68,8 +68,8 @@ class Top extends Component {
 
         return value.content.map(pageEntry => {
             return {
+                id: pageEntry.element,
                 key: pageEntry.key,
-                fragment: this.props.app.store.fragment(pageEntry.element),
                 latest: pageEntry.key === latestEntryKey
             }
         });

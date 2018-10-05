@@ -6,8 +6,7 @@ export function elementList(entries, path, selection, app, showAppend) {
     var result = entries.map(entry =>
         <Element
         key={entry.key}
-        fragment={entry.fragment}
-        loc={{path: path, key: entry.key, latest: entry.latest}}
+        tag={{id: entry.id, path: path, key: entry.key, latest: entry.latest}}
         selection={selection}
         app={app} />
     );

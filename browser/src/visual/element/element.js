@@ -8,30 +8,47 @@ class Element extends Component
     constructor(props) {
         super(props);
 
-        this.refNode = { current: null };
+        this.state = {
+            hide: false,
+            type: null,
+            value: null
+        }
+
+        this.fragment = props.app.store.fragment(props.tag.id);
         this.uniqueSelection = new Selection(
-            props.loc, props.fragment, this.refNode
+            props.tag, this.fragment, { current: null }
         );
+        this.grabFocus = this.grabSelectionIfLatest();
+    }
 
-        this.dragEnabled = true;
+    componentWillMount() {
+        this.fragment.attach(this, (value, type) => this.model(value, type));
+    }
 
-        this.grabFocus = false;
-        if(this.props.loc.latest) {
+    grabSelectionIfLatest() {
+        if(this.props.tag.latest) {
             var grabPath = this.props.app.getGrabPath();
             if(grabPath != null) {
-                var samePath = this.props.loc.path.every((item, index) => item === grabPath[index])
+                var samePath = this.props.tag.path.every((item, index) => item === grabPath[index])
                 if(samePath) {
                     this.props.app.grabSelection(this.uniqueSelection);
-                    this.grabFocus = true;
+                    return true;
                 }
             }
         }
 
-        this.state = { hide: false }
+        return false;
+    }
+
+    model(value, type) {
+        this.setState({
+            type: type,
+            value: value
+        });
     }
 
     setRefNode(node) {
-        this.refNode.current = node;
+        this.uniqueSelection.ref.current = node;
     }
 
     droppedAt(newPath, beforeKey) {
@@ -64,6 +81,7 @@ class Element extends Component
     }
 
     componentWillUnmount() {
+        this.fragment.detach(this);
         this.props.app.deselected(this.uniqueSelection);
     }
 
@@ -87,75 +105,59 @@ class Element extends Component
     }
 
     specializedElement() {
-        var fragment = this.props.fragment;
+        var type = this.state.type;
+        var value = this.state.value;
         var loc = this.props.loc;
         var selection = this.props.selection;
         var app = this.props.app;
         var grabFocus = this.grabFocus;
 
-        // Catch errors resulting from null fragment (not found in store)
-        var type = "Undefined"
-        if(this.props.fragment != null)
-            type = fragment.type();
-
         switch(type) {
-            case "Page":
+            /*case "Page":
                 return <Page
-                    fragment={fragment}
+                    value={value}
                     loc={loc}
                     selection={selection}
                     grabFocus={grabFocus}
                     app={app} />;
             case "Text":
                 return <Text
-                    fragment={fragment}
+                    value={value}
                     loc={loc}
                     selection={selection}
                     grabFocus={grabFocus}
                     app={app} />;
             case "Image":
                 return <Image
-                    fragment={fragment}
+                    value={value}
                     loc={loc}
                     selection={selection}
                     grabFocus={grabFocus}
                     app={app} />;
             case "Script":
                 return <Script
-                    fragment={fragment}
+                    value={value}
                     loc={loc}
                     selection={selection}
                     grabFocus={grabFocus}
                     app={app} />;
             case "Link":
                 return <Link
-                    fragment={fragment}
+                    value={value}
                     loc={loc}
                     selection={selection}
                     grabFocus={grabFocus}
                     app={app} />;
             case "FileRef":
                 return <FileRef
-                    fragment={fragment}
+                    value={value}
                     loc={loc}
                     selection={selection}
                     grabFocus={grabFocus}
-                    app={app} />
+                    app={app} />*/
             default:
-                return <p>Unknown element. Type: {fragment.type()}</p>;
+                return <p>Unknown element. Type: {type}</p>;
         }
-    }
-
-    onMouseOver(ev) {
-        this.setState({
-            dragEnabled: false
-        });
-    }
-
-    onMouseOut(ev) {
-        this.setState({
-            dragEnabled: true
-        });
     }
 
     renderHandle(dragSource) {
@@ -167,7 +169,14 @@ class Element extends Component
         return null;
     }
 
+    renderPreload() {
+        return <p>Loading...</p>
+    }
+
     render() {
+        if(this.state.type == null || this.state.value == null)
+            return this.renderPreload();
+        
         var dropTarget = this.props.dropTarget;
         var dragSource = this.props.dragSource;
         var dragPreview = this.props.dragPreview;
