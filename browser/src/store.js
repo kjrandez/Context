@@ -54,47 +54,22 @@ export default class Store
         this.app.kernelSend("detachElement", fragment.id());
     }
 
-    invoke(fragment, selector, args) {
-        this.invokeCommon(fragment, selector, args, "invoke");
+    invoke(fragment, selector, args, respond) {
+        this.invokeCommon(fragment, selector, args, respond, "invoke");
     }
 
-    invokeBackground(fragment, selector, args) {
-        this.invokeCommon(fragment, selector, args, "invokeInBackground");
+    invokeBackground(fragment, selector, args, respond) {
+        this.invokeCommon(fragment, selector, args, respond, "invokeInBackground");
     }
 
-    invokeCommon(fragment, selector, args, command) {
-        var requestUpdate = true;
-        var invlocId = fragment.type() + "-" + selector;
-        /*if(invlocId in this.localHandlers) {
-            this.localHandlers[invlocId](fragment, args)
-            requestUpdate = false;
-        }*/
+    invokeCommon(fragment, selector, args, respond, command) {
         this.app.kernelSend(command, {
             element: fragment.id(),
             selector: selector,
             arguments: args.map(arg => encoded(arg)),
-            respond: requestUpdate
+            respond: respond
         });
     }
-
-    /*invlocContentSplice(fragment, args) {
-        const model = this.modelDict[fragment.id()];
-        const prev = model.value.content;
-
-        const start = args[0];
-        const stop = args[1];
-        const addition = args[2];
-
-        // Perform the specified splice
-        model.value.content = strSplice(prev, start, stop - start, addition);
-        fragment.update();
-    }
-
-    invlocContentUpdate(fragment, args) {
-        var model = this.modelDict[fragment.id()];
-        model.value.content = args[0];
-        fragment.update();
-    }*/
 
     actionPin(selection) {
         this.clipboard.invoke("insertAt", [selection.fragment, 0]);
@@ -169,8 +144,3 @@ function encoded(param) {
     else
         return { type: "std", value: param };
 }
-
-/*function strSplice(str, index, amount, add) {
-    const res = str.substring(0, index) + add + str.substring(index + amount);
-    return res;
-}*/

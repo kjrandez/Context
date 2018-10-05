@@ -13,12 +13,12 @@ export default class Fragment
         return this.immId;
     }
 
-    invoke(selector, args) {
-        this.store.invoke(this, selector, args);
+    invoke(selector, args, respond) {
+        this.store.invoke(this, selector, args, respond);
     }
 
-    invokeBackground(selector, args) {
-        this.store.invokeBackground(this, selector, args);
+    invokeBackground(selector, args, respond) {
+        this.store.invokeBackground(this, selector, args, respond);
     }
 
     model(value, type) {

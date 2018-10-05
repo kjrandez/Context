@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Selection from '../../selection.js';
 import { Page, Image, Text, Script, Link, FileRef } from '.';
 import { DragSource, DropTarget } from 'react-dnd';
+import { TextAction } from '../../action/index.js';
 
 class Element extends Component 
 {
@@ -107,7 +108,7 @@ class Element extends Component
     specializedElement() {
         var type = this.state.type;
         var value = this.state.value;
-        var loc = this.props.loc;
+        var tag = this.props.tag;
         var selection = this.props.selection;
         var app = this.props.app;
         var grabFocus = this.grabFocus;
@@ -119,15 +120,16 @@ class Element extends Component
                     loc={loc}
                     selection={selection}
                     grabFocus={grabFocus}
-                    app={app} />;
+                    app={app} />;*/
             case "Text":
                 return <Text
                     value={value}
-                    loc={loc}
+                    tag={tag}
                     selection={selection}
                     grabFocus={grabFocus}
+                    action={new TextAction(this.fragment, value)}
                     app={app} />;
-            case "Image":
+            /*case "Image":
                 return <Image
                     value={value}
                     loc={loc}
