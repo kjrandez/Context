@@ -114,13 +114,14 @@ class Element extends Component
         var grabFocus = this.grabFocus;
 
         switch(type) {
-            /*case "Page":
+            case "Page":
                 return <Page
                     value={value}
-                    loc={loc}
+                    tag={tag}
                     selection={selection}
                     grabFocus={grabFocus}
-                    app={app} />;*/
+                    action={null}
+                    app={app} />;
             case "Text":
                 return <Text
                     value={value}

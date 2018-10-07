@@ -8,17 +8,21 @@ export default class Page extends Component
     constructor(props) {
         super(props);
 
-        var value = this.props.fragment.value();
-
         this.state = {
-            content: value.content.map(entry => {
-                return {
-                    key: entry.key,
-                    fragment: this.props.app.store.fragment(entry.element)
-                }
-            }),
             isOpen: false
         }
+    }
+
+    contentFromValue(value) {
+        var latestEntryKey = (value.latestEntry == null) ? null : value.latestEntry.key;
+
+        return value.content.map(pageEntry => {
+            return {
+                id: pageEntry.element,
+                key: pageEntry.key,
+                latest: pageEntry.key === latestEntryKey
+            }
+        });
     }
 
     modelChanged() {
@@ -37,23 +41,18 @@ export default class Page extends Component
     }
 
     isRecursivePage() {
-        return this.props.loc.path.indexOf(this.props.fragment.id()) >= 0;
+        return this.props.tag.path.indexOf(this.props.tag.id) >= 0;
     }
 
     firstElementIsHeader() {
-        if(this.state.content.length > 1) {
-            if(this.state.content[0].fragment.type() === "Text")
-                return true;
-        }
-
         return false;
     }
 
     revealContent() {
         if(!this.isRecursivePage()) {
             var pageElements = elementList(
-                this.state.content, 
-                this.props.loc.path.concat(this.props.fragment.id()),
+                this.contentFromValue(this.props.value), 
+                this.props.tag.path.concat(this.props.tag.id),
                 this.props.selection,
                 this.props.app,
                 true
@@ -66,7 +65,6 @@ export default class Page extends Component
                         {pageElements[0]}
                     </span>
                 );
-                console.log("is header");
             }
 
             return pageElements;
@@ -102,17 +100,18 @@ export default class Page extends Component
                 <div className="page-sidebar">
                     <div className="page-sidebar-button">
                         <button
-                            type="button"
-                            className={this.expandButtonClass()}
-                            onMouseDown={(event) => this.onMouseDown(event)}
-                            onClick={(event) => this.onClick(event)}>
-                        </button>
+                        type="button"
+                        className={this.expandButtonClass()}
+                        onMouseDown={(event) => this.onMouseDown(event)}
+                        onClick={(event) => this.onClick(event)}></button>
                     </div>
                     <div className="page-sidebar-line"></div>
                 </div>
                 <div className="page-body">
                     <Collapse isOpen={!this.state.isOpen}>
-                        <PageHeader fragment={this.props.fragment} path={this.props.loc.path} app={this.props.app} />
+                        <PageHeader tag={this.props.tag}
+                        value={this.props.value}
+                        app={this.props.app} />
                     </Collapse>
                     <Collapse isOpen={this.state.isOpen}>
                         <div className="page-body-content">
@@ -122,13 +121,5 @@ export default class Page extends Component
                 </div>
             </div>
         );
-    }
-
-    componentWillMount() {
-        this.props.fragment.connect(this);
-    }
-
-    componentWillUnmount() {
-        this.props.fragment.disconnect(this);
     }
 }

@@ -5,14 +5,14 @@ export default class PageHeader extends Component
     constructor(props) {
         super(props);
 
-        var titleElement = this.getTitleElement();
+        /*var titleElement = this.getTitleElement();
         this.state = {
             titleElement: titleElement,
             title: (titleElement != null) ? titleElement.value().content : null,
             mouseOver: false,
             shiftDown: false,
             ctrlDown: false
-        };
+        };*/
     }
 
     getTitleElement() {
@@ -31,7 +31,7 @@ export default class PageHeader extends Component
         return titleElement;
     }
 
-    componentWillMount() {
+    /*componentWillMount() {
         this.props.fragment.connect(this);
         if(this.state.titleElement != null)
             this.state.titleElement.connect(this);
@@ -43,7 +43,7 @@ export default class PageHeader extends Component
             this.state.titleElement.disconnect(this);
         this.props.fragment.disconnect(this);
         this.props.app.disconnectKeyListener(this);
-    }
+    }*/
 
     shiftKey(down) {
         this.setState({
@@ -108,10 +108,10 @@ export default class PageHeader extends Component
     }
 
     render() {
-        if(this.state.titleElement == null)
+        //if(this.state.titleElement == null)
             return <div className="page-header-rule"></div>
-        return <p className={this.pageHeaderClass()}>
-            {this.pageHeaderLabel()}
-        </p>
+        //return <p className={this.pageHeaderClass()}>
+        //    {this.pageHeaderLabel()}
+        //</p>
     }
 }
