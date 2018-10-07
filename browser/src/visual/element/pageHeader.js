@@ -5,45 +5,51 @@ export default class PageHeader extends Component
     constructor(props) {
         super(props);
 
-        /*var titleElement = this.getTitleElement();
         this.state = {
-            titleElement: titleElement,
-            title: (titleElement != null) ? titleElement.value().content : null,
-            mouseOver: false,
+            title: null,
             shiftDown: false,
             ctrlDown: false
-        };*/
+        };
+        this.first = null;
     }
 
-    getTitleElement() {
-        var value = this.props.fragment.value();
-        var titleElement = null;
+    setupForProps(props) {
+        var prev = this.first;
 
-        if(value.content.length > 1) {
-            // Only show title if there are at least 2 elements
-            var firstEntryId = value.content[0].element;
-            var firstElement = this.props.app.store.fragment(firstEntryId);
-
-            if(firstElement.type() === "Text")
-                titleElement = firstElement
+        if(props.value.content.length > 1) {
+            var firstId = props.value.content[0].element;
+            this.first = props.app.store.fragment(firstId);
         }
-
-        return titleElement;
+        
+        if(this.first != prev) {
+            if(prev != null)
+                prev.detach(this);
+            if(this.first != null)
+                this.first.attach(this, (val, type) => this.firstModelValue(val, type));
+        }
     }
 
-    /*componentWillMount() {
-        this.props.fragment.connect(this);
-        if(this.state.titleElement != null)
-            this.state.titleElement.connect(this);
+    componentWillMount() {
+        this.setupForProps(this.props);
         this.props.app.connectKeyListener(this);
     }
 
+    componentWillReceiveProps(props) {
+        this.setupForProps(props);
+    }
+
     componentWillUnmount() {
-        if(this.state.titleElement != null)
-            this.state.titleElement.disconnect(this);
-        this.props.fragment.disconnect(this);
+        if(this.first != null)
+            this.first.detach(this);
         this.props.app.disconnectKeyListener(this);
-    }*/
+    }
+
+    firstModelValue(value, type) {
+        if(type == "Text")
+            this.setState({ title: value.content });
+        else
+            this.setState({ title: null });
+    }
 
     shiftKey(down) {
         this.setState({
@@ -57,41 +63,20 @@ export default class PageHeader extends Component
         })
     }
 
-    modelChanged(updatedFragment) {
-        if(updatedFragment === this.state.titleElement) {
-            this.setState({ title: updatedFragment.value().content });
-        }
-        else {
-            var titleElement = this.getTitleElement();
-
-            if(titleElement !== this.state.titleElement) {
-                if(this.state.titleElement != null)
-                    this.state.titleElement.disconnect(this);
-                titleElement.connect(this);
-
-                this.setState({
-                    titleElement: titleElement,
-                    title: (titleElement != null) ? titleElement.value().content : null
-                });
-            }
-            
-        }
-    }
-
     onClick(event) {
         // Prevent default shift-click behavior (new window)
         if(this.state.shiftDown) {
             event.preventDefault();
 
             // Set new top page to this one
-            this.props.app.enterPage(this.props.path, this.props.fragment.id());
+            this.props.app.enterPage(this.props.tag.path, this.props.tag.id);
         }
     }
 
     pathHash() {
         var hash = "#";
-        this.props.path.forEach(id => {hash += (id + ",")});
-        hash += this.props.fragment.id();
+        this.props.tag.path.forEach(id => {hash += (id + ",")});
+        hash += this.props.tag.id;
         return hash;
     }
 
@@ -108,10 +93,13 @@ export default class PageHeader extends Component
     }
 
     render() {
-        //if(this.state.titleElement == null)
+        if(this.state.title == null)
             return <div className="page-header-rule"></div>
-        //return <p className={this.pageHeaderClass()}>
-        //    {this.pageHeaderLabel()}
-        //</p>
+
+        return(
+            <p className={this.pageHeaderClass()}>
+                {this.pageHeaderLabel()}
+            </p>
+        );
     }
 }
