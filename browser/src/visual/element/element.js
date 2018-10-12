@@ -22,10 +22,6 @@ class Element extends Component
         this.grabFocus = this.grabSelectionIfLatest();
     }
 
-    componentWillMount() {
-        this.fragment.attach(this, (value, type) => this.model(value, type));
-    }
-
     grabSelectionIfLatest() {
         if(this.props.tag.latest) {
             var grabPath = this.props.app.getGrabPath();
@@ -39,6 +35,15 @@ class Element extends Component
         }
 
         return false;
+    }
+    
+    componentWillMount() {
+        this.fragment.attach(this, (value, type) => this.model(value, type));
+    }
+
+    componentWillUnmount() {
+        this.fragment.detach(this);
+        this.props.app.deselected(this.uniqueSelection);
     }
 
     model(value, type) {
@@ -54,10 +59,10 @@ class Element extends Component
 
     droppedAt(newPath, beforeKey) {
         // Remove this page entry from the parent
-        var myPath = this.props.loc.path;
+        var myPath = this.props.tag.path;
         var parentId = myPath[myPath.length - 1];
         var parent = this.props.app.store.fragment(parentId);
-        parent.invoke("remove", [this.props.loc.key]);
+        parent.invoke("remove", [this.props.tag.key], true);
 
         // Get reference to the new parent page
         var newParentId = newPath[newPath.length - 1];
@@ -68,9 +73,9 @@ class Element extends Component
 
         // Add this element to the new page before the given key or at the end
         if(beforeKey != null)
-            newParent.invoke("insertBefore", [this.props.fragment, beforeKey, true]);
+            newParent.invoke("insertBefore", [this.fragment, beforeKey, true], true);
         else
-            newParent.invoke("append", [this.props.fragment, true]);
+            newParent.invoke("append", [this.fragment, true], true);
         
         // Keep this element invisible while background operations are occurring
         this.setState({ hide: true });
@@ -79,11 +84,6 @@ class Element extends Component
     onMouseDown(event) {
         event.stopPropagation();
         this.props.app.selected(this.uniqueSelection, event.ctrlKey);
-    }
-
-    componentWillUnmount() {
-        this.fragment.detach(this);
-        this.props.app.deselected(this.uniqueSelection);
     }
 
     isSelected() {
@@ -223,7 +223,7 @@ const dragSource = {
         if(result == null)
             return;
         
-        component.droppedAt(result.path, result.key, result.before);
+        component.droppedAt(result.path, result.key);
     }
 };
 
@@ -241,9 +241,8 @@ const dropTarget = {
             return;
 
         return { 
-            path: props.loc.path,
-            key: props.loc.key,
-            before: true
+            path: props.tag.path,
+            key: props.tag.key
         };
     }
 };
