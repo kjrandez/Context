@@ -13,7 +13,7 @@ class Element extends Component
             hide: false,
             type: null,
             value: null
-        }
+        };
 
         this.fragment = props.app.store.fragment(props.tag.id);
         this.uniqueSelection = new Selection(

@@ -59,9 +59,9 @@ export default class SidePanel extends Component
     }
 
     tabContent() {
-        /*if(this.state.selectedTab === "clipboard")
-            return <Clipboard clip={this.props.clip} app={this.props.app} />
-        else*/
+        if(this.state.selectedTab === "clipboard")
+            return <Clipboard fragment={this.props.clip} app={this.props.app} />
+        else
             return <History />
     }
 

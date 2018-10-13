@@ -9,7 +9,8 @@ export default class FileRef extends Component
     }
 
     onClick(ev) {
-        this.props.action.openInDefault();
+        if(this.props.action != null)
+            this.props.action.openInDefault();
         ev.preventDefault();
     }
 

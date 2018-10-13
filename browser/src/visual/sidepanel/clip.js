@@ -1,18 +1,45 @@
 import React, { Component } from 'react';
-import { Text, Image, Page, Script, FileRef } from '../element';
+import { Text, Image, Page, Script, FileRef, Link } from '../element';
 import { DragSource, DropTarget } from 'react-dnd';
+import { TextAction, FileAction } from '../../action/index.js';
 
 class Clip extends Component
 {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            type: null,
+            value: null
+        };
+
+        this.fragment = props.app.store.fragment(props.tag.id);
+    }
+
+    componentWillMount() {
+        this.fragment.attach(this, (value, type) => this.model(value, type));
+    }
+
+    componentWillUnmount() {
+        this.fragment.detach(this);
+    }
+
+    model(value, type) {
+        this.setState({
+            type: type,
+            value: value
+        });
+    }
+
     droppedAt(newPath, beforeKey) {
         // Remove this page entry from the clipboard if newPath is also clipboard
-        var clipId = this.props.loc.path[0];
+        var clipId = this.props.tag.path[0];
         if(newPath.length === 1 && newPath[0] === clipId) {
             // Abort if inserting before self
-            if(beforeKey === this.props.loc.key)
+            if(beforeKey === this.props.tag.key)
                 return;
             var clip = this.props.app.store.fragment(clipId);
-            clip.invoke("remove", [this.props.loc.key]);
+            clip.invoke("remove", [this.props.tag.key], true);
         }
 
         // Get reference to the new parent page
@@ -24,50 +51,52 @@ class Clip extends Component
 
         // Add this element to the new page before the given key or at the end
         if(beforeKey != null)
-            newParent.invoke("insertBefore", [this.props.fragment, beforeKey, true]);
+            newParent.invoke("insertBefore", [this.fragment, beforeKey, true], true);
         else
-            newParent.invoke("append", [this.props.fragment, true]);
-        
-        // Keep this element invisible while background operations are occurring
-        this.setState({ hide: true });
+            newParent.invoke("append", [this.fragment, true], true);
     }
 
     renderSpecialized() {
-        switch(this.props.fragment.type()) {
-            case "Text":
-                return <Text fragment={this.props.fragment}
-                loc={{path: [], key: 0}}
-                selection={[]}
-                grabFocus={false}
-                app={this.props.app} />;
-            case "Image":
-                return <Image fragment={this.props.fragment}
-                loc={{path: [], key: 0}}
-                selection={[]}
-                grabFocus={false}
-                app={this.props.app} />;
+        var type = this.state.type;
+        var value = this.state.value;
+        var tag = this.props.tag;
+        var app = this.props.app;
+
+        switch(type) {
             case "Page":
-                return <Page fragment={this.props.fragment}
-                loc={{path: [], key: 0}}
-                selection={[]}
-                grabFocus={false}
-                app={this.props.app} />;
+                return <Page
+                    value={value} tag={tag}
+                    selection={[]} grabFocus={false} action={null}
+                    app={app} />;
+            case "Text":
+                return <Text
+                    value={value} tag={tag}
+                    selection={[]} grabFocus={false} action={null}
+                    app={app} />;
+            case "Image":
+                return <Image
+                    value={value} tag={tag}
+                    selection={[]} grabFocus={false} action={null}
+                    app={app} />;
             case "Script":
-                return <Script fragment={this.props.fragment}
-                loc={{path: [], key: 0}}
-                selection={[]}
-                grabFocus={false}
-                app={this.props.app} />;
+                return <Script
+                    value={value} tag={tag}
+                    selection={[]} grabFocus={false} action={null}
+                    app={app} />;
+            case "Link":
+                return <Link
+                    value={value} tag={tag}
+                    selection={[]} grabFocus={false} action={null}
+                    app={app} />;
             case "FileRef":
-                return <FileRef fragment={this.props.fragment}
-                loc={{path: [], key: 0}}
-                selection={[]}
-                grabFocus={false}
-                app={this.props.app} />;
+                return <FileRef
+                    value={value} tag={tag}
+                    selection={[]} grabFocus={false} action={null}
+                    app={app} />
             default:
                 return <div>
-                    <p>{this.props.fragment.type()}</p>
-                    <p>Id: {this.props.fragment.id()}</p>
+                    <p>{type}</p>
+                    <p>Id: {tag.id}</p>
                 </div>
         }
     }
@@ -126,8 +155,8 @@ const dropTarget = {
             return;
 
         return { 
-            path: props.loc.path,
-            key: props.loc.key
+            path: props.tag.path,
+            key: props.tag.key
         };
     }
 };

@@ -21,7 +21,7 @@ export default class PageHeader extends Component
             this.first = props.app.store.fragment(firstId);
         }
         
-        if(this.first != prev) {
+        if(this.first !== prev) {
             if(prev != null)
                 prev.detach(this);
             if(this.first != null)
@@ -45,7 +45,7 @@ export default class PageHeader extends Component
     }
 
     firstModelValue(value, type) {
-        if(type == "Text")
+        if(type === "Text")
             this.setState({ title: value.content });
         else
             this.setState({ title: null });

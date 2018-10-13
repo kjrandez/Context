@@ -8,55 +8,63 @@ export default class Clipboard extends Component
         super(props);
 
         this.state = {
-            content: this.contentFromFragment(this.props.clip),
-            isOpen: false
-        }
+            isOpen: false,
+            content: null
+        };
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.props.clip.disconnect(this);
-        nextProps.clip.connect(this);
-        
-        this.setState({
-            content: this.contentFromFragment(nextProps.clip)
-        });
+    componentWillMount() {
+        this.props.fragment.attach(this, value => this.modelValue(value));
     }
 
-    modelChanged() {
-        this.setState({
-            content: this.contentFromFragment(this.props.clip)
-        });
+    componentWillUnmount() {
+        this.props.fragment.detach(this);
     }
 
-    contentFromFragment(fragment) {
-        var value = fragment.value();
-
-        return value.content.map(entry => {
+    contentFromValue(value) {
+        return value.content.map(pageEntry => {
             return {
-                key: entry.key,
-                fragment: this.props.app.store.fragment(entry.element)
+                id: pageEntry.element,
+                key: pageEntry.key
             }
         });
     }
 
-    componentWillMount() {
-        this.props.clip.connect(this);
+    modelValue(value) {
+        console.log("New clipboard value");
+        this.setState({
+            content: this.contentFromValue(value)
+        });
     }
 
-    componentWillUnmount() {
-        this.props.clip.disconnect(this);
+    clipsFromEntries(content) {
+        var clipId = this.props.fragment.id();
+
+        return content.map(entry => 
+            <Clip key={entry.key}
+            tag={{id: entry.id, path: [clipId], key: entry.key}}
+            app={this.props.app} />
+        )
+    }
+
+    tabContent() {
+        if(this.state.content != null) {
+            return([
+                this.clipsFromEntries(this.state.content),
+
+                <AppendArea key="append"
+                path={[this.props.fragment.id()]}
+                app={this.props.app} />
+            ]);
+        }
+
+        return <p>Loading...</p>
     }
 
     render() {
         return(
-            <div className="sidepanel-tab-content">
-                {this.state.content.map(entry => 
-                    <Clip key={entry.key}
-                    loc={{path: [this.props.clip.id()], key: entry.key}}
-                    fragment={entry.fragment}
-                    app={this.props.app} />
-                )}
-                <AppendArea key="append" path={[this.props.clip.id()]} app={this.props.app} />
+            <div className = "sidepanel-tab-content">
+                {this.tabContent()}
             </div>
         );
     }
