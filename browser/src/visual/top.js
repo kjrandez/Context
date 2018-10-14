@@ -16,6 +16,7 @@ class Top extends Component {
             pathFragments: [],
             pathIds: [],
             selection: [],
+            selContent: [],
             content: []
         }
 
@@ -27,7 +28,7 @@ class Top extends Component {
     }
 
     onMouseDown(event) {
-        this.props.app.selected(null, false);
+        this.props.app.deselectedAll();
     }
 
     setPage(newTopFragment, newClipboardFragment, pathIds) {
@@ -81,6 +82,12 @@ class Top extends Component {
         });
     }
 
+    setSelectionContent(selectionContent) {
+        this.setState({
+            selContent: selectionContent
+        });
+    }
+
     sidepanelContent() {
         if(this.state.clipboardFragment != null)
             return <SidePanel clip={this.state.clipboardFragment} app={this.props.app} />
@@ -91,7 +98,11 @@ class Top extends Component {
 
     toolbarContent() {
         if(this.state.clipboardFragment != null)
-            return <Toolbar clip={this.state.clipboardFragment} selection={this.state.selection} app={this.props.app} />
+            return (
+                <Toolbar clip={this.state.clipboardFragment}
+                selContent={this.state.selContent}
+                app={this.props.app} />
+            );
         else
             return <span />
     }

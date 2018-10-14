@@ -1,24 +1,22 @@
 export default class Selection
 {
-    constructor(loc, fragment, ref) {
-        this.loc = loc;
-        this.fragment = fragment;
+    constructor(tag, ref) {
+        this.tag = tag;
         this.ref = ref;
     }
 
     equals(aSelection) {
-        return this.samePath(aSelection.loc.path) &&
-            (this.loc.key === aSelection.loc.key) &&
-            (this.fragment === aSelection.fragment) &&
+        return this.samePath(aSelection.tag.path) &&
+            (this.tag.key === aSelection.tag.key) &&
             (this.ref === aSelection.ref)
     }
 
     samePath(path2) {
-        return this.loc.path.length === path2.length &&
-            this.loc.path.every((item, index) => item === path2[index]);
+        return this.tag.path.length === path2.length &&
+            this.tag.path.every((item, index) => item === path2[index]);
     }
 
     parentId() {
-        return this.loc.path[this.loc.path.length - 1];
+        return this.tag.path[this.tag.path.length - 1];
     }
 }

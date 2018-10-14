@@ -14,6 +14,8 @@ export default class Toolbar extends Component
     }
 
     currentSelection(props) {
+        console.log("Toolbar updating for selection content:");
+        console.log(props.selContent);
         var selection = props.selection;
         if(selection == null)
             selection = []

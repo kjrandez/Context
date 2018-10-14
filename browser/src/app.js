@@ -9,7 +9,7 @@ export default class App
         this.kernel.onclose = (event) => this.kernelClose(event);
 
         this.top = null;
-        this.selection = [];
+        this.selection = new Map();
         this.grabPath = null;
         this.keyListeners = []
         this.shiftDown = false;
@@ -66,7 +66,7 @@ export default class App
             this.notifyCtrlKey(true);
         }
         if(event.keyCode === 27) {
-            this.selected(null, false);
+            this.deselectedAll();
         }
     }
 
@@ -110,44 +110,99 @@ export default class App
         this.grabPath = null;
     }
 
+    clearSelections() {
+        this.selection.forEach(selContent => selContent.fragment.detach(this));
+        this.selection.clear();
+    }
+
+    removeSelection(selection) {
+        this.selection.get(selection).fragment.detach(this);
+        this.selection.delete(selection);
+    }
+
+    addSelection(selection) {
+        var fragment = this.store.fragment(selection.tag.id);
+
+        this.selection.set(selection, {
+            tag: selection.tag,
+            ref: selection.ref,
+            fragment: fragment,
+            value: null,
+            type: null
+        });
+
+        fragment.attach(
+            this,
+            (value, type) => this.selectionFilled(selection, value, type)
+        );
+    }
+
+    selectionList() {
+        return [...this.selection.keys()];
+    }
+
+    selectionContent() {
+        return [...this.selection.values()];
+    }
+
+    selectionFilled(selection, value, type) {
+        var selContent = this.selection.get(selection);
+        selContent.value = value;
+        selContent.type = type;
+
+        if(this.selectionComplete())
+            this.top.setSelectionContent(this.selectionContent());
+    }
+
+    selectionComplete() {
+        var complete = true;
+        for(let selContent of this.selection.values()) {
+            if(selContent.value == null) {
+                complete = false;
+                break;
+            }
+        }
+
+        return complete;
+    }
+
     selected(newSelection, ctrlDown) {
         if(ctrlDown) {
-            var index = this.selection.indexOf(newSelection);
-            if(index >= 0) {
-                // Ctrl is down and we clicked on an already-selected
-                // element, so de-select it.
-                this.selection.splice(index, 1);
+            if(this.selection.has(newSelection)) {
+                this.removeSelection(newSelection);
+                this.top.setSelectionContent(this.selectionContent());
             }
             else {
-                // Ctrl is down and we clicked on a non-selected element,
-                // so add it to the list of selections.
-                this.selection.push(newSelection);
+                this.addSelection(newSelection);
+                // selectionContent gets updated later
             }
         }
         else {
-            if(newSelection != null) {
-                if(this.selection.length === 1 && this.selection[0] === newSelection)
-                    return;
-                
-                this.selection = [newSelection];
-            }
-            else {
-                if(this.selection.length === 0)
-                    return;
-                
-                this.selection = [];
-            }
+            if(this.selection.size === 1 && this.selection.has(newSelection))
+                return;
+            this.clearSelections();
+            this.addSelection(newSelection);
+            // selectionContent gets updated later
         }
 
-        this.top.setSelection(this.selection);
+        this.top.setSelection(this.selectionList());
     }
 
     deselected(selection) {
-        var index = this.selection.indexOf(selection);
-        if(index >= 0) {
-            this.selection.splice(index, 1);
-        }
-        this.top.setSelection(this.selection);
+        if(this.selection.has(selection))
+            this.removeSelection(selection);
+
+        this.top.setSelection(this.selectionList());
+        this.top.setSelectionContent(this.selectionContent());
+    }
+
+    deselectedAll() {
+        if(this.selection.size === 0)
+            return;
+        this.clearSelections();
+
+        this.top.setSelection([]);
+        this.top.setSelectionContent([]);
     }
 
     kernelSend(selector, data) {

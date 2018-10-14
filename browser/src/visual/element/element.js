@@ -17,7 +17,7 @@ class Element extends Component
 
         this.fragment = props.app.store.fragment(props.tag.id);
         this.uniqueSelection = new Selection(
-            props.tag, this.fragment, { current: null }
+            props.tag, { current: null }
         );
         this.grabFocus = this.grabSelectionIfLatest();
     }
