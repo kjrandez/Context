@@ -109,6 +109,9 @@ class Clip extends Component
     }
 
     render() {
+        if(this.state.value == null)
+            return null;
+
         var dragSource = this.props.dragSource;
         var dragPreview = this.props.dragPreview;
         var dropTarget = this.props.dropTarget;

@@ -3,27 +3,32 @@ import { Tooltip, Button, Popover, Divider } from '@blueprintjs/core';
 
 export default class GenericToolbar extends Component
 {
-    infoContent(path, key, fragment) {
+    infoContent(tag, type) {
         return(
             <div className="info-content">
-                <p>Id: {fragment.id()}</p>
-                <p>Type: {fragment.type()}</p>
-                <p>Path: {JSON.stringify(path)}</p>
-                <p>Key: {key}</p>
+                <p>Id: {tag.id}</p>
+                <p>Type: {type}</p>
+                <p>Path: {JSON.stringify(tag.path)}</p>
+                <p>Key: {tag.key}</p>
             </div>
         );
     }
        
-    perform(selections, call) {
-        selections.forEach(sel => this.props.app.store[call](sel));
+    perform(call) {
+        this.props.selection.forEach(sel => call(sel));
+    }
+
+    samePath(path1, path2) {
+        return path1.length === path2.length &&
+            path1.every((item, index) => item === path2[index]);
     }
 
     allSelectionsAreNeighbors(selections) {
-        var first = selections[0];
+        var firstPath = selections[0].tag.path;
         
         var i;
         for(i = 1; i < selections.length; i++) {
-            if(!first.samePath(selections[i].loc.path))
+            if(!this.samePath(firstPath, selections[i].tag.path))
                 return false;
         }
 
@@ -32,21 +37,22 @@ export default class GenericToolbar extends Component
 
     commonToolbarButtons(selections, app) {
         var results = [];
+        var action = this.props.action;
 
         if(this.allSelectionsAreNeighbors(selections)) {
             results.push(
                 <Tooltip key="c0" content="Indent to sub-page" hoverOpenDelay={250}>
                     <Button icon="double-chevron-right"
-                    onClick={() => this.props.app.store.actionIndent(selections)}></Button>
+                    onClick={() => action.indent(selections)}></Button>
                 </Tooltip>
             );
 
             // Allow unindent if elements are not on the root page
-            if(selections[0].loc.path.length > 1) {
+            if(selections[0].tag.path.length > 1) {
                 results.push(
                     <Tooltip key="c1" content="Unindent to outer page" hoverOpenDelay={250}>
                         <Button icon="double-chevron-left"
-                        onClick={() => this.props.app.store.actionDedent(selections)}></Button>
+                        onClick={() => action.dedent(selections)}></Button>
                     </Tooltip>
                 )
             }
@@ -57,41 +63,41 @@ export default class GenericToolbar extends Component
         results.push(
             <Tooltip key="c11" content="Pin to clipboard" hoverOpenDelay={250}>
                 <Button icon="pin"
-                onClick={() => this.perform(selections, "actionPin")}></Button>
+                onClick={() => this.perform(action.pin)}></Button>
             </Tooltip>
         );
     
         results.push(
             <Tooltip key="c2" content="Duplicate to clipboard" hoverOpenDelay={250}>
                 <Button icon="duplicate"
-                onClick={() => this.perform(selections, "actionDuplicate")}></Button>
+                onClick={() => this.perform(action.duplicate)}></Button>
             </Tooltip>
         );
     
         results.push(
             <Tooltip key="c3" content="Cut to clipboard" hoverOpenDelay={250}>
                 <Button icon="cut"
-                onClick={() => this.perform(selections, "actionCut")}></Button>
+                onClick={() => this.perform(action.cut)}></Button>
             </Tooltip>
         );
             
         results.push(
             <Tooltip key="c4" content="Delete" hoverOpenDelay={250}>
                 <Button icon="delete"
-                onClick={() => this.perform(selections, "actionDelete")}></Button>
+                onClick={() => this.perform(action.delete)}></Button>
             </Tooltip>
         );
 
         if(selections.length === 1) {
-            var fragment = selections[0].fragment;
-            var loc = selections[0].loc;
+            var tag = selections[0].tag;
+            var type = selections[0].type;
             
             results.push(<Divider key="c5" />);
 
             results.push(
                 <Popover key="c6"
                 transitionDuration={70}
-                content={this.infoContent(loc.path, loc.key, fragment)}>
+                content={this.infoContent(tag, type)}>
                     <Tooltip content="Inspect" hoverOpenDelay={250}>
                         <Button icon="info-sign"></Button>
                     </Tooltip>
