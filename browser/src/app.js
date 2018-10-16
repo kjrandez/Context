@@ -10,6 +10,7 @@ export default class App
 
         this.top = null;
         this.selection = new Map();
+        this.pathPages = new Map();
         this.grabPath = null;
         this.keyListeners = []
         this.shiftDown = false;
@@ -81,9 +82,55 @@ export default class App
         }
     }
 
+    setPage(page, path) {
+        // Detach page fragments of previous path which aren't in new path
+        var prevPathIds = [...this.pathPages.keys()];
+        prevPathIds.forEach(pathId => {
+            if(path.indexOf(pathId) < 0) {
+                this.pathPages.get(pathId).fragment.detach(this);
+                this.pathPages.delete(pathId);
+            }
+        });
+
+        // Attach page fragments of current path, if not already in dictionary
+        path.forEach(pageId => {
+            if(!this.pathPages.has(pageId)) {
+                var fragment = this.store.fragment(pageId);
+                this.pathPages.set(pageId, {
+                    fragment: fragment,
+                    value: null
+                });
+
+                fragment.attach(this, value => this.pathPageFilled(pageId, value));
+            }
+        });
+
+        this.top.setPage(page, this.clipboard, path);
+    }
+
+    pathPageFilled(pageId, value) {
+        this.pathPages.get(pageId).value = value;
+
+        if(this.pathPagesComplete()) {
+            // ... Do something with the path pages ...
+        }
+    }
+
+    pathPagesComplete() {
+        var complete = true;
+        for(let content of this.pathPages.values()) {
+            if(content.value == null) {
+                complete = false;
+                break;
+            }
+        }
+
+        return complete;
+    }
+
     enterRoot() {
         window.location.hash = "";
-        this.top.setPage(this.rootPage, this.clipboard, []);
+        this.setPage(this.rootPage, []);
     }
 
     enterPage(path, pageId) {
@@ -93,7 +140,7 @@ export default class App
         newHash += pageId;
 
         window.location.hash = newHash;
-        this.top.setPage(this.store.fragment(pageId), this.clipboard, path);
+        this.setPage(this.store.fragment(pageId), path);
     }
 
     setGrabPath(path) {
@@ -254,7 +301,7 @@ export default class App
                 else   
                     page = this.rootPage;
                 
-                this.top.setPage(page, this.clipboard, this.openingPath);
+                this.setPage(page, this.openingPath);
                 break;
             case 'model':
                 this.store.model(...message.arguments);

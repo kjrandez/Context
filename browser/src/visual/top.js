@@ -55,9 +55,6 @@ class Top extends Component {
     }
 
     modelValue(newValue) {
-        console.log("Top received value from fragment");
-        console.log(newValue);
-
         // Stop here for now
         this.setState({
             content: this.contentFromValue(newValue)
