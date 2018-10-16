@@ -109,7 +109,14 @@ export default class App
     }
 
     pathPageFilled(pageId, value) {
-        this.pathPages.get(pageId).value = value;
+        var content = this.pathPages.get(pageId)
+        
+        // We receive these updates even for keystrokes, short-circuit, or else everything
+        // slows way down.
+        if(content.value != null)
+            return;
+
+        content.value = value;
 
         if(this.pathPagesComplete()) {
             // ... Do something with the path pages ...
@@ -194,6 +201,12 @@ export default class App
 
     selectionFilled(selection, value, type) {
         var selContent = this.selection.get(selection);
+
+        // We receive these updates even for keystrokes, short-circuit, or else everything
+        // slows way down.
+        if(selContent.value != null)
+            return;
+
         selContent.value = value;
         selContent.type = type;
 
