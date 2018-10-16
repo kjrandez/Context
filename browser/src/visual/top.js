@@ -4,7 +4,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { elementList } from './shared.js';
 import { Toolbar } from './toolbar';
 import { SidePanel } from './sidepanel';
-import TopHeader from './topHeader.js';
+import Header from './header.js';
 
 class Top extends Component {
     constructor(props) {
@@ -13,11 +13,11 @@ class Top extends Component {
         this.state = {
             topFragment: null,
             clipboardFragment: null,
-            pathFragments: [],
-            pathIds: [],
+            pathIds: null,
+            pathContent: null,
             selection: [],
-            selContent: [],
-            content: []
+            selContent: null,
+            content: null
         }
 
         this.topFragment = null;
@@ -36,16 +36,10 @@ class Top extends Component {
         if(this.state.topFragment != null)
             this.state.topFragment.detach(this);
 
-        // If on a sub-page, remove root and add current to the breadcrumbs
-        var breadcrumbIds = pathIds.slice()
-        breadcrumbIds.push(newTopFragment.id());
-        var pathFragments = breadcrumbIds.map(id => this.props.app.store.fragment(id));
-
         // Set state to initial prior to content load
         this.setState({
             topFragment: newTopFragment,
             clipboardFragment: newClipboardFragment,
-            pathFragments: pathFragments,
             pathIds: pathIds,
             content: []
         });
@@ -85,6 +79,12 @@ class Top extends Component {
         });
     }
 
+    setPathContent(pathContent) {
+        this.setState({
+            pathContent: pathContent
+        });
+    }
+
     sidepanelContent() {
         if(this.state.clipboardFragment != null)
             return <SidePanel clip={this.state.clipboardFragment} app={this.props.app} />
@@ -96,7 +96,8 @@ class Top extends Component {
     toolbarContent() {
         if(this.state.clipboardFragment != null)
             return (
-                <Toolbar clip={this.state.clipboardFragment}
+                <Toolbar
+                clip={this.state.clipboardFragment}
                 selContent={this.state.selContent}
                 app={this.props.app} />
             );
@@ -105,15 +106,16 @@ class Top extends Component {
     }
 
     pageHeader() {
-        if(this.state.topFragment != null && this.state.pathFragments != null) {
-            return <TopHeader key="breadcrumb"
-            pathFragments={this.state.pathFragments} app={this.props.app} />
+        if(this.state.pathContent != null) {
+            return <Header key="breadcrumb"
+            pathContent={this.state.pathContent}
+            app={this.props.app} />
         }
         return null;
     }
 
     pageContent() {
-        if(this.state.topFragment != null && this.state.pathFragments != null) {
+        if(this.state.topFragment != null) {
             return(elementList(
                     this.state.content,
                     this.state.pathIds.concat([this.state.topFragment.id()]),

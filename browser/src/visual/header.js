@@ -1,16 +1,8 @@
 import React, { Component } from 'react';
 import { Intent, Icon, Position, MenuItem, Menu, OverflowList, Boundary, Popover } from '@blueprintjs/core';
 
-export default class TopHeader extends Component
+export default class Header extends Component
 {
-    constructor(props) {
-        super(props);
-
-        /*this.state = {
-            items: this.getItems(props.pathFragments)
-        }*/
-    }
-
     getItems(fragments) {
         var href = "#" + fragments[0].id();
         var target = [fragments[0].id()];
@@ -66,18 +58,6 @@ export default class TopHeader extends Component
         //this.disconnectFromPathFragments(this.props.pathFragments);
     }
 
-    connectToPathFragments(fragments) {
-        fragments.forEach(fragment => {
-            fragment.connect(this);
-        });
-    }
-
-    disconnectFromPathFragments(fragments) {
-        fragments.forEach(fragment => {
-            fragment.disconnect(this);
-        });
-    }
-
     items() {
         return this.state.titles.map((title, index) => {
             return { href: "#", icon: "folder-close", text: title }
@@ -96,7 +76,8 @@ export default class TopHeader extends Component
     }
 
     renderBreadcrumb(props, index) {
-        var iconStyle = {position: "relative", top: "2px"};
+        return props;
+        /*var iconStyle = {position: "relative", top: "2px"};
         var intent = Intent.NONE;
         if(props.icon === "symbol-diamond") {
             iconStyle = {position: "relative", marginRight: "5px", top: "2px"};
@@ -109,11 +90,12 @@ export default class TopHeader extends Component
                     {props.text}
                 </a>
             </li>
-        );
+        );*/
     }
 
     renderOverflow(items) {
-        const position = Position.BOTTOM_LEFT;
+        return <p>asdf</p>;
+        /*const position = Position.BOTTOM_LEFT;
         const orderedItems = items.slice().reverse();
         const menuItems = orderedItems.map((item, index) => 
             <MenuItem {...item} onClick={() => this.navigate(item.target)} key={index} />
@@ -125,26 +107,53 @@ export default class TopHeader extends Component
                     <Menu>{menuItems}</Menu>
                 </Popover>
             </li>
-        );
+        );*/
     };
 
     onMouseDown(ev) {
         ev.stopPropagation();
     }
 
+    rootHereEntry() {
+        return <li>Root ()</li>;
+    }
+
+    rootEntry(entry) {
+        return <li>Root</li>;
+    }
+
+    defaultEntry(entry) {
+        return <li>Page</li>;
+    }
+
+    hereEntry() {
+        return <li>()</li>;
+    }
+
+    headerItems() {
+        var pathContent = this.props.pathContent;
+        if(pathContent.length == 0)
+            return [this.rootHereEntry()];
+        
+        var entries = this.props.pathContent.map((entry, i) => {
+            if(i == 0)
+                return this.rootEntry(entry);
+            return this.defaultEntry(entry);
+        });
+        entries.push(this.hereEntry())
+        return entries;
+    }
+
     render() {
         return(
-            <div className="header-breadcrumb">Unimplemented</div>
-        );
-        /*return(
             <div className="header-breadcrumb" onMouseDown={ev => this.onMouseDown(ev)}>
                 <OverflowList
                 className="bp3-breadcrumbs"
                 collapseFrom={Boundary.START}
-                items={this.state.items}
+                items={this.headerItems()}
                 overflowRenderer={this.renderOverflow.bind(this)}
                 visibleItemRenderer={this.renderBreadcrumb.bind(this)}/>
             </div>
-        );*/
+        );
     }
 }

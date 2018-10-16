@@ -10,6 +10,7 @@ export default class App
 
         this.top = null;
         this.selection = new Map();
+        this.currentPath = null;
         this.pathPages = new Map();
         this.grabPath = null;
         this.keyListeners = []
@@ -83,6 +84,8 @@ export default class App
     }
 
     setPage(page, path) {
+        this.currentPath = path;
+
         // Detach page fragments of previous path which aren't in new path
         var prevPathIds = [...this.pathPages.keys()];
         prevPathIds.forEach(pathId => {
@@ -93,6 +96,7 @@ export default class App
         });
 
         // Attach page fragments of current path, if not already in dictionary
+        var pathUnchanged = true;
         path.forEach(pageId => {
             if(!this.pathPages.has(pageId)) {
                 var fragment = this.store.fragment(pageId);
@@ -102,10 +106,25 @@ export default class App
                 });
 
                 fragment.attach(this, value => this.pathPageFilled(pageId, value));
+                pathUnchanged = false;
             }
         });
 
         this.top.setPage(page, this.clipboard, path);
+        if(pathUnchanged) {
+            this.top.setPathContent(this.pathContent());
+        }
+    }
+
+    pathContent() {
+        return this.currentPath.map(pageId => {
+            var content = this.pathPages.get(pageId);
+            return {
+                pageId: pageId,
+                fragment: content.fragment,
+                value: content.value
+            }
+        });
     }
 
     pathPageFilled(pageId, value) {
@@ -119,7 +138,7 @@ export default class App
         content.value = value;
 
         if(this.pathPagesComplete()) {
-            // ... Do something with the path pages ...
+            this.top.setPathContent(this.pathContent());
         }
     }
 
