@@ -29,3 +29,14 @@ host/pyphantom/__pycache__/
 host/filesystem/__pycache__/
 node_modules/
 browser/package-lock.json
+*.sln
+.vs/
+*.njsproj
+*.user
+*.vcxproj
+*.filters
+*.pyproj
+*.csproj
+*.pfx
+Window/obj/
+Window/Properties/
