@@ -1,4 +1,4 @@
-kernel/__pycache__/
+*__pycache__*
 
 # dependencies
 browser/node_modules
@@ -40,3 +40,10 @@ browser/package-lock.json
 *.pfx
 Window/obj/
 Window/Properties/
+*.code-workspace
+Kernel/filesystem/__pycache__/
+Kernel/kernel/__pycache__/
+Kernel/kernel/core/__pycache__/
+Shell/bin/
+Shell/obj/
+Shell/Properties/
