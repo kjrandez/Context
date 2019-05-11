@@ -1,3 +1,5 @@
+from .element import Element
+
 from .page import Page
 from .clipboard import Clipboard
 

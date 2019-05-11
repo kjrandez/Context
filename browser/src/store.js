@@ -2,6 +2,8 @@ import Fragment from './fragment.js';
 import NewElement from './newElement.js';
 import DuplicateElement from './duplicateElement.js';
 
+// This class routes messages from Kernel about objects to the respective Fragment
+
 export default class Store
 {
     constructor(app) {
@@ -9,13 +11,6 @@ export default class Store
         this.fragmentDict = {};
         this.rootPage = null;
         this.clipboard = null;
-
-        /*this.localHandlers = {
-            "Text-update": this.invlocContentUpdate.bind(this),
-            "Text-splice": this.invlocContentSplice.bind(this),
-            "Script-update": this.invlocContentUpdate.bind(this),
-            "Script-splice": this.invlocContentSplice.bind(this),
-        };*/
     }
 
     clear() {

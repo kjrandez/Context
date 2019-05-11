@@ -7,6 +7,8 @@ export default class Fragment
         this.store = store;
         this.immId = id;
         this.visuals = [];
+        this.promiseIndex = 0;
+        this.promises = [];
     }
 
     id() {
@@ -15,6 +17,11 @@ export default class Fragment
 
     invoke(selector, args, respond) {
         this.store.invoke(this, selector, args, respond);
+    }
+
+    invokeAsync(selector, args) {
+        new Promise()
+        this.store.invoke(this, selector, args, true);
     }
 
     invokeBackground(selector, args, respond) {

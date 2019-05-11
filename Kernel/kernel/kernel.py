@@ -24,6 +24,7 @@ class Kernel:
             block()
 
     def asyncThreadEntry(self, loop):
+        self.loop = loop
         self.remotes = []
 
         self.ledger = Ledger(loop)
@@ -57,7 +58,7 @@ class Kernel:
             print(">> ---------- SEND ---------- >> " + json.dumps(value, indent=2))
             await websocket.send(json.dumps(value))
 
-        handler = Remote(self.root, self.runInWorkThread, send)
+        handler = Remote(self.root, self.runInWorkThread, self.loop.create_future, send)
         self.remotes.append(handler)
         try:
             while True:

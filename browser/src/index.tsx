@@ -1,11 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Top } from './visual';
-import App from './app.js';
+import App from './app';
 import * as serviceWorker from './serviceWorker';
 
-var app = new App();
-ReactDOM.render(<Top app={app} />, document.getElementById('root'));
+new App();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

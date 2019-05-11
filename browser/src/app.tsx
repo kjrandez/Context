@@ -1,22 +1,189 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Fragment from './fragment';
 import Store from './store';
+import TopPresenter from './views/topPresenter';
 
-export default class App
+interface Proxyable {
+    proxyableId: number | null;
+}
+
+export default class App implements Proxyable
 {
-    constructor()
-    {
+    proxyableId: number | null = null;
+
+    store: Store = new Store(this);
+    top: TopPresenter = new TopPresenter(this, null);
+    kernel: WebSocket;
+    objectTable: Proxyable[] = [this];
+    objectIndex: number = 1;
+    refs: any[] = [];
+    refIndex: number = 0;
+    freeRefIndexes: number[] = [];
+
+    constructor() {
+        this.rootChanged();
+
         this.kernel = new WebSocket("ws://localhost:8085/broadcast");
         this.kernel.onopen = (event) => this.kernelOpen(event);
         this.kernel.onclose = (event) => this.kernelClose(event);
-
-        this.top = null;
-        this.selection = new Map();
-        this.currentPath = null;
-        this.pathPages = new Map();
-        this.grabPath = null;
-        this.keyListeners = []
-        this.shiftDown = false;
-        this.ctrlDown = false;
+        this.kernel.onmessage = event => this.kernelMessage(event);
     }
+
+    rootChanged() {
+        ReactDOM.render(this.top.render(), document.getElementById('root'));
+    }
+
+    setPage(page: Fragment, clipboard: Fragment) {
+        this.top = new TopPresenter(this, page);
+        this.rootChanged();
+    }
+
+    kernelOpen(event: Event) {
+        this.hostCall(0, "rootPage", []).then((result: any) => {
+            console.log("Fulfilled");
+            console.log(result);
+        }, (rejection: any) => {
+            console.log("Rejected");
+            console.log(rejection);
+        });
+    }
+    
+    kernelClose(event: Event) {
+        alert('Connection closed.');
+    }
+    
+    kernelSend(data: object) {
+        this.kernel.send(JSON.stringify(data));
+    }
+
+    kernelMessage(event: MessageEvent) {
+        var msg = JSON.parse(event.data);
+        console.log("Received message: ");
+        console.log(msg);
+
+        switch(msg.type) {
+            case 'call':
+                this.dispatchCall(msg.id, msg.target, msg.selector, msg.arguments);
+                break;
+            case 'return':
+                this.dispatchReturn(msg.id, msg.result)
+                break;
+            default:
+                console.log("Unhandled message");
+                break;
+        }
+    }
+
+    dispatchCall(foreignId: number, targetId: number, selector: string, argDescs: []) {
+        let target: any = this.objectTable[targetId];
+        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
+
+        let result: any = target[selector].apply(target, args)
+
+        this.kernelSend({
+            type: 'return',
+            id: foreignId,
+            result: this.encodedArgument(result)
+        });
+    }
+
+    dispatchReturn(localId: number, resultDesc: any) {
+        let result: any = this.decodedArgument(resultDesc);
+        let resolve: any = this.lookupLocalId(localId);
+        this.freeLocalId(resolve);
+
+        resolve(result);
+    }
+
+    hostCall(targetId: number, selector: string, args: any[]) {
+        let argDescs: any[] = args.map((X: any) => this.encodedArgument(X));
+        
+        return new Promise((resolve, reject) => this.kernelSend({
+            type: 'call',
+            id: this.newLocalId(resolve),
+            target: targetId,
+            selector: selector,
+            arguments: argDescs
+        }));
+    }
+
+    newLocalId(object: any) {
+        let index: number | undefined = this.freeRefIndexes.pop();
+        if (index != undefined) {
+            this.refs[index] = object;
+            return index;
+        }
+        else {
+            this.refs.push(object);
+            index = this.refIndex;
+            this.refIndex ++;
+            return index;
+        }
+    }
+
+    lookupLocalId(index: number) {
+        return this.refs[index];
+    }
+
+    freeLocalId(index: number) {
+        this.refs[index] = null;
+        this.freeRefIndexes.push(index)
+    }
+
+    decodedArgument(argDesc: any) {
+        if (argDesc.type == 'hostObject')
+            return this.store.fragment(argDesc.id) // Fragment ~= Proxy
+        else if (argDesc.type == 'clientObject')
+            return this.objectTable[argDesc.id];
+        else
+            return argDesc.value;
+    }
+
+    encodedArgument(arg: any): any {
+        if (arg instanceof Fragment) {
+            return { type: 'hostObject', id: arg.immId };
+        }
+        else if ('proxyableId' in arg) {
+            if (arg.proxyableId == null) {
+                let nextId = this.objectIndex ++;
+                arg.proxyableId = nextId;
+            }
+            return { type: 'clientObject', id: arg.proxyableId };
+        }
+        else {
+            return { type: 'primitive', value: arg };
+        }
+    }
+}
+
+
+        //this.top = null;
+        //this.selection = new Map();
+        //this.currentPath = null;
+        //this.pathPages = new Map();
+        //this.grabPath = null;
+        //this.keyListeners = []
+        //this.shiftDown = false;
+        //this.ctrlDown = false;
+
+/*
+
+                var rootPageId = message.arguments[0];
+                var clipboardId = message.arguments[1];
+
+                var rootPage = this.store.fragment(rootPageId);
+                var clipboard = this.store.fragment(clipboardId);
+
+                this.setPage(rootPage, clipboard);
+                break;
+            case 'model':
+                this.store.model(...message.arguments);
+                break;
+            case 'update':
+                this.store.update(...message.arguments);
+                break;
+
 
     connectKeyListener(listener) {
         this.keyListeners.push(listener);
@@ -82,40 +249,9 @@ export default class App
             this.notifyCtrlKey(false);
         }
     }
+*/
 
-    setPage(page, path) {
-        this.currentPath = path;
-
-        // Detach page fragments of previous path which aren't in new path
-        var prevPathIds = [...this.pathPages.keys()];
-        prevPathIds.forEach(pathId => {
-            if(path.indexOf(pathId) < 0) {
-                this.pathPages.get(pathId).fragment.detach(this);
-                this.pathPages.delete(pathId);
-            }
-        });
-
-        // Attach page fragments of current path, if not already in dictionary
-        var pathUnchanged = true;
-        path.forEach(pageId => {
-            if(!this.pathPages.has(pageId)) {
-                var fragment = this.store.fragment(pageId);
-                this.pathPages.set(pageId, {
-                    fragment: fragment,
-                    value: null
-                });
-
-                fragment.attach(this, value => this.pathPageFilled(pageId, value));
-                pathUnchanged = false;
-            }
-        });
-
-        this.top.setPage(page, this.clipboard, path);
-        if(pathUnchanged) {
-            this.top.setPathContent(this.pathContent());
-        }
-    }
-
+/*
     pathContent() {
         return this.currentPath.map(pageId => {
             var content = this.pathPages.get(pageId);
@@ -284,14 +420,9 @@ export default class App
         this.top.setSelectionContent([]);
     }
 
-    kernelSend(selector, data) {
-        this.kernel.send(JSON.stringify({
-            selector: selector,
-            data: data
-        }));
-    }
+*/
 
-    kernelOpen(event) {
+        /* FROM KERNELOPEN
         var pathString = window.location.hash.substr(1);
         var splitPath = pathString.split(",");
 
@@ -304,46 +435,37 @@ export default class App
             var pageId = path.pop();
             this.openingPage = pageId;
             this.openingPath = path;
-        }
+        }*/
 
-        this.kernelSend("requestRoot", null);
-    }
-    
-    kernelClose(event) {
-        alert('Connection closed.');
-    }
-    
-    kernelMessage(event) {
-        var message = JSON.parse(event.data);
-        console.log("Received message: ");
-        console.log(message);
+        /* FROM SETPAGE
+        
+        this.currentPath = path;
 
-        switch(message.selector) {
-            case 'root':
-                var rootPageId = message.arguments[0];
-                var clipboardId = message.arguments[1];
+        // Detach page fragments of previous path which aren't in new path
+        var prevPathIds = [...this.pathPages.keys()];
+        prevPathIds.forEach(pathId => {
+            if(path.indexOf(pathId) < 0) {
+                this.pathPages.get(pathId).fragment.detach(this);
+                this.pathPages.delete(pathId);
+            }
+        });
 
-                this.store = new Store(this);
-                this.rootPage = this.store.fragment(rootPageId);
-                this.clipboard = this.store.fragment(clipboardId);
+        // Attach page fragments of current path, if not already in dictionary
+        var pathUnchanged = true;
+        path.forEach(pageId => {
+            if(!this.pathPages.has(pageId)) {
+                var fragment = this.store.fragment(pageId);
+                this.pathPages.set(pageId, {
+                    fragment: fragment,
+                    value: null
+                });
 
-                var page = null;
-                if(this.openingPage != null)
-                    page = this.store.fragment(this.openingPage);
-                else   
-                    page = this.rootPage;
-                
-                this.setPage(page, this.openingPath);
-                break;
-            case 'model':
-                this.store.model(...message.arguments);
-                break;
-            case 'update':
-                this.store.update(...message.arguments);
-                break;
-            default:
-                console.log("Unhandled message");
-                break;
-        }
-    }
-}
+                fragment.attach(this, value => this.pathPageFilled(pageId, value));
+                pathUnchanged = false;
+            }
+        });
+
+        this.top.setPage(page, this.clipboard, path);
+        if(pathUnchanged) {
+            this.top.setPathContent(this.pathContent());
+        }*/

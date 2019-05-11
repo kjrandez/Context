@@ -1,7 +1,7 @@
 from ..core import Dataset, Transaction
 
 class Element:
-    nextId = 0
+    nextId = 1 # Host object is 0
 
     def __init__(self):
         self.id = Element.nextId

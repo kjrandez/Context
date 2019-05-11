@@ -7,7 +7,7 @@ import { SidePanel } from './sidepanel';
 import Header from './header.js';
 
 class Top extends Component {
-    constructor(props) {
+    /*constructor(props) {
         super(props);
 
         this.state = {
@@ -151,7 +151,7 @@ class Top extends Component {
                 </div>
             </div>
         );
-    }
+    }*/
 }  
 
 export default DragDropContext(HTML5Backend)(Top);
