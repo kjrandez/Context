@@ -1,4 +1,4 @@
-import Fragment from './fragment.js';
+import Proxy from './proxy.tsx/index.js.js';
 import NewElement from './newElement.js';
 import DuplicateElement from './duplicateElement.js';
 
@@ -31,7 +31,7 @@ export default class Store
         var fragment = null;
 
         if(!(id in this.fragmentDict)) {
-            fragment = new Fragment(id, this);
+            fragment = new Proxy(id, this);
             this.fragmentDict[id] = fragment;
         }
         else {
@@ -70,7 +70,7 @@ export default class Store
 function encoded(param) {
     if(Array.isArray(param))
         return param.map(entry => encoded(entry))
-    else if(param instanceof Fragment)
+    else if(param instanceof Proxy)
         return { type: "obj", value: param.id() }
     else if(param instanceof NewElement)
         return { type: "new", value: {

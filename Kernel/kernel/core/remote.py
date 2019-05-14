@@ -50,14 +50,12 @@ class Remote:
 
     async def dispatchCall(self, foreignId, targetId, selector, argDescs):
         target = self
-        if foreignId != 0:
+        if targetId != 0:
             target = Dataset.singleton.lookup(targetId)
         method = getattr(target, selector)
         arguments = [self.decodedArgument(X) for X in argDescs]
 
-        print("Dispatching...")
         result = method(*arguments)
-        print("Result " + str(result))
 
         await self.send({
             "type" : "return",

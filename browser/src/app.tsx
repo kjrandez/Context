@@ -1,159 +1,44 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Fragment from './fragment';
-import Store from './store';
+import Proxy from './proxy';
 import TopPresenter from './views/topPresenter';
+import Client from './client';
 
-interface Proxyable {
-    proxyableId: number | null;
-}
-
-export default class App implements Proxyable
+export default class App
 {
-    proxyableId: number | null = null;
-
-    store: Store = new Store(this);
-    top: TopPresenter = new TopPresenter(this, null);
-    kernel: WebSocket;
-    objectTable: Proxyable[] = [this];
-    objectIndex: number = 1;
-    refs: any[] = [];
-    refIndex: number = 0;
-    freeRefIndexes: number[] = [];
+    top: TopPresenter | null = null;
 
     constructor() {
-        this.rootChanged();
+        this.clearPage();
+        new Client(this.connected.bind(this), this.disconnected.bind(this));
+    }
 
-        this.kernel = new WebSocket("ws://localhost:8085/broadcast");
-        this.kernel.onopen = (event) => this.kernelOpen(event);
-        this.kernel.onclose = (event) => this.kernelClose(event);
-        this.kernel.onmessage = event => this.kernelMessage(event);
+    connected(host: Proxy) {
+        let startup = (async () => {
+            let page = await host.call('rootPage', []);
+            let clipboard = await host.call('clipboardPage', []);
+            this.setPage(page, clipboard);
+        })();
+        
+        startup.then();
+    }
+
+    disconnected() {
+        this.clearPage();
     }
 
     rootChanged() {
+        if (this.top != null)
+            ReactDOM.render(this.top.render(), document.getElementById('root'));
+    }
+
+    setPage(page: Proxy, clipboard: Proxy) {
+        this.top = new TopPresenter(this, page);
         ReactDOM.render(this.top.render(), document.getElementById('root'));
     }
-
-    setPage(page: Fragment, clipboard: Fragment) {
-        this.top = new TopPresenter(this, page);
-        this.rootChanged();
-    }
-
-    kernelOpen(event: Event) {
-        this.hostCall(0, "rootPage", []).then((result: any) => {
-            console.log("Fulfilled");
-            console.log(result);
-        }, (rejection: any) => {
-            console.log("Rejected");
-            console.log(rejection);
-        });
-    }
     
-    kernelClose(event: Event) {
-        alert('Connection closed.');
-    }
-    
-    kernelSend(data: object) {
-        this.kernel.send(JSON.stringify(data));
-    }
-
-    kernelMessage(event: MessageEvent) {
-        var msg = JSON.parse(event.data);
-        console.log("Received message: ");
-        console.log(msg);
-
-        switch(msg.type) {
-            case 'call':
-                this.dispatchCall(msg.id, msg.target, msg.selector, msg.arguments);
-                break;
-            case 'return':
-                this.dispatchReturn(msg.id, msg.result)
-                break;
-            default:
-                console.log("Unhandled message");
-                break;
-        }
-    }
-
-    dispatchCall(foreignId: number, targetId: number, selector: string, argDescs: []) {
-        let target: any = this.objectTable[targetId];
-        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
-
-        let result: any = target[selector].apply(target, args)
-
-        this.kernelSend({
-            type: 'return',
-            id: foreignId,
-            result: this.encodedArgument(result)
-        });
-    }
-
-    dispatchReturn(localId: number, resultDesc: any) {
-        let result: any = this.decodedArgument(resultDesc);
-        let resolve: any = this.lookupLocalId(localId);
-        this.freeLocalId(resolve);
-
-        resolve(result);
-    }
-
-    hostCall(targetId: number, selector: string, args: any[]) {
-        let argDescs: any[] = args.map((X: any) => this.encodedArgument(X));
-        
-        return new Promise((resolve, reject) => this.kernelSend({
-            type: 'call',
-            id: this.newLocalId(resolve),
-            target: targetId,
-            selector: selector,
-            arguments: argDescs
-        }));
-    }
-
-    newLocalId(object: any) {
-        let index: number | undefined = this.freeRefIndexes.pop();
-        if (index != undefined) {
-            this.refs[index] = object;
-            return index;
-        }
-        else {
-            this.refs.push(object);
-            index = this.refIndex;
-            this.refIndex ++;
-            return index;
-        }
-    }
-
-    lookupLocalId(index: number) {
-        return this.refs[index];
-    }
-
-    freeLocalId(index: number) {
-        this.refs[index] = null;
-        this.freeRefIndexes.push(index)
-    }
-
-    decodedArgument(argDesc: any) {
-        if (argDesc.type == 'hostObject')
-            return this.store.fragment(argDesc.id) // Fragment ~= Proxy
-        else if (argDesc.type == 'clientObject')
-            return this.objectTable[argDesc.id];
-        else
-            return argDesc.value;
-    }
-
-    encodedArgument(arg: any): any {
-        if (arg instanceof Fragment) {
-            return { type: 'hostObject', id: arg.immId };
-        }
-        else if ('proxyableId' in arg) {
-            if (arg.proxyableId == null) {
-                let nextId = this.objectIndex ++;
-                arg.proxyableId = nextId;
-            }
-            return { type: 'clientObject', id: arg.proxyableId };
-        }
-        else {
-            return { type: 'primitive', value: arg };
-        }
+    clearPage() {
+        ReactDOM.render(<div></div>, document.getElementById('root'));
     }
 }
 

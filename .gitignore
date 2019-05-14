@@ -47,3 +47,4 @@ Kernel/kernel/core/__pycache__/
 Shell/bin/
 Shell/obj/
 Shell/Properties/
+Kernel/.mypy_cache/

@@ -1,21 +1,25 @@
 import React, { ReactElement } from 'react';
-import DynamicPresenter from '../dynamicPresenter';
-import Fragment from '../fragment';
+import { DynamicPresenter } from '../interfaces';
+import Proxy from '../proxy';
 
 export default class PagePresenter implements DynamicPresenter
 {
     parent: DynamicPresenter;
-    page: Fragment;
+    page: Proxy;
 
-    constructor(parent: DynamicPresenter, page: Fragment) {
+    constructor(parent: DynamicPresenter, page: Proxy) {
         this.parent = parent;
         this.page = page;
 
-        setTimeout(this.loadContents, 0);
+        this.loadContents().then();
     }
 
     async loadContents() {
-        var model = await this.page.invokeAsync('model');
+        var model = await this.page.call('model');
+    }
+
+    modelChanged(object: Proxy, model: any): void {
+        throw new Error("Method not implemented.");
     }
 
     contentChanged(): void {
