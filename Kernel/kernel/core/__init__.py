@@ -5,4 +5,4 @@ from .remote import Remote
 from .transaction import Transaction
 
 # Override which modules this package exports
-#__all__ = ["bar"]
+__all__ = ['Dataset', 'Ledger', 'Local', 'Remote', 'Transaction']

@@ -1,6 +1,6 @@
 import json
 import traceback
-from aioconsole import ainput
+from aioconsole import ainput  # type: ignore
 from .dataset import Dataset
 
 class Local:
