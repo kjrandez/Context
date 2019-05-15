@@ -2,8 +2,8 @@ import json
 import traceback
 from aioconsole import ainput  # type: ignore
 
-from .data import Dataset
-from .elements import Text, Page, Image, Script
+from kernel.data import Dataset
+from kernel.elements import Text, Page, Image, Script
 
 
 class Local:
@@ -13,17 +13,17 @@ class Local:
         self.context = root
 
         self.commands = {
-            "list" : self.commandList,
-            "enter" : self.commandEnter,
-            "root" : self.commandRoot,
-            "invoke" : self.commandInvoke,
-            "make" : self.commandMake
+            "list": self.commandList,
+            "enter": self.commandEnter,
+            "root": self.commandRoot,
+            "invoke": self.commandInvoke,
+            "make": self.commandMake
         }
         self.classList = {
-            "Text" : Text,
-            "Image" : Image,
-            "Page" : Page,
-            "Script" : Script
+            "Text": Text,
+            "Image": Image,
+            "Page": Page,
+            "Script": Script
         }
 
     async def run(self):
@@ -36,7 +36,7 @@ class Local:
         parts = message.split()
         if len(parts) == 0:
             return
-        
+
         command = parts[0]
         args = " ".join(parts[1:])
 
@@ -59,7 +59,7 @@ class Local:
             i = i + 1
 
     async def commandEnter(self, args):
-        from ..elements import Page
+        from .elements import Page
         newContext = Dataset.singleton.lookup(int(args))
         if isinstance(newContext, Page):
             self.context = newContext

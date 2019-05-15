@@ -1,6 +1,6 @@
-from .local import Local
-from .remote import Remote
-from .worker import Worker
-from .kernel import Kernel
+from kernel.local import Local
+from kernel.remote import Remote
+from kernel.worker import Worker
+from kernel.kernel import Kernel
 
-__all__ = ['Kernel']
+__all__ = ['Kernel', 'Local', 'Remote', 'Worker']

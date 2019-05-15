@@ -1,22 +1,24 @@
+import asyncio
 import janus
 import threading
+from typing import Optional
 
-# Synchronized access global ledger.
-# One transaction at a time can be performed/undone/redone.
+from kernel.data import Transaction
+
 
 class Ledger:
-    def __init__(self, loop):
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.forward = []
         self.reverse = []
-        self.queue = janus.Queue(loop = loop)
+        self.queue = janus.Queue(loop=loop)
         self.lock = threading.Lock()
         self.ongoing = None
 
-    async def next(self):
+    async def next(self) -> Transaction:
         return await self.queue.async_q.get()
 
-    def begin(self, trans):
-        if trans.reverse == None:
+    def begin(self, trans: Transaction) -> None:
+        if trans.reverse is None:
             self.lock.acquire()
             self.ongoing = trans
         else:
@@ -26,12 +28,12 @@ class Ledger:
             # should be that of the ongoing transaction
             pass
 
-    def cancel(self, trans):
+    def cancel(self, trans: Transaction) -> None:
         assert trans == self.ongoing
 
         self.lock.release()
-    
-    def complete(self, trans):
+
+    def complete(self, trans: Transaction) -> None:
         assert trans == self.ongoing
 
         self.forward.append(trans)
@@ -40,12 +42,12 @@ class Ledger:
 
         self.lock.release()
 
-    def undo(self, endTrans = None):
+    def undo(self, endTrans: Optional[Transaction] = None) -> None:
         self.lock.acquire()
-        # Perform reverse 
+        # Perform reverse
         self.lock.release()
-    
-    def redo(self, endTrans = None):
+
+    def redo(self, endTrans: Optional[Transaction] = None) -> None:
         self.lock.acquire()
         # Perform reverse
         self.lock.release()

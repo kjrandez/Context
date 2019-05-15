@@ -1,15 +1,16 @@
-from ..data import Transaction, Dataset
+from kernel.data import Transaction, Dataset
 
 
 class Element:
-    nextId = 1 # Host object is 0
+    nextId = 1  # Host object is 0
 
     def __init__(self):
         self.id = Element.nextId
-        Dataset.singleton.append(self)
+        if Dataset.singleton is not None:
+            Dataset.singleton.append(self)
         Element.nextId = Element.nextId + 1
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo) -> 'Element':
         return self.duplicate(memo)
 
     def backgroundInit(self):
@@ -17,7 +18,7 @@ class Element:
 
     def duplicate(self, memo):
         return self
-    
+
     def value(self):
         return None
 
@@ -35,7 +36,7 @@ class Element:
         """ Incorporate my own model and any models under this hierarchy into 'flattened' """
         if flattened == None:
             flattened = {}
-        
+
         if self.id not in flattened:
             myModel = self.model()
             flattened[self.id] = myModel

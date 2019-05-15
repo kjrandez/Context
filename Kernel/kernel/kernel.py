@@ -2,8 +2,8 @@ import asyncio
 import websockets
 from typing import List
 
-from . import Local, Remote, Worker
-from .data import Dataset, Ledger
+from kernel import Local, Remote, Worker
+from kernel.data import Dataset, Ledger
 
 
 class Kernel:
@@ -19,8 +19,7 @@ class Kernel:
         loop.create_task(self.persistence())
         loop.create_task(self.console())
 
-        server = websockets.serve(self.connection, 'localhost', 8085)
-        loop.run_until_complete(server)
+        loop.run_until_complete(websockets.serve(self.connection, 'localhost', 8085))
 
     def asyncThreadExit(self) -> None:
         self.worker.finish()
@@ -31,6 +30,7 @@ class Kernel:
             return
 
         handler = Remote(self.loop, websocket, self.dataset, self.worker)
+
         self.remotes.append(handler)
         await handler.run()
         self.remotes.remove(handler)

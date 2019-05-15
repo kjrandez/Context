@@ -1,3 +1,6 @@
+from kernel.data import Ledger
+from kernel.elements import Element
+
 lorem1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vestibulum at erat eget suscipit. Nulla rhoncus libero sapien, id molestie nibh luctus in. Pellentesque tristique nulla sit amet eros sodales, quis luctus enim congue. Integer placerat viverra sollicitudin. In libero ligula, interdum nec pellentesque non, elementum vel dolor. Aenean ut nisl vulputate, interdum urna eget, placerat enim. Vestibulum felis turpis, elementum ac malesuada id, lacinia at justo. In laoreet mauris et nibh ullamcorper convallis. Maecenas faucibus ipsum at congue scelerisque. Aliquam sem purus, pharetra suscipit condimentum quis, imperdiet at ex. Vestibulum maximus mattis odio, sed elementum dolor feugiat eget. Aliquam consectetur, neque vitae porta dictum, ante dui posuere libero, id euismod nisi dolor at ipsum.'  # noqa: E501
 
 lorem2 = 'Maecenas vitae eros non lacus tincidunt ultrices sit amet id massa. Praesent pretium ante sit amet sapien suscipit eleifend. In hac habitasse platea dictumst. Nulla erat nisi, elementum vitae tempor ut, vehicula sit amet nibh. Vestibulum cursus fermentum enim, vel mollis augue sodales ut. Suspendisse in mattis justo. In eget ipsum blandit dolor ultricies euismod. Mauris sit amet massa maximus, placerat nisi nec, dignissim ipsum. Donec sodales id lectus sit amet pulvinar. Pellentesque sodales felis fringilla ultrices tincidunt. Phasellus vehicula lorem sed felis pulvinar, id porta mi commodo.'  # noqa: E501
@@ -8,26 +11,27 @@ lorem3 = 'Donec imperdiet id lectus eu hendrerit. Curabitur sodales libero sit a
 class Dataset:
     singleton = None
 
-    def __init__(self, observer):
+    def __init__(self, observer: Ledger) -> None:
+        from kernel.elements import Clipboard
+
         self.observer = observer
         self.objMap = {}
-        self.root = None
+        self.clipboard = Clipboard()
+        self.root = self.makeDefault()
 
         Dataset.singleton = self
 
-    def lookup(self, id):
+    def lookup(self, id: int) -> Element:
         return self.objMap[id]
 
-    def append(self, inst):
+    def append(self, inst: Element) -> None:
         assert not (inst.id in self.objMap)
         self.objMap[inst.id] = inst
 
-    def makeDefault(self):
-        from ..elements import Page, Text, Image, Script, Clipboard
+    def makeDefault(self) -> Element:
+        from kernel.elements import Page, Text, Image, Script
 
-        self.clipboard = Clipboard()
-
-        self.root = Page([
+        return Page([
             Text('Hello world'),
             Text('How are you doing today?'),
             Text("I'm doing just fine thank you very much."),
