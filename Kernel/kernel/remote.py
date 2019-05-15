@@ -1,30 +1,58 @@
+from __future__ import annotations
 import json
-from .dataset import Dataset
-import threading
-import tkinter as tk
-import tkinter.filedialog as filedialog
-import copy
+import asyncio
+import websockets
+from typing import Callable, List, Any, Awaitable, Dict
+
+from .data import Dataset
+from .worker import Worker
+from .elements import Element, Page
+
 
 class Proxy:
-    def __init__(self, clientCall, foreignId):
+    def __init__(self, clientCall: Callable[[int, str, List[Any]], Awaitable[Any]], foreignId: int):
         self.foreignId = foreignId
         self.clientCall = clientCall
 
-    def invoke(self, selector, arguments):
-        self.clientCall(selector, arguments)
+    async def call(self, selector: str, arguments: List[Any]) -> Any:
+        return await self.clientCall(self.foreignId, selector, arguments)
+
+
+class ProxyMap:
+    pass
+
+
+class TagCache:
+    pass
+
 
 class Remote:
-    def __init__(self, root, runInBackground, createFuture, send):
-        self.root = root
-        self.runInBackground = runInBackground
-        self.createFuture = createFuture
-        self.send = send
-        
-        self.refs = []
-        self.refIndex = 0
-        self.freeRefIndexes = []
+    def __init__(
+            self, loop: asyncio.AbstractEventLoop, websocket: websockets.WebSocketServerProtocol,
+            dataset: Dataset, worker: Worker) -> None:
+        self.loop = loop
+        self.websocket = websocket
+        self.worker = worker
+        self.dataset = dataset
 
-    def newLocalId(self, object):
+        self.refs: List[Any] = []
+        self.refIndex = 0
+        self.freeRefIndexes: List[int] = []
+
+    async def run(self) -> None:
+        try:
+            while True:
+                message = json.loads(await self.websocket.recv())
+                print("<< ---------- RECV ---------- << " + json.dumps(message, indent=2))
+                await self.dispatch(message)
+        except websockets.exceptions.ConnectionClosed:
+            print("Connection closed")
+
+    async def send(self, value: Any) -> None:
+        print(">> ---------- SEND ---------- >> " + json.dumps(value, indent=2))
+        await self.websocket.send(json.dumps(value))
+
+    def newLocalId(self, object: Any) -> int:
         if len(self.freeRefIndexes) > 0:
             index = self.freeRefIndexes.pop()
             self.refs[index] = object
@@ -34,21 +62,23 @@ class Remote:
             index = self.refIndex
             self.refIndex = self.refIndex + 1
             return index
-    
-    def lookupLocalId(self, index):
+
+    def lookupLocalId(self, index: int) -> Any:
         return self.refs[index]
 
-    def freeLocalId(self, index):
+    def freeLocalId(self, index: int) -> None:
         self.refs[index] = None
         self.freeRefIndexes.append(index)
 
-    async def dispatch(self, msg):
+    async def dispatch(self, msg: Dict[str, Any]) -> None:
         if msg["type"] == "call":
             await self.dispatchCall(msg["id"], msg["target"], msg["selector"], msg["arguments"])
         elif msg["type"] == "return":
             self.dispatchReturn(msg["id"], msg["result"])
 
-    async def dispatchCall(self, foreignId, targetId, selector, argDescs):
+    async def dispatchCall(
+            self, foreignId: int, targetId: int, selector: str,
+            argDescs: List[Any]) -> None:
         target = self
         if targetId != 0:
             target = Dataset.singleton.lookup(targetId)
@@ -63,15 +93,15 @@ class Remote:
             "result" : self.encodedArgument(result)
         })
 
-    async def dispatchReturn(self, localId, resultDesc):
+    def dispatchReturn(self, localId: int, resultDesc: Dict[str, Any]) -> None:
         future = self.lookupLocalId(localId)
         self.freeLocalId(localId)
 
         future.setResult(self.decodedArgument(resultDesc))
 
-    async def clientCall(self, targetId, selector, arguments):
+    async def clientCall(self, targetId: int, selector: str, arguments: List[Any]) -> Any:
         argDescs = [self.encodedArgument(X) for X in arguments]
-        future = self.createFuture()
+        future = self.loop.create_future()
 
         await self.send({
             "type" : "call",
@@ -83,13 +113,13 @@ class Remote:
 
         return await future
 
-    def rootPage(self):
-        return self.root
+    def rootPage(self) -> Page:
+        return self.dataset.root
 
-    def clipboardPage(self):
-        return Dataset.singleton.clipboard
+    def clipboardPage(self) -> Page:
+        return self.dataset.clipboard
 
-    def decodedArgument(self, arg):
+    def decodedArgument(self, arg: Dict[str, Any]) -> Any:
         if arg["type"] == "hostObject":
             if arg["id"] == 0:
                 return self
@@ -100,9 +130,7 @@ class Remote:
         else:
             return arg["value"]
 
-    def encodedArgument(self, arg):
-        from ..elements import Element
-
+    def encodedArgument(self, arg: Any) -> Dict[str, Any]:
         if arg == self:
             return { "type" : "hostObject", "id" : 0 }
         elif isinstance(arg, Element):

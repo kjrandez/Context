@@ -48,3 +48,4 @@ Shell/bin/
 Shell/obj/
 Shell/Properties/
 Kernel/.mypy_cache/
+.idea/

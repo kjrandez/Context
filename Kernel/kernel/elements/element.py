@@ -1,4 +1,5 @@
-from ..core import Dataset, Transaction
+from ..data import Transaction, Dataset
+
 
 class Element:
     nextId = 1 # Host object is 0

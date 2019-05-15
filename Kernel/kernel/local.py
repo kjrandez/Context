@@ -1,12 +1,13 @@
 import json
 import traceback
 from aioconsole import ainput  # type: ignore
-from .dataset import Dataset
+
+from .data import Dataset
+from .elements import Text, Page, Image, Script
+
 
 class Local:
     def __init__(self, root, observer):
-        from ..elements import Text, Page, Image, Script
-
         self.root = root
         self.observer = observer
         self.context = root
@@ -24,6 +25,12 @@ class Local:
             "Page" : Page,
             "Script" : Script
         }
+
+    async def run(self):
+        print("Console started")
+        while True:
+            command = await ainput("")
+            await self.dispatch(command)
 
     async def dispatch(self, message):
         parts = message.split()
