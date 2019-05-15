@@ -9,7 +9,7 @@ class Element:
         Dataset.singleton.append(self)
         Element.nextId = Element.nextId + 1
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo) -> 'Element':
         return self.duplicate(memo)
 
     def backgroundInit(self):
