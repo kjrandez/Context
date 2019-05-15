@@ -43,4 +43,4 @@ class Kernel:
         while True:
             transaction = await self.ledger.next()
             for remote in self.remotes:
-                await remote.update(transaction)
+                await remote.broadcast(transaction)
