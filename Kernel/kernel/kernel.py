@@ -2,8 +2,9 @@ import asyncio
 import websockets
 from typing import List
 
+from kernel.element import setGlobalObserver
 from kernel.local import Local
-from kernel.remote import Remote
+from kernel.host import Host
 from kernel.worker import Worker
 from kernel.dataset import Dataset
 from kernel.ledger import Ledger
@@ -12,10 +13,14 @@ from kernel.ledger import Ledger
 class Kernel:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.loop = loop
-        self.remotes: List[Remote] = []
+        self.remotes: List[Host] = []
         self.worker = Worker(loop)
         self.dataset = Dataset()
+
         self.ledger = Ledger(loop, self.dataset)
+        setGlobalObserver(self.ledger)
+
+        self.dataset.loadExample()
 
     def asyncThreadEntry(self, loop: asyncio.AbstractEventLoop) -> None:
         loop.create_task(self.persistence())
@@ -31,7 +36,7 @@ class Kernel:
         if not path == "/broadcast":
             return
 
-        handler = Remote(self.loop, websocket, self.dataset, self.worker)
+        handler = Host(self.loop, websocket, self.dataset, self.worker)
 
         self.remotes.append(handler)
         await handler.run()

@@ -1,45 +1,101 @@
 import json
 import asyncio
 import websockets
-from typing import Callable, List, Any, Awaitable, Dict
+from typing import List, Any, Awaitable, Dict, Callable, TypeVar, Generic, Union
 
 from kernel.dataset import Dataset
 from kernel.worker import Worker
-from kernel.element import Element
+from kernel.element import Element, Transaction
 from kernel.elements.page import Page
 
 
+T = TypeVar('T')
+
+
+class TagCache(Generic[T]):
+    def __init__(self) -> None:
+        self.refs: List[T] = []
+        self.nextIndex = 0
+        self.freeIndexes: List[int] = []
+
+    def assignTag(self, inst: T):
+        if len(self.freeIndexes) > 0:
+            index = self.freeIndexes.pop()
+            self.refs[index] = inst
+            return index
+        else:
+            self.refs.append(inst)
+            index = self.nextIndex
+            self.nextIndex += 1
+            return index
+
+    def getObject(self, tag: int) -> T:
+        return self.refs[tag]
+
+    def freeTag(self, tag: int) -> None:
+        self.freeIndexes.append(tag)
+
+
 class Proxy:
-    def __init__(self, clientCall: Callable[[int, str, List[Any]], Awaitable[Any]], foreignId: int):
+    def __init__(
+            self, foreignId: int,
+            clientCall: Callable[[int, str, List[Any]], Awaitable[Any]],
+            clientSend: Callable[[int, str, List[Any]], Awaitable[None]]) -> None:
+
         self.id = foreignId
         self.clientCall = clientCall
+        self.clientSend = clientSend
 
     async def call(self, selector: str, arguments: List[Any]) -> Any:
         return await self.clientCall(self.id, selector, arguments)
 
+    async def send(self, selector: str, arguments: List[Any]) -> None:
+        await self.clientSend(self.id, selector, arguments)
+
 
 class ProxyMap:
-    pass
+    def __init__(self, makeProxy: Callable[[int], Proxy]) -> None:
+        self.make = makeProxy
+        self.refs: Dict[int, Proxy] = {}
+
+    def getObject(self, tag: int) -> Proxy:
+        if tag in self.refs:
+            return self.refs[tag]
+
+        proxy = self.make(tag)
+        self.refs[tag] = proxy
+        return proxy
 
 
-class TagCache:
-    pass
+class HostService:
+    def __init__(self, dataset: Dataset) -> None:
+        self.dataset = dataset
+
+    def rootPage(self) -> Page:
+        return self.dataset.root
+
+    def clipboardPage(self) -> Page:
+        return self.dataset.clipboard
 
 
-class Remote:
+class Host:
     def __init__(
             self, loop: asyncio.AbstractEventLoop, websocket: websockets.WebSocketServerProtocol,
             dataset: Dataset, worker: Worker) -> None:
+
         self.loop = loop
         self.websocket = websocket
         self.worker = worker
         self.dataset = dataset
 
-        self.refs: List[Any] = []
-        self.refIndex = 0
-        self.freeRefIndexes: List[int] = []
+        def makeProxy(tag: int):
+            return Proxy(tag, self.clientCall, self.clientSend)
 
-        self.client = Proxy(self.clientCall, 0)
+        self.proxyMap = ProxyMap(makeProxy)
+        self.pendingCalls = TagCache[asyncio.Future]()
+
+        self.hostService = HostService(self.dataset)
+        self.clientService = self.proxyMap.getObject(0)
 
     async def run(self) -> None:
         try:
@@ -54,68 +110,8 @@ class Remote:
         print(">> ---------- SEND ---------- >> " + json.dumps(value, indent=2))
         await self.websocket.send(json.dumps(value))
 
-    async def broadcast(self, object: any) -> None:
-        await self.client.call('broadcast')
-
-    def newLocalId(self, ref: Any) -> int:
-        if len(self.freeRefIndexes) > 0:
-            index = self.freeRefIndexes.pop()
-            self.refs[index] = ref
-            return index
-        else:
-            self.refs.append(object)
-            index = self.refIndex
-            self.refIndex = self.refIndex + 1
-            return index
-
-    def lookupLocalId(self, index: int) -> Any:
-        return self.refs[index]
-
-    def freeLocalId(self, index: int) -> None:
-        self.refs[index] = None
-        self.freeRefIndexes.append(index)
-
-    async def dispatch(self, msg: Dict[str, Any]) -> None:
-        if msg['type'] == 'send':
-            self.dispatchSend(msg['target'], msg['selector'], msg['arguments'])
-        elif msg['type'] == 'call':
-            await self.dispatchCall(msg['id'], msg['target'], msg['selector'], msg['arguments'])
-        elif msg['type'] == 'return':
-            self.dispatchReturn(msg['id'], msg['result'])
-        else:
-            print("Unhandled message")
-
-    async def dispatchCall(
-            self, foreignId: int, targetId: int, selector: str,
-            argDescs: List[Any]) -> None:
-        target = self
-        if targetId != 0:
-            target = Dataset.singleton.lookup(targetId)
-        method = getattr(target, selector)
-        arguments = [self.decodedArgument(X) for X in argDescs]
-
-        result = method(*arguments)
-
-        await self.send({
-            'type': 'return',
-            'id': foreignId,
-            'result': self.encodedArgument(result)
-        })
-
-    def dispatchSend(self, targetId: int, selector: str, argDescs: List[Any]) -> None:
-        target = self
-        if targetId != 0:
-            target = Dataset.singleton.lookup(targetId)
-        method = getattr(target, selector)
-        arguments = [self.decodedArgument(X) for X in argDescs]
-
-        method(*arguments)
-
-    def dispatchReturn(self, localId: int, resultDesc: Dict[str, Any]) -> None:
-        future = self.lookupLocalId(localId)
-        self.freeLocalId(localId)
-
-        future.setResult(self.decodedArgument(resultDesc))
+    async def broadcast(self, trans: Transaction) -> None:
+        await self.clientService.send('broadcast', [trans])
 
     async def clientCall(self, targetId: int, selector: str, arguments: List[Any]) -> Any:
         argDescs = [self.encodedArgument(X) for X in arguments]
@@ -123,7 +119,7 @@ class Remote:
 
         await self.send({
             'type': 'call',
-            'id': self.newLocalId(future),
+            'id': self.pendingCalls.assignTag(future),
             'target': targetId,
             'selector': selector,
             'arguments': argDescs
@@ -141,25 +137,63 @@ class Remote:
             'arguments': argDescs
         })
 
-    def rootPage(self) -> Page:
-        return self.dataset.root
+    async def dispatch(self, msg: Dict[str, Any]) -> None:
+        if msg['type'] == 'send':
+            self.dispatchSend(msg['target'], msg['selector'], msg['arguments'])
+        elif msg['type'] == 'call':
+            await self.dispatchCall(msg['id'], msg['target'], msg['selector'], msg['arguments'])
+        elif msg['type'] == 'return':
+            self.dispatchReturn(msg['id'], msg['result'])
+        else:
+            print("Unhandled message")
 
-    def clipboardPage(self) -> Page:
-        return self.dataset.clipboard
+    async def dispatchCall(
+            self, foreignId: int, targetId: int, selector: str,
+            argDescs: List[Any]) -> None:
+
+        target: Union[HostService, Element] = self.hostService
+        if targetId != 0:
+            target = self.dataset.lookup(targetId)
+
+        method = getattr(target, selector)
+        arguments = [self.decodedArgument(X) for X in argDescs]
+
+        result = method(*arguments)
+
+        await self.send({
+            'type': 'return',
+            'id': foreignId,
+            'result': self.encodedArgument(result)
+        })
+
+    def dispatchSend(self, targetId: int, selector: str, argDescs: List[Any]) -> None:
+        target = self
+        if targetId != 0:
+            target = self.dataset.lookup(targetId)
+        method = getattr(target, selector)
+        arguments = [self.decodedArgument(X) for X in argDescs]
+
+        method(*arguments)
+
+    def dispatchReturn(self, localId: int, resultDesc: Dict[str, Any]) -> None:
+        future = self.pendingCalls.getObject(localId)
+        self.pendingCalls.freeTag(localId)
+
+        future.setResult(self.decodedArgument(resultDesc))
 
     def decodedArgument(self, arg: Dict[str, Any]) -> Any:
         if arg['type'] == 'hostObject':
             if arg['id'] == 0:
-                return self
+                return self.hostService
             else:
-                return Dataset.singleton.lookup(arg['id'])
+                return self.dataset.lookup(arg['id'])
         elif arg['type'] == 'clientObject':
-            return Proxy(self.clientCall, arg['id'])
+            return self.proxyMap.getObject(arg['id'])
         else:
             return arg['value']
 
     def encodedArgument(self, arg: Any) -> Dict[str, Any]:
-        if arg == self:
+        if arg == self.hostService:
             return {'type': 'hostObject', 'id': 0}
         elif isinstance(arg, Element):
             return {'type': 'hostObject', 'id': arg.id}
