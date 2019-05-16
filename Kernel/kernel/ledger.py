@@ -3,16 +3,29 @@ import janus
 import threading
 from typing import Optional
 
-from kernel.data import Transaction
+from kernel.element import IObserver, Element, Transaction
+from kernel.dataset import Dataset
 
-
-class Ledger:
-    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+class Ledger(IObserver):
+    def __init__(self, loop: asyncio.AbstractEventLoop, dataset: Dataset) -> None:
         self.forward = []
         self.reverse = []
         self.queue = janus.Queue(loop=loop)
         self.lock = threading.Lock()
         self.ongoing = None
+        self.dataset = dataset
+        self.nextTransaction = 0
+
+    def elementCreated(self, inst: Element) -> int:
+        return self.dataset.append(inst)
+
+    def transactionStarted(self, trans: Transaction) -> int:
+        newTransactionId = self.nextTransaction
+        self.nextTransaction += 1
+        return newTransactionId
+
+    def transactionCompleted(self, trans: Transaction) -> None:
+        pass
 
     async def next(self) -> Transaction:
         return await self.queue.async_q.get()

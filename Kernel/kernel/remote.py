@@ -1,11 +1,12 @@
 import json
 import asyncio
 import websockets
-from typing import Callable, List, Any, Awaitable, Dict, Optional
+from typing import Callable, List, Any, Awaitable, Dict
 
-from .data import Dataset
-from .worker import Worker
-from .elements import Element, Page
+from kernel.dataset import Dataset
+from kernel.worker import Worker
+from kernel.element import Element
+from kernel.elements.page import Page
 
 
 class Proxy:

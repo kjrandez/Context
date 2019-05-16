@@ -1,6 +1,6 @@
 import os
 import subprocess
-from .element import Element
+from kernel.element import Element
 
 class FileRef(Element):
     def __init__(self, path = ""):

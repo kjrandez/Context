@@ -2,8 +2,11 @@ import json
 import traceback
 from aioconsole import ainput  # type: ignore
 
-from kernel.data import Dataset
-from kernel.elements import Text, Page, Image, Script
+from kernel.dataset import Dataset
+from kernel.elements.text import Text
+from kernel.elements.page import Page
+from kernel.elements.image import Image
+from kernel.elements.script import Script
 
 
 class Local:

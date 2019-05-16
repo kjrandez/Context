@@ -1,6 +1,6 @@
 import traceback
-from threading import Thread
-from .text import Text
+
+from kernel.elements.text import Text
 
 class Script(Text):
     def __init__(self, content = ""):

@@ -1,7 +1,7 @@
 import copy
 from typing import List, Dict, Any, Optional, Union
 
-from kernel.elements import Element
+from kernel.element import Element
 
 
 class PageEntry:

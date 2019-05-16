@@ -2,8 +2,11 @@ import asyncio
 import websockets
 from typing import List
 
-from kernel import Local, Remote, Worker
-from kernel.data import Dataset, Ledger
+from kernel.local import Local
+from kernel.remote import Remote
+from kernel.worker import Worker
+from kernel.dataset import Dataset
+from kernel.ledger import Ledger
 
 
 class Kernel:
@@ -11,9 +14,8 @@ class Kernel:
         self.loop = loop
         self.remotes: List[Remote] = []
         self.worker = Worker(loop)
-        self.ledger = Ledger(loop)
-        self.dataset = Dataset(self.ledger)
-        self.dataset.makeDefault()
+        self.dataset = Dataset()
+        self.ledger = Ledger(loop, self.dataset)
 
     def asyncThreadEntry(self, loop: asyncio.AbstractEventLoop) -> None:
         loop.create_task(self.persistence())

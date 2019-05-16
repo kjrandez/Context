@@ -1,4 +1,4 @@
-from .element import Element
+from kernel.element import Element
 
 class Text(Element):
     def __init__(self, content = ""):

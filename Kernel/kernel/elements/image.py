@@ -1,4 +1,4 @@
-from .element import Element
+from kernel.element import Element
 
 class Image(Element):
     def __init__(self, src = "", alt = ""):
