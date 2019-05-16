@@ -1,6 +1,6 @@
 import traceback
 
-from kernel.elements.text import Text
+from elements.text import Text
 
 class Script(Text):
     def __init__(self, content = ""):

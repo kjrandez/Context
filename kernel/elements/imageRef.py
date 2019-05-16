@@ -1,4 +1,4 @@
-from kernel.elements.fileRef import FileRef
+from elements import FileRef
 
 class ImageRef(FileRef):
     def __init__(self, path = ""):

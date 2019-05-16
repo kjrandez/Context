@@ -1,9 +1,11 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, Callable, List, Dict
 
-# Observer interface is defined so that element module does not have to import anything, the
-# module which fulfills the IObserver contract can import element and set the global instance
 
 class IObserver:
+
+    """ Observer interface is defined so that the application code can import the elements
+        without elements needing to import application code, preventing import cycles. """
+
     singleton: Optional['IObserver'] = None
 
     def elementCreated(self, inst: 'Element') -> int:
@@ -20,6 +22,9 @@ def setGlobalObserver(observer: IObserver) -> None:
     IObserver.singleton = observer
 
 
+Model = Dict[str, object]
+
+
 class Element:
     def __init__(self) -> None:
         self.id: Optional[int] = None
@@ -29,37 +34,42 @@ class Element:
             self.observer = IObserver.singleton
             self.id = self.observer.elementCreated(self)
 
-    def __deepcopy__(self, memo) -> 'Element':
+    def __deepcopy__(self, memo: object) -> 'Element':
         return self.duplicate(memo)
 
-    def backgroundInit(self):
+    def backgroundInit(self) -> None:
         pass
 
-    def duplicate(self, memo):
-        return self
+    def duplicate(self, memo: object) -> 'Element':
+        return self  # ???
 
-    def value(self):
+    def value(self) -> object:
         return None
 
-    def type(self):
+    def type(self) -> str:
         return type(self).__name__
 
-    def model(self):
+    def model(self) -> Model:
         return {
-            "id" : self.id,
-            "type" : type(self).__name__,
-            "value" : self.value()
+            'id': self.id,
+            'type': type(self).__name__,
+            'value': self.value()
         }
 
-    def flatten(self, flattened = None, notPresent = None, maxDepth = None, depth = 0):
+    def flatten(
+            self, flattened: Optional[Dict[int, Model]] = None,
+            notPresent: Optional[Callable[[Model], None]] = None,
+            maxDepth: Optional[int] = None, depth: int = 0) -> Dict[int, Model]:
+
         """ Incorporate my own model and any models under this hierarchy into 'flattened' """
-        if flattened == None:
+
+        if flattened is None:
             flattened = {}
 
-        if self.id not in flattened:
+        if (self.id is not None) and (self.id not in flattened):
             myModel = self.model()
             flattened[self.id] = myModel
-            if notPresent != None:
+            if notPresent is not None:
                 notPresent(myModel)
         
         return flattened
@@ -70,7 +80,6 @@ class Element:
     def completeTransaction(self, trans: 'Transaction') -> None:
         if self.observer is not None:
             self.observer.transactionCompleted(trans)
-
 
 
 class Transaction:
@@ -85,9 +94,8 @@ class Transaction:
     def reference(self, element: Element) -> None:
         self.others.append(element)
 
-    def model(self) -> Dict[str, Any]:
+    def model(self) -> Model:
         return {
             'index': self.id,
             'id': self.element.id
         }
-

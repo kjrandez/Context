@@ -1,5 +1,5 @@
 import asyncio
-from kernel.kernel import Kernel
+from kernel import Kernel
 
 
 async def periodic() -> None:
@@ -9,12 +9,11 @@ async def periodic() -> None:
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    k = Kernel(loop)
+    kernel = Kernel(loop)
 
     try:
-        k.asyncThreadEntry(loop)
         loop.create_task(periodic())
-        loop.run_forever()
+        kernel.run()
     except KeyboardInterrupt:
-        k.asyncThreadExit()
+        kernel.halted()
         raise
