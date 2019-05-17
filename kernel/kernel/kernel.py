@@ -14,8 +14,8 @@ class Kernel:
 
     """ The kernel comprises the top-level modules, an asyncio event loop, and a worker thread. """
 
-    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
-        self.loop = loop
+    def __init__(self) -> None:
+        self.loop = asyncio.get_event_loop()
         self.remotes: List[Host] = []
         self.worker = Worker(self.loop)
         self.dataset = Dataset()
@@ -26,13 +26,18 @@ class Kernel:
         self.dataset.loadExample()
 
     def run(self) -> None:
+        self.loop.create_task(periodic())
         self.loop.create_task(self.persistence())
         self.loop.create_task(self.console())
-        self.loop.run_until_complete(websockets.serve(self.connection, 'localhost', 8085))
-        self.loop.run_forever()
 
-    def halted(self) -> None:
-        self.worker.finish()
+        server = websockets.serve(self.connection, 'localhost', 8085)
+        self.loop.run_until_complete(server)
+
+        try:
+            self.loop.run_forever()
+        except KeyboardInterrupt:
+            self.worker.finish()
+            raise
 
     async def connection(self, websocket: websockets.WebSocketServerProtocol, path: str) -> None:
         print("Connection at path: " + path)
@@ -54,3 +59,8 @@ class Kernel:
             transaction = await self.ledger.next()
             for remote in self.remotes:
                 await remote.broadcast(transaction)
+
+
+async def periodic() -> None:
+    while True:
+        await asyncio.sleep(0.2)

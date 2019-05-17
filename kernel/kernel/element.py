@@ -3,8 +3,8 @@ from typing import Optional, Callable, List, Dict, cast
 
 class IObserver:
 
-    """ Observer interface is defined so that the application code can import the elements
-        without elements needing to import application code, preventing import cycles. """
+    """ Observer interface is defined so that the kernel code can import the elements
+        without elements needing to import kernel code, preventing import cycles. """
 
     singleton: Optional['IObserver'] = None
 
