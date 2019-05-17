@@ -1,6 +1,6 @@
 import asyncio
 import websockets
-from typing import List
+from typing import List, Coroutine
 
 from .element import setGlobalObserver
 from .local import Local
@@ -19,25 +19,56 @@ class Kernel:
         self.remotes: List[Host] = []
         self.worker = Worker(self.loop)
         self.dataset = Dataset()
-
+        self.killServer = self.loop.create_future()
+        self.tasks: List[asyncio.Task] = []
         self.ledger = Ledger(self.loop, self.dataset)
+
         setGlobalObserver(self.ledger)
 
         self.dataset.loadExample()
 
     def run(self) -> None:
-        self.loop.create_task(periodic())
-        self.loop.create_task(self.persistence())
-        self.loop.create_task(self.console())
+        for coro in [periodic(), self.persistence(), self.console()]:
+            self.runTask(coro)
 
-        server = websockets.serve(self.connection, 'localhost', 8085)
-        self.loop.run_until_complete(server)
+        self.worker.start()
 
         try:
-            self.loop.run_forever()
+            self.loop.run_until_complete(self.server())
+            print("Kernel loop stopped")
         except KeyboardInterrupt:
+            print("Kernel loop interrupted")
+        finally:
             self.worker.finish()
-            raise
+
+    def runTask(self, coro: Coroutine):
+        task = self.loop.create_task(coro)
+        self.tasks.append(task)
+
+    async def console(self) -> None:
+        handler = Local(self.dataset, self.stop)
+        await handler.run()
+
+    async def persistence(self) -> None:
+        while True:
+            transaction = await self.ledger.next()
+            for remote in self.remotes:
+                await remote.broadcast(transaction)
+
+    async def server(self) -> None:
+        async with websockets.serve(self.connection, 'localhost', 8085):
+            await self.killServer
+
+    async def stop(self) -> None:
+        self.killServer.set_result(None)
+
+        thisTask = asyncio.current_task()
+
+        tasks = [t for t in self.tasks if t is not thisTask]
+        for task in tasks:
+            task.cancel()
+
+        thisTask.cancel()
 
     async def connection(self, websocket: websockets.WebSocketServerProtocol, path: str) -> None:
         print("Connection at path: " + path)
@@ -49,16 +80,6 @@ class Kernel:
         self.remotes.append(handler)
         await handler.run()
         self.remotes.remove(handler)
-
-    async def console(self) -> None:
-        handler = Local(self.dataset)
-        await handler.run()
-
-    async def persistence(self) -> None:
-        while True:
-            transaction = await self.ledger.next()
-            for remote in self.remotes:
-                await remote.broadcast(transaction)
 
 
 async def periodic() -> None:

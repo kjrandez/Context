@@ -1,7 +1,7 @@
 import json
 import traceback
 from aioconsole import ainput
-from typing import List, Optional
+from typing import List, Optional, Callable, Awaitable
 
 from .dataset import Dataset
 from .elements.text import Text
@@ -11,17 +11,19 @@ from .elements.script import Script
 
 
 class Local:
-    def __init__(self, dataset: Dataset):
+    def __init__(self, dataset: Dataset, stopKernel: Callable[[], Awaitable[None]]):
         self.dataset = dataset
         self.root: Optional[Page] = dataset.root
         self.context: Optional[Page] = self.root
+        self.stopKernel = stopKernel
 
         self.commands = {
             "list": self.commandList,
             "enter": self.commandEnter,
             "root": self.commandRoot,
             "invoke": self.commandInvoke,
-            "make": self.commandMake
+            "make": self.commandMake,
+            "exit": self.commandExit
         }
         self.classList = {
             "Text": Text,
@@ -55,6 +57,9 @@ class Local:
                 print(trace)
         else:
             print("Error")
+
+    async def commandExit(self, _: str) -> None:
+        await self.stopKernel()
 
     async def commandList(self, _: str) -> None:
         if self.context is None:
