@@ -46,7 +46,7 @@ class Kernel:
         self.remotes.remove(handler)
 
     async def console(self) -> None:
-        handler = Local(self.dataset.root, self.ledger)
+        handler = Local(self.dataset)
         await handler.run()
 
     async def persistence(self) -> None:
@@ -54,8 +54,3 @@ class Kernel:
             transaction = await self.ledger.next()
             for remote in self.remotes:
                 await remote.broadcast(transaction)
-
-
-async def periodic() -> None:
-    while True:
-        await asyncio.sleep(0.2)

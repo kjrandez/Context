@@ -1,30 +1,31 @@
 from ..element import Element
 
+
 class Text(Element):
-    def __init__(self, content = ""):
+    def __init__(self, content: str):
         super().__init__()
         self.content = content
 
-    def value(self):
+    def value(self) -> object:
         return {
-            "content" : self.content
+            'content': self.content
         }
 
-    def duplicate(self, memo):
+    def duplicate(self) -> Element:
         return Text(self.content)
 
-    def update(self, value, reverse = None):
-        trans = self.transaction(reverse)
+    def update(self, value: str) -> None:
+        trans = self.newTransaction()
 
         prev = self.content
         self.content = value
 
-        trans.reverseOp = self.update
-        trans.reverseArgs = [prev]
-        return trans.complete()
+        trans.reverseOp = lambda: self.update(prev)
 
-    def splice(self, start, stop, addition, reverse = None):
-        trans = self.transaction(reverse)
+        self.completeTransaction(trans)
+
+    def splice(self, start: int, stop: int, addition: str) -> None:
+        trans = self.newTransaction()
 
         try:
             if (start < 0) or (start > len(self.content)):
@@ -36,11 +37,11 @@ class Text(Element):
             
             prev = self.content
             self.content = prev[:start] + addition + prev[stop:]
-
             removed = prev[start:stop]
-            trans.reverseOp = self.splice
-            trans.reverseArgs = [start, start + len(addition), removed]
-            return trans.complete()
+
+            trans.reverseOp = lambda: self.splice(start, start + len(addition), removed)
+
+            self.completeTransaction(trans)
         except IndexError:
-            trans.cancel()
+            self.cancelTransaction(trans)
             raise

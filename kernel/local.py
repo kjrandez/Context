@@ -1,7 +1,7 @@
 import json
 import traceback
 from aioconsole import ainput
-from typing import List
+from typing import List, Optional
 
 from .dataset import Dataset
 from .elements.text import Text
@@ -13,8 +13,8 @@ from .elements.script import Script
 class Local:
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
-        self.root: Page = dataset.root
-        self.context: Page = self.root
+        self.root: Optional[Page] = dataset.root
+        self.context: Optional[Page] = self.root
 
         self.commands = {
             "list": self.commandList,
@@ -57,6 +57,9 @@ class Local:
             print("Error")
 
     async def commandList(self, _: str) -> None:
+        if self.context is None:
+            return
+
         i = 0
         print("Listing " + str(self.context.id))
         for entry in self.context.content:
@@ -74,7 +77,11 @@ class Local:
             print("Error")
 
     async def commandRoot(self, _: str) -> None:
+        if self.root is None:
+            return
+
         self.context = self.root
+
         print("Entered " + str(self.context.id))
 
     async def commandInvoke(self, args: str) -> None:

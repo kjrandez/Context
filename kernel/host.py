@@ -1,11 +1,11 @@
 import json
 import websockets
 from asyncio import Future, AbstractEventLoop
-from typing import List, Awaitable, Dict, Callable, Union, cast
+from typing import Optional, List, Awaitable, Dict, Callable, Union, cast
 
 from .dataset import Dataset
 from .worker import Worker
-from .element import Element, Transaction, Model
+from .element import Element, Transaction
 from .elements.page import Page
 
 
@@ -71,10 +71,10 @@ class HostService:
     def __init__(self, dataset: Dataset) -> None:
         self.dataset = dataset
 
-    def rootPage(self) -> Page:
+    def rootPage(self) -> Optional[Page]:
         return self.dataset.root
 
-    def clipboardPage(self) -> Page:
+    def clipboardPage(self) -> Optional[Page]:
         return self.dataset.clipboard
 
 
@@ -160,7 +160,7 @@ class Host:
             self, foreignId: int, targetId: int, selector: str,
             argDescs: List[Argument]) -> None:
 
-        target: Union[HostService, Element] = self.hostService
+        target: Union[HostService, Optional[Element]] = self.hostService
         if targetId != 0:
             target = self.dataset.lookup(targetId)
 
@@ -176,7 +176,7 @@ class Host:
         })
 
     def dispatchSend(self, targetId: int, selector: str, argDescs: List[Argument]) -> None:
-        target = self
+        target: Union[HostService, Optional[Element]] = self.hostService
         if targetId != 0:
             target = self.dataset.lookup(targetId)
         method = getattr(target, selector)

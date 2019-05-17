@@ -10,10 +10,7 @@ lorem3 = 'Donec imperdiet id lectus eu hendrerit. Curabitur sodales libero sit a
 
 class Dataset:
     def __init__(self) -> None:
-        from elements.clipboard import Clipboard
-
         self.objMap: Dict[int, Element] = {}
-        self.clipboard = Clipboard()
         self.root: Optional[Page] = None
         self.clipboard: Optional[Page] = None
         self.nextIndex = 1
@@ -34,11 +31,12 @@ class Dataset:
         return newId
 
     def loadExample(self) -> None:
-        from elements.text import Text
-        from elements.image import Image
-        from elements.script import Script
+        from .elements.text import Text
+        from .elements.image import Image
+        from .elements.script import Script
+        from .elements.clipboard import Clipboard
 
-        self.clipboard = Page()
+        self.clipboard = Clipboard([])
 
         self.root = Page([
             Text("Hello world"),
@@ -58,10 +56,10 @@ class Dataset:
                     Text("[Scope_0]"),
                     Image('lol2.png', "Funny joke")
                 ])
-            ], column=True),
+            ]),
             Page([
                 Text(lorem3)
-            ], column=True),
+            ]),
             Image('sw.png', "Switching characteristics"),
             Page([
                 Text("This is pretty funy if you actually think about it for a second."),
