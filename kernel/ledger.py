@@ -3,8 +3,8 @@ import janus
 import threading
 from typing import Optional
 
-from element import IObserver, Element, Transaction
-from dataset import Dataset
+from .element import IObserver, Element, Transaction
+from .dataset import Dataset
 
 class Ledger(IObserver):
     def __init__(self, loop: asyncio.AbstractEventLoop, dataset: Dataset) -> None:

@@ -1,6 +1,6 @@
 import traceback
 
-from elements.text import Text
+from .text import Text
 
 class Script(Text):
     def __init__(self, content = ""):

@@ -50,3 +50,4 @@ Shell/Properties/
 Kernel/.mypy_cache/
 .idea/
 Kernel/venv/
+.mypy_cache/

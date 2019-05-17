@@ -1,19 +1,20 @@
 import json
 import traceback
-from aioconsole import ainput  # type: ignore
+from aioconsole import ainput
+from typing import List
 
-from dataset import Dataset
-from elements.text import Text
-from elements.page import Page
-from elements.image import Image
-from elements.script import Script
+from .dataset import Dataset
+from .elements.text import Text
+from .elements.page import Page
+from .elements.image import Image
+from .elements.script import Script
 
 
 class Local:
-    def __init__(self, root, observer):
-        self.root = root
-        self.observer = observer
-        self.context = root
+    def __init__(self, dataset: Dataset):
+        self.dataset = dataset
+        self.root: Page = dataset.root
+        self.context: Page = self.root
 
         self.commands = {
             "list": self.commandList,
@@ -29,13 +30,13 @@ class Local:
             "Script": Script
         }
 
-    async def run(self):
+    async def run(self) -> None:
         print("Console started")
         while True:
             command = await ainput("")
             await self.dispatch(command)
 
-    async def dispatch(self, message):
+    async def dispatch(self, message: str) -> None:
         parts = message.split()
         if len(parts) == 0:
             return
@@ -44,64 +45,66 @@ class Local:
         args = " ".join(parts[1:])
 
         if parts[0] in self.commands:
+            # noinspection PyBroadException
             try:
                 await self.commands[command](args)
             except KeyboardInterrupt:
                 raise
-            except:
+            except Exception:
                 trace = traceback.format_exc()
                 print(trace)
         else:
             print("Error")
 
-    async def commandList(self, args):
+    async def commandList(self, _: str) -> None:
         i = 0
         print("Listing " + str(self.context.id))
         for entry in self.context.content:
-            print("#" + str(entry.key) + " " + type(entry.element).__name__ + " " + str(entry.element.id))
+            output = "#" + str(entry.key) + " " + type(entry.element).__name__
+            output += " " + str(entry.element.id)
+            print(output)
             i = i + 1
 
-    async def commandEnter(self, args):
-        from .elements import Page
-        newContext = Dataset.singleton.lookup(int(args))
+    async def commandEnter(self, args: str) -> None:
+        newContext = self.dataset.lookup(int(args))
         if isinstance(newContext, Page):
             self.context = newContext
             print("Entered " + str(self.context.id))
         else:
             print("Error")
 
-    async def commandRoot(self, args):
+    async def commandRoot(self, _: str) -> None:
         self.context = self.root
         print("Entered " + str(self.context.id))
 
-    async def commandInvoke(self, args):
+    async def commandInvoke(self, args: str) -> None:
         split = args.split()
-        target = Dataset.singleton.lookup(int(split[0]))
-        selector = selector = getattr(target, split[1])
+        target = self.dataset.lookup(int(split[0]))
+        selector = getattr(target, split[1])
 
-        arguments = await promptArgs()
+        arguments = await self.promptArgs()
         selector(*arguments)
 
-    async def commandMake(self, args):
+    async def commandMake(self, args: str) -> None:
         if not (args in self.classList):
             print("Error")
             return
 
         instClass = self.classList[args]
 
-        constructorArgs = await promptArgs()
+        constructorArgs = await self.promptArgs()
         inst = instClass(*constructorArgs)
         print("Id: " + str(inst.id))
 
-async def promptArgs():
-    args = []
-    while True:
-        line = await ainput(" | ")
-        if line == "GO":
-            break
-        else:
-            if line[0] == "+":
-                args.append(Dataset.singleton.lookup(int(line[1:])))
+    async def promptArgs(self) -> List[object]:
+        args: List[object] = []
+        while True:
+            line = await ainput(" | ")
+            if line == "GO":
+                break
             else:
-                args.append(json.loads(line))
-    return args
+                if line[0] == "+":
+                    args.append(self.dataset.lookup(int(line[1:])))
+                else:
+                    args.append(json.loads(line))
+        return args

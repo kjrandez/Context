@@ -1,5 +1,6 @@
 import asyncio
-from kernel import Kernel
+
+from .kernel import Kernel
 
 
 async def periodic() -> None:

@@ -2,12 +2,12 @@ import asyncio
 import websockets
 from typing import List
 
-from element import setGlobalObserver
-from local import Local
-from host import Host
-from worker import Worker
-from dataset import Dataset
-from ledger import Ledger
+from .element import setGlobalObserver
+from .local import Local
+from .host import Host
+from .worker import Worker
+from .dataset import Dataset
+from .ledger import Ledger
 
 
 class Kernel:

@@ -3,10 +3,10 @@ import websockets
 from asyncio import Future, AbstractEventLoop
 from typing import List, Awaitable, Dict, Callable, Union, cast
 
-from dataset import Dataset
-from worker import Worker
-from element import Element, Transaction, Model
-from elements.page import Page
+from .dataset import Dataset
+from .worker import Worker
+from .element import Element, Transaction, Model
+from .elements.page import Page
 
 
 Argument = Dict[str, object]
