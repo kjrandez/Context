@@ -1,12 +1,10 @@
-import { Model } from "../interfaces";
-import ElementPresenter from './elementPresenter';
+import ElementPresenter from '../elementPresenter';
 import React, { ReactElement } from 'react';
 import Proxy from '../proxy';
 import UnknownView from './unknownView';
 
 export default class UnknownPresenter extends ElementPresenter
 {
-    // Async loaded
     type: string | null = null;
 
     view(): ReactElement {
@@ -16,11 +14,13 @@ export default class UnknownPresenter extends ElementPresenter
             return <UnknownView key={this.key} type={this.type} />
     }
 
-    async fetch(): Promise<void> {
+    async onLoad(): Promise<void> {
         this.type = await this.element.call('type');
     }
 
-    async modelChanged(object: Proxy, model: Model<any>): Promise<void> {
-        throw new Error("Method not implemented.");
+    async onChange(subject: Proxy): Promise<void> {
+        if (subject === this.element) {
+            this.type = await this.element.call('type');
+        }
     }
 }

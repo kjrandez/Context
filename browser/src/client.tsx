@@ -1,5 +1,74 @@
 import Proxy from './proxy';
-import { Proxyable, Argument, Model, mapObjValues } from './interfaces';
+import { Proxyable, Argument, mapObjValues } from './interfaces';
+
+class TagCache<T>
+{
+    refs: T[] = [];
+    nextIndex: number = 0;
+    freeIndexes: number[] = [];
+
+    assignTag(object: T) {
+        let index: number | undefined = this.freeIndexes.pop();
+        if (index !== undefined) {
+            this.refs[index] = object;
+            return index;
+        }
+        else {
+            this.refs.push(object);
+            index = this.nextIndex ++;
+            return index;
+        }
+    }
+
+    getObject(tag: number) {
+        return this.refs[tag];
+    }
+
+    freeTag(tag: number) {
+        this.freeIndexes.push(tag)
+    }
+}
+
+class ProxyableTable
+{
+    refs: Proxyable[];
+    index: number = 0;
+
+    constructor(rootObject: Proxyable) {
+        rootObject.proxyableId = 0;
+        this.refs = [rootObject];
+    }
+
+    getObject(tag: number) {
+        return this.refs[tag];
+    }
+
+    getTag(object: Proxyable) {
+        if (object.proxyableId == null)
+            object.proxyableId = ++ this.index;
+
+        return object.proxyableId;
+    }
+}
+
+class ProxyMap
+{
+    make: Function;
+    refs: { [_: number]: Proxy } = {};
+
+    constructor(makeProxy: Function) {
+        this.make = makeProxy;
+    }
+
+    getObject(tag: number) {
+        if (tag in this.refs)
+            return this.refs[tag];
+
+        let proxy = this.make(tag);
+        this.refs[tag] = proxy;
+        return proxy;
+    }
+}
 
 export default class Client
 {
@@ -10,8 +79,11 @@ export default class Client
     localObjects: ProxyableTable;
     foreignObjects: ProxyMap;
 
-    constructor(connected: Function, disconnected: Function) {
-        let clientService = new ClientService();
+    constructor(connected: Function, disconnected: Function, broadcast: Function) {
+        let clientService = {
+            proxyableId: 0,
+            broadcast: broadcast
+        };
         this.localObjects = new ProxyableTable(clientService);
 
         let dispatcher = this.dispatchCall.bind(this);
@@ -31,10 +103,11 @@ export default class Client
 
     websocketReceive(event: MessageEvent) {
         var msg = JSON.parse(event.data);
-        console.log("Received message: ");
-        console.log(msg);
 
         switch(msg.type) {
+            case 'send':
+                this.handleSend(msg.target, msg.selector, msg.arguments);
+                break;
             case 'call':
                 this.handleCall(msg.id, msg.target, msg.selector, msg.arguments);
                 break;
@@ -42,7 +115,8 @@ export default class Client
                 this.handleReturn(msg.id, msg.result)
                 break;
             default:
-                console.log("Unhandled message");
+                console.log("Invalid message received:");
+                console.log(msg);
                 break;
         }
     }
@@ -57,6 +131,13 @@ export default class Client
             selector: selector,
             arguments: argDescs
         }));
+    }
+
+    handleSend(targetId: number, selector: string, argDescs: Argument[]) {
+        let target: Proxyable = this.localObjects.getObject(targetId);
+        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
+
+        (target as any)[selector].apply(target, args)
     }
 
     handleCall(foreignId: number, targetId: number, selector: string, argDescs: Argument[]) {
@@ -81,13 +162,13 @@ export default class Client
     }
 
     decodedArgument(argDesc: Argument): any {
-        if (argDesc.type == 'hostObject')
+        if (argDesc.type === 'hostObject')
             return this.foreignObjects.getObject(argDesc.value)
-        else if (argDesc.type == 'clientObject')
+        else if (argDesc.type === 'clientObject')
             return this.localObjects.getObject(argDesc.value);
-        else if (argDesc.type == 'list')
+        else if (argDesc.type === 'list')
             return argDesc.value.map((X: any) => this.decodedArgument(X))
-        else if (argDesc.type == 'dictionary')
+        else if (argDesc.type === 'dictionary')
             return mapObjValues(argDesc.value, (X: any) => this.decodedArgument(X))
         else
             return argDesc.value;
@@ -104,92 +185,5 @@ export default class Client
             return { type: 'dictionary', value: mapObjValues(arg, X => this.encodedArgument(X))}
         else
             return { type: 'primitive', value: arg };
-    }
-}
-
-class ClientService implements Proxyable
-{
-    proxyableId: number | null = null;
-
-    broadcastChange(foreignObject: Proxy, model: Model<any>) {
-        foreignObject.handleChange(model);
-    }
-}
-
-// This is used to store promises, so indexes can be re-used, and you only need to look up
-// object by tag, not tag by object.
-
-class TagCache<T>
-{
-    refs: T[] = [];
-    nextIndex: number = 0;
-    freeIndexes: number[] = [];
-
-    assignTag(object: T) {
-        let index: number | undefined = this.freeIndexes.pop();
-        if (index != undefined) {
-            this.refs[index] = object;
-            return index;
-        }
-        else {
-            this.refs.push(object);
-            index = this.nextIndex ++;
-            return index;
-        }
-    }
-
-    getObject(tag: number) {
-        return this.refs[tag];
-    }
-
-    freeTag(tag: number) {
-        this.freeIndexes.push(tag)
-    }
-}
-
-// This is used to record objects marshalled across the web socket interface, so indexes should
-// never be repeated, and we need to look up both object by tag and tag by object
-
-class ProxyableTable
-{
-    refs: Proxyable[];
-    index: number = 0;
-
-    constructor(rootObject: Proxyable) {
-        rootObject.proxyableId = 0;
-        this.refs = [rootObject];
-    }
-
-    getObject(tag: number) {
-        return this.refs[tag];
-    }
-
-    getTag(object: Proxyable) {
-        if (object.proxyableId == null)
-            object.proxyableId = ++ this.index;
-
-        return object.proxyableId;
-    }
-}
-
-// This is used to record foreign objects proxies, so indexes are sparse and we need to look up
-// object by index and index by object
-
-class ProxyMap
-{
-    make: Function;
-    refs: { [_: number]: Proxy } = {};
-
-    constructor(makeProxy: Function) {
-        this.make = makeProxy;
-    }
-
-    getObject(tag: number) {
-        if (tag in this.refs)
-            return this.refs[tag];
-
-        let proxy = this.make(tag);
-        this.refs[tag] = proxy;
-        return proxy;
     }
 }

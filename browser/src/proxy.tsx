@@ -1,4 +1,4 @@
-import { Presenter } from "./interfaces";
+import Presenter from "./presenter";
 
 // Acts as a foreign object proxy in the JSON RPC and also wraps the model in the MVP UI
 
@@ -6,12 +6,12 @@ export default class Proxy
 {
     immId: number;
     dispatchCall: Function;
-    presenters: Presenter[] = [];
+    paths: Presenter[][] = [];
 
     constructor(tag: number, dispatcher: Function) {
         this.dispatchCall = dispatcher
         this.immId = tag;
-        this.presenters = [];
+        this.paths = [];
     }
 
     id() {
@@ -26,17 +26,17 @@ export default class Proxy
         this.dispatchCall(this.immId, selector, args, false);
     }
 
-    handleChange(value: any) {
-        this.presenters.forEach(entry => entry.modelChanged(this, value));
+    sensitivePaths() {
+        return this.paths;
     }
 
-    attach(presenter: Presenter) {
-        this.presenters.push(presenter);
+    attach(path: Presenter[]) {
+        this.paths.push(path);
     }
 
-    detach(presenter: Presenter) {
-        var index = this.presenters.findIndex(entry => entry === presenter);
+    detach(path: Presenter[]) {
+        var index = this.paths.findIndex(entry => entry === path);
         if(index >= 0)
-            this.presenters.splice(index, 1);
+            this.paths.splice(index, 1);
     }
 }

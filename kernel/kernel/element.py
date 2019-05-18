@@ -85,6 +85,7 @@ class Transaction:
 
     def model(self) -> Model:
         return {
-            'index': self.id,
-            'id': self.element.id
+            'id': self.id,
+            'subject': self.element,
+            'others': self.others
         }

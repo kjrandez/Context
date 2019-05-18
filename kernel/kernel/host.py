@@ -109,7 +109,10 @@ class Host:
         await self.websocket.send(json.dumps(value))
 
     async def broadcast(self, trans: Transaction) -> None:
-        await self.clientService.send('broadcast', [trans])
+        model = trans.model()
+        print("Broadcasting transaction: ")
+        print(model)
+        await self.clientService.send('broadcast', [model])
 
     async def clientCall(self, targetId: int, selector: str, arguments: List[object]) -> object:
         argDescs = [self.encodedArgument(X) for X in arguments]
@@ -126,7 +129,7 @@ class Host:
         return await future
 
     async def clientSend(self, targetId: int, selector: str, arguments: List[object]) -> None:
-        argDescs = map(lambda X: self.encodedArgument(X), arguments)
+        argDescs = [self.encodedArgument(X) for X in arguments]
 
         await self.send({
             'type': 'send',

@@ -54,6 +54,11 @@ class Page(Element):
 
         return [x.element for x in self.entries]
 
+    def get(self, offset: int) -> Element:
+        """ Returns the element in the PageEntry at the given offset. """
+
+        return self.entries[offset].element
+
     def find(self, keyEntryOrElement: PageEntryComparable) -> int:
         """ Returns the offset of the specified entry or first element instance """
 

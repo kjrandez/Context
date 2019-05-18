@@ -1,4 +1,4 @@
-import React, { Component, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 
 interface PageProps {
     title: string;

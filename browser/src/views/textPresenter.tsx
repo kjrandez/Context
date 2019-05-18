@@ -1,5 +1,4 @@
-import { Model } from "../interfaces";
-import ElementPresenter from './elementPresenter';
+import ElementPresenter from '../elementPresenter';
 import React, { ReactElement } from 'react';
 import Proxy from '../proxy';
 import TextView from './textView';
@@ -8,25 +7,25 @@ type TextValue = {
     content: string;
 }
 
-
 export default class TextPresenter extends ElementPresenter
 {
-    // Async loaded
-    content: string | null = null;
+    value: TextValue | null = null;
 
     view(): ReactElement {
-        if (this.content == null)
+        if (this.value == null)
             return <div>Unloaded Text Element</div>
         else
-            return <TextView key={this.key} content={this.content} />
+            return <TextView key={this.key} content={this.value.content} />
     }
 
-    async fetch(): Promise<void> {
-        let value = await this.element.call<TextValue>('value');
-        this.content = value.content;
+    async onLoad(): Promise<void> {
+        this.value = await this.element.call<TextValue>('value');
     }
 
-    async modelChanged(object: Proxy, model: Model<TextValue>): Promise<void> {
-        throw new Error("Method not implemented.");
+    async onChange(subject: Proxy): Promise<void> {
+        if (subject === this.element) {
+            this.value = await this.element.call<TextValue>('value');
+        }
     }
 }
+ 
