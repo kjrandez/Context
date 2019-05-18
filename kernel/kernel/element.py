@@ -55,7 +55,7 @@ class Element:
     def model(self) -> Model:
         return {
             'id': self.id,
-            'type': type(self).__name__,
+            'type': self.type(),
             'value': self.value()
         }
 

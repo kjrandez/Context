@@ -1,10 +1,10 @@
 import React, { ReactElement } from 'react';
 import App from '../app';
 import Proxy from '../proxy';
-import { DynamicPresenter } from '../interfaces';
+import { Presenter } from '../interfaces';
 import PagePresenter from './pagePresenter';
 
-export default class TopPresenter extends DynamicPresenter
+export default class TopPresenter extends Presenter
 {
     app: App;
     pagePresenter: PagePresenter | null;
@@ -16,7 +16,7 @@ export default class TopPresenter extends DynamicPresenter
         this.app = app;
 
         if (page != null)
-            this.pagePresenter = new PagePresenter(this, page);
+            this.pagePresenter = new PagePresenter(this, 0, page);
         else
             this.pagePresenter = null;
 

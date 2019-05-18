@@ -22,11 +22,6 @@ export abstract class Presenter
     }
 }
 
-export abstract class DynamicPresenter extends Presenter
-{
-    //contentChanged(): void;
-}
-
 export type Dict<T> = { [_: string]: T }
 
 export type Argument = Dict<any>
