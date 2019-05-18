@@ -1,53 +1,54 @@
+from IPython.terminal.embed import InteractiveShellEmbed
+from threading import Thread
 import asyncio
 import websockets
-from typing import List, Coroutine
+from typing import List
 
 from .element import setGlobalObserver
-from .local import Local
 from .host import Host
 from .worker import Worker
 from .dataset import Dataset
 from .ledger import Ledger
 
 
-class Kernel:
+class Kernel(Thread):
 
     """ The kernel comprises the top-level modules, an asyncio event loop, and a worker thread. """
 
     def __init__(self) -> None:
-        self.loop = asyncio.get_event_loop()
+        super().__init__()
+
+        self.loop = asyncio.new_event_loop()
         self.remotes: List[Host] = []
         self.worker = Worker(self.loop)
         self.dataset = Dataset()
         self.killServer = self.loop.create_future()
-        self.tasks: List[asyncio.Task] = []
         self.ledger = Ledger(self.loop, self.dataset)
 
         setGlobalObserver(self.ledger)
 
         self.dataset.loadExample()
 
-    def run(self) -> None:
-        for coro in [periodic(), self.persistence(), self.console()]:
-            self.runTask(coro)
-
+    def start(self) -> None:
+        print("Starting worker")
         self.worker.start()
 
-        try:
-            self.loop.run_until_complete(self.server())
-            print("Kernel loop stopped")
-        except KeyboardInterrupt:
-            print("Kernel loop interrupted")
-        finally:
-            self.worker.finish()
+        print("Starting server")
+        super().start()
 
-    def runTask(self, coro: Coroutine):
-        task = self.loop.create_task(coro)
-        self.tasks.append(task)
+        print("Starting console")
+        shell = InteractiveShellEmbed(user_ns={})
+        shell.mainloop(local_ns={"root": self.dataset.root})
+        print("Console stopped")
 
-    async def console(self) -> None:
-        handler = Local(self.dataset, self.stop)
-        await handler.run()
+        self.killServer.set_result(None)
+        self.worker.finish()
+
+    def run(self) -> None:
+        asyncio.set_event_loop(self.loop)
+        self.loop.create_task(self.persistence())
+        self.loop.run_until_complete(self.server())
+        print("Server stopped")
 
     async def persistence(self) -> None:
         while True:
@@ -59,17 +60,6 @@ class Kernel:
         async with websockets.serve(self.connection, 'localhost', 8085):
             await self.killServer
 
-    async def stop(self) -> None:
-        self.killServer.set_result(None)
-
-        thisTask = asyncio.current_task()
-
-        tasks = [t for t in self.tasks if t is not thisTask]
-        for task in tasks:
-            task.cancel()
-
-        thisTask.cancel()
-
     async def connection(self, websocket: websockets.WebSocketServerProtocol, path: str) -> None:
         print("Connection at path: " + path)
         if not path == "/broadcast":
@@ -80,8 +70,3 @@ class Kernel:
         self.remotes.append(handler)
         await handler.run()
         self.remotes.remove(handler)
-
-
-async def periodic() -> None:
-    while True:
-        await asyncio.sleep(0.2)

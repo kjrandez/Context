@@ -14,7 +14,7 @@ class Worker(threading.Thread):
         while not self.finished:
             block = self.workThreadQueue.sync_q.get()
             block()
-        print("Worker thread stopped")
+        print("Worker stopped")
 
     async def execute(self, block: Callable[[Any], Any], *args: Any) -> None:
         def executeBlock() -> None:

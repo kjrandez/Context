@@ -36,29 +36,29 @@ PageEntryComparable = Union[int, PageEntry, Element]
 class Page(Element):
     def __init__(self, content: List[Element]) -> None:
         super().__init__()
-        self.content: List[PageEntry] = [resolvedEntry(x) for x in content]
+        self.entries: List[PageEntry] = [resolvedEntry(x) for x in content]
         self.latestEntry: Optional[PageEntry] = None
 
     def duplicate(self) -> 'Page':
-        dupContent = [copy.deepcopy(entry.element) for entry in self.content]
+        dupContent = [copy.deepcopy(entry.element) for entry in self.entries]
         return Page(dupContent)
 
     def value(self) -> object:
         return {
-            'content': [x.model() for x in self.content],
+            'entries': [x.model() for x in self.entries],
             'latestEntry': self.latestEntry.model() if (self.latestEntry is not None) else None
         }
 
-    def elements(self) -> List[Element]:
+    def content(self) -> List[Element]:
         """ Returns a list of elements corresponding to the page's entries. """
 
-        return [x.element for x in self.content]
+        return [x.element for x in self.entries]
 
     def find(self, keyEntryOrElement: PageEntryComparable) -> int:
         """ Returns the offset of the specified entry or first element instance """
 
         bogus = cast(PageEntry, keyEntryOrElement)
-        return self.content.index(bogus)
+        return self.entries.index(bogus)
 
     def append(self, inst: Element, noteEntry: bool = False) -> None:
         """ Trans: Appends an element to the end of the Page """
@@ -67,7 +67,7 @@ class Page(Element):
         trans.reference(inst)
 
         entry = PageEntry(inst)
-        self.content.append(entry)
+        self.entries.append(entry)
         if noteEntry:
             self.latestEntry = entry
 
@@ -87,7 +87,7 @@ class Page(Element):
         try:
             entry = PageEntry(inst)
             offset = self.find(keyEntryOrElement)
-            self.content.insert(offset, entry)
+            self.entries.insert(offset, entry)
             if noteEntry:
                 self.latestEntry = entry
 
@@ -111,7 +111,7 @@ class Page(Element):
         try:
             entry = PageEntry(inst)
             offset = self.find(keyEntryOrElement)
-            self.content.insert(offset + 1, entry)
+            self.entries.insert(offset + 1, entry)
             if noteEntry:
                 self.latestEntry = entry
             
@@ -130,7 +130,7 @@ class Page(Element):
         trans.reference(inst)
 
         entry = PageEntry(inst)
-        self.content.insert(offset, entry)
+        self.entries.insert(offset, entry)
         if noteEntry:
             self.latestEntry = entry
 
@@ -145,7 +145,7 @@ class Page(Element):
         
         try:
             offset = self.find(keyEntryOrElement)
-            entry = self.content.pop(offset)
+            entry = self.entries.pop(offset)
 
             trans.reverseOp = lambda: self.insertAt(entry.element, offset)
 
@@ -161,7 +161,7 @@ class Page(Element):
         trans = self.newTransaction()
 
         try:
-            entry = self.content.pop(offset)
+            entry = self.entries.pop(offset)
 
             trans.reverseOp = lambda: self.insertAt(entry.element, offset)
 

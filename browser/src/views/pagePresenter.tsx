@@ -7,7 +7,7 @@ import TextPresenter from './textPresenter';
 import PageView from './pageView';
 
 type PageValue = {
-    content: {
+    entries: {
         key: number,
         element: Proxy
     }[];
@@ -31,7 +31,7 @@ export default class PagePresenter extends ElementPresenter
         let pageValue: PageValue = await this.element.call('value');
 
         this.children = []
-        for (const entry of pageValue.content) {
+        for (const entry of pageValue.entries) {
             let type = await entry.element.call<string>('type')
             let child = this.presenterForEntry(entry.key, type, entry.element)
             await child.fetch();
