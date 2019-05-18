@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import Proxy from './proxy';
+import { argumentPlaceholder } from '@babel/types';
 
 export interface Proxyable {
     proxyableId: number | null;
@@ -14,7 +15,7 @@ export abstract class Presenter
     abstract async fetch(): Promise<any>;
 
     // Hook to update information asynchronously when a connected model has changed
-    abstract modelChanged(object: Proxy, model: Model): Promise<void>;
+    abstract modelChanged(object: Proxy, model: Model<any>): Promise<void>;
 
     async fetchView(): Promise<ReactElement> {
         await this.fetch();
@@ -22,11 +23,19 @@ export abstract class Presenter
     }
 }
 
+export type Argument = {
+    type: string;
+    value: any;
+}
+
+export type Model<T> = {
+    id: number;
+    type: string;
+    value: T
+}
+
 export type Dict<T> = { [_: string]: T }
 
-export type Argument = Dict<any>
-
-export type Model = Dict<any>
 
 export type Mapping<T> = (_: T) => T;
 // e.g. X => foo(X)

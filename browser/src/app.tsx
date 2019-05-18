@@ -15,8 +15,8 @@ export default class App
 
     connected(host: Proxy) {
         (async () => {
-            let page = await host.call('rootPage', []);
-            let clipboard = await host.call('clipboardPage', []);
+            let page = await host.call<Proxy>('rootPage', []);
+            let clipboard = await host.call<Proxy>('clipboardPage', []);
             await this.setPage(page, clipboard);
         })();
     }

@@ -18,7 +18,7 @@ export default class Proxy
         return this.immId;
     }
 
-    async call(selector: string, args: any[] = []) {
+    async call<T>(selector: string, args: any[] = []): Promise<T> {
         return await this.dispatchCall(this.immId, selector, args, true);
     }
 

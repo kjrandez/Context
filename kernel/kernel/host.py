@@ -192,13 +192,13 @@ class Host:
 
     def decodedArgument(self, arg: Argument) -> object:
         if arg['type'] == 'hostObject':
-            if arg['id'] == 0:
+            if arg['value'] == 0:
                 return self.hostService
             else:
-                localId = cast(int, arg['id'])
+                localId = cast(int, arg['value'])
                 return self.dataset.lookup(localId)
         elif arg['type'] == 'clientObject':
-            foreignId = cast(int, arg['id'])
+            foreignId = cast(int, arg['value'])
             return self.proxyMap.getObject(foreignId)
         elif arg['type'] == 'list':
             return [self.decodedArgument(X) for X in cast(List, arg['value'])]
@@ -209,11 +209,11 @@ class Host:
 
     def encodedArgument(self, arg: object) -> Argument:
         if arg == self.hostService:
-            return {'type': 'hostObject', 'id': 0}
+            return {'type': 'hostObject', 'value': 0}
         elif isinstance(arg, Element):
-            return {'type': 'hostObject', 'id': arg.id}
+            return {'type': 'hostObject', 'value': arg.id}
         elif isinstance(arg, Proxy):
-            return {'type': 'clientObject', 'id': arg.id}
+            return {'type': 'clientObject', 'value': arg.id}
         elif isinstance(arg, list):
             return {
                 'type': 'list',

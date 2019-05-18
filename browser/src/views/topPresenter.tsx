@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import App from '../app';
 import Proxy from '../proxy';
-import { Presenter } from '../interfaces';
+import { Presenter, Model } from '../interfaces';
 import PagePresenter from './pagePresenter';
 
 export default class TopPresenter extends Presenter
@@ -35,7 +35,7 @@ export default class TopPresenter extends Presenter
             this.pageContent = await this.pagePresenter.fetchView();
     }
 
-    async modelChanged(object: Proxy, model: any): Promise<void> {
+    async modelChanged(object: Proxy, model: Model<any>): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

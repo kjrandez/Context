@@ -1,9 +1,10 @@
 import React, { ReactElement, Children } from 'react';
-import { Presenter } from '../interfaces';
+import { Presenter, Model } from '../interfaces';
 import Proxy from '../proxy';
 import ElementPresenter from './elementPresenter';
 import UnknownPresenter from './unknownPresenter';
 import TextPresenter from './textPresenter';
+import PageView from './pageView';
 
 type PageValue = {
     content: {
@@ -23,9 +24,7 @@ export default class PagePresenter extends ElementPresenter
         if (this.children == null)
             return <div>No content loaded</div>;
         
-        return <div style={{marginLeft: '20px'}}>
-            {this.children.map(X => X.view())}
-        </div>
+        return <PageView key={this.key} title="Page Title" content={this.children.map(X => X.view())} />
     }
 
     async fetch(): Promise<void> {
@@ -33,14 +32,14 @@ export default class PagePresenter extends ElementPresenter
 
         this.children = []
         for (const entry of pageValue.content) {
-            let type = await entry.element.call('type')
+            let type = await entry.element.call<string>('type')
             let child = this.presenterForEntry(entry.key, type, entry.element)
             await child.fetch();
             this.children.push(child)
         }
     }
 
-    async modelChanged(object: Proxy, model: any): Promise<void> {
+    async modelChanged(object: Proxy, model: Model<PageValue>): Promise<void> {
         throw new Error("Method not implemented.");
     }
 

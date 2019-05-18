@@ -82,9 +82,9 @@ export default class Client
 
     decodedArgument(argDesc: Argument): any {
         if (argDesc.type == 'hostObject')
-            return this.foreignObjects.getObject(argDesc.id) // Fragment ~= Proxy
+            return this.foreignObjects.getObject(argDesc.value)
         else if (argDesc.type == 'clientObject')
-            return this.localObjects.getObject(argDesc.id);
+            return this.localObjects.getObject(argDesc.value);
         else if (argDesc.type == 'list')
             return argDesc.value.map((X: any) => this.decodedArgument(X))
         else if (argDesc.type == 'dictionary')
@@ -95,9 +95,9 @@ export default class Client
 
     encodedArgument(arg: any): Argument {
         if (arg instanceof Proxy) 
-            return { type: 'hostObject', id: arg.id() };
+            return { type: 'hostObject', value: arg.id() };
         else if ('proxyableId' in arg) // "instanceof Proxyable"
-            return { type: 'clientObject', id: this.localObjects.getTag(arg) };
+            return { type: 'clientObject', value: this.localObjects.getTag(arg) };
         else if (arg instanceof Array)
             return { type: 'list', value: arg.map(X => this.encodedArgument(X))}
         else if (arg instanceof Object)
@@ -111,7 +111,7 @@ class ClientService implements Proxyable
 {
     proxyableId: number | null = null;
 
-    broadcastChange(foreignObject: Proxy, model: Model) {
+    broadcastChange(foreignObject: Proxy, model: Model<any>) {
         foreignObject.handleChange(model);
     }
 }
