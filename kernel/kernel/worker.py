@@ -21,7 +21,7 @@ class Worker(threading.Thread):
             block(*args)
         await self.workThreadQueue.async_q.put(executeBlock)
 
-    def finish(self) -> None:
+    def stop(self) -> None:
         self.finished = True
 
         def push() -> None:

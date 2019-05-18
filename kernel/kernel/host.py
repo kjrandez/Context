@@ -4,7 +4,6 @@ from asyncio import Future, AbstractEventLoop
 from typing import Optional, List, Awaitable, Dict, Callable, Union, cast
 
 from .dataset import Dataset
-from .worker import Worker
 from .element import Element, Transaction
 from .elements.page import Page
 
@@ -80,12 +79,11 @@ class HostService:
 
 class Host:
     def __init__(
-            self, loop: AbstractEventLoop, websocket: websockets.WebSocketServerProtocol,
-            dataset: Dataset, worker: Worker) -> None:
+            self, loop: AbstractEventLoop,
+            websocket: websockets.WebSocketServerProtocol, dataset: Dataset) -> None:
 
         self.loop = loop
         self.websocket = websocket
-        self.worker = worker
         self.dataset = dataset
 
         def makeProxy(tag: int) -> Proxy:
@@ -201,9 +199,11 @@ class Host:
             foreignId = cast(int, arg['value'])
             return self.proxyMap.getObject(foreignId)
         elif arg['type'] == 'list':
-            return [self.decodedArgument(X) for X in cast(List, arg['value'])]
+            items = cast(List[Argument], arg['value'])
+            return [self.decodedArgument(X) for X in items]
         elif arg['type'] == 'dictionary':
-            return {K: self.decodedArgument(V) for K, V in cast(Dict, arg['value'])}
+            items = cast(Dict[str, Argument], arg['value']).items()
+            return {K: self.decodedArgument(V) for K, V in items}
         else:
             return arg['value']
 
@@ -217,12 +217,13 @@ class Host:
         elif isinstance(arg, list):
             return {
                 'type': 'list',
-                'value': [self.encodedArgument(X) for X in cast(List, arg)]
+                'value': [self.encodedArgument(X) for X in arg]
             }
         elif isinstance(arg, dict):
+            items = cast(Dict[str, object], arg).items()
             return {
                 'type': 'dictionary',
-                'value': {K: self.encodedArgument(V) for K, V in cast(Dict, arg).items()}
+                'value': {K: self.encodedArgument(V) for K, V in items}
             }
         else:
             return {'type': 'primitive', 'value': arg}
