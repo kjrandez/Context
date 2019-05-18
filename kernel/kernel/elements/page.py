@@ -14,7 +14,7 @@ class PageEntry:
         PageEntry.nextKey = PageEntry.nextKey + 1
 
     def model(self) -> Model:
-        return {'key': self.key, 'element': self.element.id}
+        return {'key': self.key, 'element': self.element}
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, PageEntry):

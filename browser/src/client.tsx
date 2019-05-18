@@ -1,5 +1,5 @@
 import Proxy from './proxy';
-import { Proxyable, Argument, Model } from './interfaces';
+import { Proxyable, Argument, Model, mapObjValues } from './interfaces';
 
 export default class Client
 {
@@ -85,6 +85,10 @@ export default class Client
             return this.foreignObjects.getObject(argDesc.id) // Fragment ~= Proxy
         else if (argDesc.type == 'clientObject')
             return this.localObjects.getObject(argDesc.id);
+        else if (argDesc.type == 'list')
+            return argDesc.value.map((X: any) => this.decodedArgument(X))
+        else if (argDesc.type == 'dictionary')
+            return mapObjValues(argDesc.value, (X: any) => this.decodedArgument(X))
         else
             return argDesc.value;
     }
@@ -92,8 +96,12 @@ export default class Client
     encodedArgument(arg: any): Argument {
         if (arg instanceof Proxy) 
             return { type: 'hostObject', id: arg.id() };
-        else if ('proxyableId' in arg) // instanceof Proxyable
+        else if ('proxyableId' in arg) // "instanceof Proxyable"
             return { type: 'clientObject', id: this.localObjects.getTag(arg) };
+        else if (arg instanceof Array)
+            return { type: 'list', value: arg.map(X => this.encodedArgument(X))}
+        else if (arg instanceof Object)
+            return { type: 'dictionary', value: mapObjValues(arg, X => this.encodedArgument(X))}
         else
             return { type: 'primitive', value: arg };
     }

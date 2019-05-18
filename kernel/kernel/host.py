@@ -200,6 +200,10 @@ class Host:
         elif arg['type'] == 'clientObject':
             foreignId = cast(int, arg['id'])
             return self.proxyMap.getObject(foreignId)
+        elif arg['type'] == 'list':
+            return [self.decodedArgument(X) for X in cast(List, arg['value'])]
+        elif arg['type'] == 'dictionary':
+            return {K: self.decodedArgument(V) for K, V in cast(Dict, arg['value'])}
         else:
             return arg['value']
 
@@ -210,6 +214,16 @@ class Host:
             return {'type': 'hostObject', 'id': arg.id}
         elif isinstance(arg, Proxy):
             return {'type': 'clientObject', 'id': arg.id}
+        elif isinstance(arg, list):
+            return {
+                'type': 'list',
+                'value': [self.encodedArgument(X) for X in cast(List, arg)]
+            }
+        elif isinstance(arg, dict):
+            return {
+                'type': 'dictionary',
+                'value': {K: self.encodedArgument(V) for K, V in cast(Dict, arg).items()}
+            }
         else:
             return {'type': 'primitive', 'value': arg}
 
