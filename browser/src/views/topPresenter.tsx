@@ -4,32 +4,38 @@ import Proxy from '../proxy';
 import { DynamicPresenter } from '../interfaces';
 import PagePresenter from './pagePresenter';
 
-export default class TopPresenter implements DynamicPresenter
+export default class TopPresenter extends DynamicPresenter
 {
     app: App;
     pagePresenter: PagePresenter | null;
+    pageContent: ReactElement | null;
 
     constructor(app: App, page: Proxy | null) {
+        super();
+        
         this.app = app;
 
         if (page != null)
             this.pagePresenter = new PagePresenter(this, page);
         else
             this.pagePresenter = null;
+
+        this.pageContent = null;
     }
 
-    modelChanged(object: Proxy, model: any): void {
+    view(): ReactElement {
+        if (this.pageContent == null)
+            return <div>No Content</div>;
+        
+        return <div>{this.pageContent}</div>;
+    }
+
+    async fetch(): Promise<void> {
+        if (this.pagePresenter != null)
+            this.pageContent = await this.pagePresenter.fetchView();
+    }
+
+    async modelChanged(object: Proxy, model: any): Promise<void> {
         throw new Error("Method not implemented.");
-    }
-
-    contentChanged(): void {
-        this.app.rootChanged();
-    }
-
-    render(): ReactElement {
-        if (this.pagePresenter == null)
-            return <div>Top</div>;
-        else
-            return <div>Content</div>;
     }
 }

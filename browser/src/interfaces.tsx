@@ -5,13 +5,28 @@ export interface Proxyable {
     proxyableId: number | null;
 }
 
-export interface DynamicPresenter extends Presenter
+export abstract class Presenter
 {
-    contentChanged(): void;
+    // Synchronous render, must return quickly
+    abstract view(): ReactElement;
+
+    // Update data asynchronously if necessary
+    abstract async fetch(): Promise<any>;
+
+    // Hook to update information asynchronously when a connected model has changed
+    abstract modelChanged(object: Proxy, model: Model): Promise<void>;
+
+    async fetchView(): Promise<ReactElement> {
+        await this.fetch();
+        return this.view();
+    }
 }
 
-export interface Presenter
+export abstract class DynamicPresenter extends Presenter
 {
-    modelChanged(object: Proxy, model: any): void;
-    render(): ReactElement;
+    //contentChanged(): void;
 }
+
+export type Argument = { [_: string]: any }
+
+export type Model = { [_: string]: any }

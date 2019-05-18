@@ -1,5 +1,5 @@
 import Proxy from './proxy';
-import { Proxyable } from './interfaces';
+import { Proxyable, Argument, Model } from './interfaces';
 
 export default class Client
 {
@@ -48,7 +48,7 @@ export default class Client
     }
 
     dispatchCall(targetId: number, selector: string, args: any[]) {
-        let argDescs: any[] = args.map((X: any) => this.encodedArgument(X));
+        let argDescs: Argument[] = args.map((X: any) => this.encodedArgument(X));
         
         return new Promise<any>((resolve, reject) => this.websocketSend({
             type: 'call',
@@ -59,11 +59,11 @@ export default class Client
         }));
     }
 
-    handleCall(foreignId: number, targetId: number, selector: string, argDescs: []) {
-        let target: any = this.localObjects.getObject(targetId);
+    handleCall(foreignId: number, targetId: number, selector: string, argDescs: Argument[]) {
+        let target: Proxyable = this.localObjects.getObject(targetId);
         let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
 
-        let result: any = target[selector].apply(target, args)
+        let result = (target as any)[selector].apply(target, args)
 
         this.websocketSend({
             type: 'return',
@@ -80,7 +80,7 @@ export default class Client
         resolve(result);
     }
 
-    decodedArgument(argDesc: any) {
+    decodedArgument(argDesc: Argument): any {
         if (argDesc.type == 'hostObject')
             return this.foreignObjects.getObject(argDesc.id) // Fragment ~= Proxy
         else if (argDesc.type == 'clientObject')
@@ -89,7 +89,7 @@ export default class Client
             return argDesc.value;
     }
 
-    encodedArgument(arg: any): any {
+    encodedArgument(arg: any): Argument {
         if (arg instanceof Proxy) 
             return { type: 'hostObject', id: arg.id() };
         else if ('proxyableId' in arg) // instanceof Proxyable
@@ -103,7 +103,7 @@ class ClientService implements Proxyable
 {
     proxyableId: number | null = null;
 
-    broadcastChange(foreignObject: Proxy, model: any) {
+    broadcastChange(foreignObject: Proxy, model: Model) {
         foreignObject.handleChange(model);
     }
 }

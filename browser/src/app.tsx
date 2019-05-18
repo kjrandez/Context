@@ -14,27 +14,20 @@ export default class App
     }
 
     connected(host: Proxy) {
-        let startup = (async () => {
+        (async () => {
             let page = await host.call('rootPage', []);
             let clipboard = await host.call('clipboardPage', []);
-            this.setPage(page, clipboard);
+            await this.setPage(page, clipboard);
         })();
-        
-        startup.then();
     }
 
     disconnected() {
         this.clearPage();
     }
 
-    rootChanged() {
-        if (this.top != null)
-            ReactDOM.render(this.top.render(), document.getElementById('root'));
-    }
-
-    setPage(page: Proxy, clipboard: Proxy) {
+    async setPage(page: Proxy, clipboard: Proxy) {
         this.top = new TopPresenter(this, page);
-        ReactDOM.render(this.top.render(), document.getElementById('root'));
+        ReactDOM.render(await this.top.fetchView(), document.getElementById('root'));
     }
     
     clearPage() {
