@@ -88,7 +88,7 @@ class Transaction:
         self.others.append(element)
 
     def result(self, value: object) -> None:
-        self.value = object;
+        self.value = value
 
     def model(self) -> Model:
         return {

@@ -5,27 +5,46 @@ type Subscriber<S extends Presenter, T, R> = {
     callback: (_:T) => R
 }
 
-class Subscribable<S extends Presenter, T, R>
+class Subscribable<T>
 {
-    subscribers: Subscriber<S, T, R>[] = [];
+    syncSubscribers: Subscriber<Presenter, T, void>[] = [];
+    asyncSubscribers: Subscriber<AsyncPresenter, T, Promise<void>>[] = [];
 
-    attach(path: S[], callback: (_:T) => R) {
-        this.subscribers.push({
+    attach(path: Presenter[], callback: (_:T) => void) {
+        this.syncSubscribers.push({
             path: path,
             callback: callback
         });
     }
 
-    detach(path: S[]) {
-        var index = this.subscribers.findIndex(entry => entry.path === path);
+    detach(path: Presenter[]) {
+        var index = this.syncSubscribers.findIndex(entry => entry.path === path);
         if (index >= 0)
-            this.subscribers.splice(index, 1);
+            this.syncSubscribers.splice(index, 1);
+    }
+
+    attachAsync(path: AsyncPresenter[], callback: (_:T) => Promise<void>) {
+        this.asyncSubscribers.push({path: path, callback: callback});
+    }
+
+    detachAsync(path: AsyncPresenter[]) {
+        var index = this.asyncSubscribers.findIndex(entry => entry.path === path);
+        if (index >= 0)
+            this.asyncSubscribers.splice(index, 1);
     }
 }
 
 export type PathFilter<T> = (path: Presenter[], prevState: T) => boolean;
 
-class GenericContainer<S extends Presenter, T, R> extends Subscribable<S, T, R>
+type SetAction = {
+    setStateAction: () => void;
+    syncPaths: Presenter[][];
+    asyncPaths: AsyncPresenter[][];
+    dispatchSyncAction: () => void;
+    dispatchAsyncAction: () => Promise<void>;
+}
+
+export class Container<T> extends Subscribable<T>
 {
     state: T;
 
@@ -35,97 +54,99 @@ class GenericContainer<S extends Presenter, T, R> extends Subscribable<S, T, R>
     }
 
     set(newState: T, filter: PathFilter<T> = () => true) {
-        let receivers = this.subscribers.filter(subscriber => filter(subscriber.path, this.state));
-        this.state = newState;
-        dispatch(receivers, this.state);
+        let setter = this.setter(newState, filter);
+        Container.setMany(setter);
+    }
+
+    setter(newState: T, filter: PathFilter<T> = () => true): SetAction {
+        let syncReceivers = this.syncSubscribers.filter(subscriber => filter(subscriber.path, this.state));
+        let asyncReceivers = this.asyncSubscribers.filter(subscriber => filter(subscriber.path, this.state));
+
+        return {
+            setStateAction: () => this.state = newState,
+            syncPaths: syncReceivers.map(X => X.path),
+            asyncPaths: asyncReceivers.map(X => X.path),
+            dispatchSyncAction: () => dispatchSync(syncReceivers, newState),
+            dispatchAsyncAction: async () => await dispatchAsync(asyncReceivers, newState)
+        };
+    }
+
+    static setMany(...setters: SetAction[]) {
+        let allSyncPaths = setters.reduce(
+            (paths, action) => paths.concat(action.syncPaths),
+            [] as Presenter[][]
+        );
+
+        let allAsyncPaths = setters.reduce(
+            (paths, action) => paths.concat(action.asyncPaths),
+            [] as Presenter[][]
+        );
+
+        // Update state
+        setters.forEach(action => action.setStateAction());
+
+        // Inform synchronous
+        setters.forEach(action => action.dispatchSyncAction());
+
+        // Refresh common root of all sync subscribers
+        refresh(allSyncPaths);
+
+        // Inform asynchronous
+        Promise.all(setters.map(action => action.dispatchAsyncAction())).then(() => {
+
+            // Then, refresh common root of all async subscribers
+            refresh(allAsyncPaths);
+        });
     }
 }
 
-export class Container<T> extends GenericContainer<Presenter, T, void> {}
-
-export class AsyncContainer<T> extends GenericContainer<AsyncPresenter, T, Promise<void>>
+export class Proxy<T> extends Subscribable<T>
 {
-    async set(newState: T, filter: PathFilter<T> = () => true) {
-        let receivers = this.subscribers.filter(subscriber => filter(subscriber.path, this.state));
-        this.state = newState;
-        await dispatchAsync(receivers, this.state);
-    }
-}
-
-export class DualContainer<T> extends GenericContainer<Presenter, T, void>
-{
-    delayedSubscribers: Subscriber<AsyncPresenter, T, Promise<void>>[] = [];
-
-    attachDelayed(path: AsyncPresenter[], callback: (_:T) => Promise<void>) {
-        this.delayedSubscribers.push({path: path, callback: callback});
-    }
-
-    detachDelayed(path: AsyncPresenter[]) {
-        var index = this.delayedSubscribers.findIndex(entry => entry.path === path);
-        if (index >= 0)
-            this.delayedSubscribers.splice(index, 1);
-    }
-
-    async set(newState: T, filter: PathFilter<T> = () => true) {
-        let oldState = this.state;
-        super.set(newState, filter);
-
-        let delayedReceivers = this.delayedSubscribers.filter(subs => filter(subs.path, oldState));
-        await dispatchAsync(delayedReceivers, this.state);
-    }
-}
-
-export class Proxy<T> extends Subscribable<AsyncPresenter, T, Promise<void>>
-{
-    immId: number;
+    id: number;
     dispatchCall: Function;
 
     constructor(tag: number, dispatcher: Function) {
         super();
         this.dispatchCall = dispatcher
-        this.immId = tag;
+        this.id = tag;
     }
 
-    id() {
-        return this.immId;
+    attach(_: Presenter[], __: (_:T) => void) {
+        throw new Error("Proxy ignores synchronous subscribers.");
+    }
+
+    detach(_: Presenter[]) {
+        throw new Error("Proxy ignores synchronous subscribers.");
     }
 
     async call<T>(selector: string, args: any[] = []): Promise<T> {
-        return await this.dispatchCall(this.immId, selector, args, true);
+        return await this.dispatchCall(this.id, selector, args, true);
     }
 
     send(selector: string, args: any[] = []) {
-        this.dispatchCall(this.immId, selector, args, false);
+        this.dispatchCall(this.id, selector, args, false);
     }
 
-    broadcast(value: T) {
-        dispatchAsync(this.subscribers, value);
-    }
-}
-
-function dispatch<S extends Presenter, T, R>(
-    receivers: Subscriber<S, T, R>[], result: T)
-{
-    let paths = receivers.map(X => X.path);
-    let changeRoot = commonRoot(paths); 
-
-    if (changeRoot != null) {
-        receivers.forEach(receiver => receiver.callback(result))
-        changeRoot.refresh();
+    async broadcast(value: T): Promise<void> {
+        dispatchAsync(this.asyncSubscribers, value).then(
+            () => refresh(this.asyncSubscribers.map(subscriber => subscriber.path))
+        );
     }
 }
 
-async function dispatchAsync<S extends AsyncPresenter, T, R>(
-    receivers: Subscriber<S, T, Promise<R>>[], result: T)
-{
-    let paths = receivers.map(X => X.path);
+function dispatchSync<T>(receivers: Subscriber<Presenter, T, void>[], result: T) {
+    receivers.forEach(receiver => receiver.callback(result))
+}
+
+async function dispatchAsync<T>(receivers: Subscriber<AsyncPresenter, T, Promise<void>>[], result: T) {
+    for (const subscriber of receivers)
+        await subscriber.callback(result);
+}
+
+function refresh(paths: Presenter[][]) {
     let changeRoot = commonRoot(paths);
-
-    if (changeRoot != null) {
-        for (const subscriber of receivers)
-            await subscriber.callback(result);
+    if (changeRoot != null)
         changeRoot.refresh();
-    }
 }
 
 function commonRoot<T>(paths: T[][]) {

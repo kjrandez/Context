@@ -97,7 +97,7 @@ export default class Client
     constructor(connected: (_: Proxy<never>) => Promise<void>, disconnected: () => void) {
         let clientService = {
             proxyableId: null,
-            broadcast: (trans: TransactionModel) => this.handleBroadcast(trans)
+            broadcast: (trans: TransactionModel) => trans.subject.broadcast(trans.value).then()
         };
         this.localObjects = new ProxyableTable(clientService);
 
@@ -109,7 +109,7 @@ export default class Client
         this.websocket.onclose = (_) => disconnected();
 
         let hostService = this.foreignObjects.getObject(0);
-        this.websocket.onopen = (_) => this.handleConnected(connected, hostService);
+        this.websocket.onopen = (_) => connected(hostService).then();
     }
 
     dispatchWebsocketSend(data: object) {
@@ -176,18 +176,6 @@ export default class Client
         resolve(result);
     }
 
-    handleConnected(connected: (_:Proxy<never>) => Promise<void>, hostService: Proxy<never>) {
-        (async () => {
-            await connected(hostService)
-        })();
-    }
-
-    handleBroadcast(trans: TransactionModel) {
-        (async () => {
-            await trans.subject.broadcast(trans.value);
-        })();
-    }
-
     decodedArgument(argDesc: Argument): any {
         if (argDesc.type === 'hostObject')
             return this.foreignObjects.getObject(argDesc.value)
@@ -203,7 +191,7 @@ export default class Client
 
     encodedArgument(arg: any): Argument {
         if (arg instanceof Proxy) 
-            return { type: 'hostObject', value: arg.id() };
+            return { type: 'hostObject', value: arg.id };
         else if ('proxyableId' in arg) // "instanceof Proxyable"
             return { type: 'clientObject', value: this.localObjects.getTag(arg) };
         else if (arg instanceof Array)

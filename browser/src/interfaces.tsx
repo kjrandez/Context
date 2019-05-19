@@ -9,7 +9,7 @@ export type DictMapping<T> = (_: [string, T]) => {[_: string]: T}
 export function mapObj<T>(obj: Dict<T>, mapping: DictMapping<T>): {[_: string]: T} {
     return Object.assign({}, ...Object.entries(obj).map(mapping));
 }
-
+ 
 export function mapObjValues<T>(obj: Dict<T>, mapping: Mapping<T>) {
     return mapObj(obj, ([K,V]: [string, T]) => ( {[K]: mapping(V)} ) );
 }

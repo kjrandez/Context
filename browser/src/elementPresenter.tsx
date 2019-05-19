@@ -11,7 +11,7 @@ export default abstract class ElementPresenter extends AsyncPresenter
     constructor(state: AppState, parentPath: AsyncPresenter[], args: ElementPresenterArgs) {
         super(state, parentPath, args);
         this.subject = args.subject;
-        this.subject.attach(this.path, this.onUpdate.bind(this));
+        this.subject.attachAsync(this.path, this.onUpdate.bind(this));
     }
 
     abandoned() {
