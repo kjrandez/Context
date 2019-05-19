@@ -1,32 +1,41 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Proxy from './proxy';
 import TopPresenter from './topPresenter';
 import Client from './client';
+import Presenter from './presenter';
+import { Container, Proxy } from './state';
 
-type TransactionModel = {
-    id: number,
-    subject: Proxy
+export class AppState
+{
+    navigate: (_:Proxy) => void;
+
+    selection: Container<Presenter[]>
+
+    constructor(navigate: (_:Proxy) => void) {
+        this.navigate = navigate;
+        
+        this.selection = new Container<Presenter[]>([])
+    }
+
+    elementClicked(element: Presenter, ctrlDown: boolean) {
+        this.selection.set([element]);
+    }
 }
 
 export default class App
 {
+    state: AppState | null = null;
     top: TopPresenter | null = null;
 
     constructor() {
         this.clearPage();
-        new Client(
-            this.connected.bind(this),
-            this.disconnected.bind(this),
-            this.broadcast.bind(this)
-        );
+        new Client(this.connected.bind(this), this.disconnected.bind(this));
     }
 
     connected(host: Proxy) {
         (async () => {
-            let page = await host.call<Proxy>('rootPage', []);
-            let clipboard = await host.call<Proxy>('clipboardPage', []);
-            await this.setPage(page, clipboard);
+            let rootPage = await host.call<Proxy>('rootPage', []);
+            await this.setPage(rootPage);
         })();
     }
 
@@ -34,72 +43,20 @@ export default class App
         this.clearPage();
     }
 
-    broadcast(transaction: TransactionModel) {
-        let paths = transaction.subject.sensitivePaths();
-        let changeRoot = commonRoot(paths); 
+    async setPage(page: Proxy) {
+        if (this.top != null)
+            this.top.abandoned();
 
-        if (changeRoot != null) {
-            (async () => {
-                await changeRoot.onChange(transaction.subject);
-                changeRoot.refresh();
-            })();
-        }
-    }
+        this.state = new AppState(this.setPage.bind(this));
+        this.top = new TopPresenter(this.state, page);
 
-    async setPage(page: Proxy, clipboard: Proxy) {
-        this.top = new TopPresenter(this, page);
         await this.top.onLoad();
         ReactDOM.render(this.top.render(), document.getElementById('root'));
     }
     
     clearPage() {
-        ReactDOM.render(<div></div>, document.getElementById('root'));
+        ReactDOM.render(<div>No root</div>, document.getElementById('root'));
     }
-}
-
-function commonRoot<T>(paths: T[][]) {
-    let root: T | null = null;
-    
-    if (paths.length === 1) {
-        root = paths[0].slice(-1)[0];
-    }
-    else if (paths.length > 1) {
-        let finished = false;
-        let i = 0;
-
-        while (!finished) {
-            let current: T | null = null;
-
-            for (const path of paths) {
-                // If a path doesn't extend this far, we are done checking this level
-                if (path.length <= i) {
-                    current = null;
-                    finished = true;
-                    break;
-                }
-
-                if (current == null) {
-                    // All other paths checked against this level of the first path
-                    current = path[i]
-                }
-                else if (path[i] !== current) {
-                    // A path doesn't match the first path, we are done checking this level
-                    current = null;
-                    finished = true;
-                    break;
-                }
-            }
-
-            // If current is set, all paths are matching at this index, move the root forward
-            if (current != null) {
-                root = current;
-            }
-
-            i ++;
-        }
-    }
-
-    return root;
 }
 
 

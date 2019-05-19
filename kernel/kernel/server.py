@@ -38,7 +38,7 @@ class Server(Thread):
             await self.killServer
 
     async def connection(self, websocket: websockets.WebSocketServerProtocol, path: str) -> None:
-        print("Connection at path: " + path)
+        # print("Connection at path: " + path)
         if not path == "/broadcast":
             return
 

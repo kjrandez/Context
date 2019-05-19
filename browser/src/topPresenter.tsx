@@ -1,23 +1,18 @@
 import React, { ReactElement } from 'react';
-import App from './app';
-import Proxy from './proxy';
+import { AppState } from './app';
+import { Proxy } from './state';
 import Presenter from './presenter';
 import PagePresenter from './views/pagePresenter';
 
 export default class TopPresenter extends Presenter
 {
-    app: App;
-    pagePresenter: PagePresenter | null;
+    pagePresenter: PagePresenter;
 
-    constructor(app: App, page: Proxy | null) {
-        super([], 0); // Root
+    constructor(state: AppState, page: Proxy) {
+        super(state, [], 0); // Root
         
-        this.app = app;
-
-        if (page != null)
-            this.pagePresenter = new PagePresenter(this.path, 0, page);
-        else
-            this.pagePresenter = null;
+        this.state = state;
+        this.pagePresenter = new PagePresenter(this.state, this.path, 0, page);
     }
 
     view(): ReactElement {
@@ -32,8 +27,12 @@ export default class TopPresenter extends Presenter
             await this.pagePresenter.onLoad();
     }
 
-    async onChange(subject: Proxy): Promise<void> {
+    async onUpdate(subject: Proxy): Promise<void> {
         if (this.pagePresenter != null)
-            await this.pagePresenter.onChange(subject);
+            await this.pagePresenter.onUpdate(subject);
+    }
+
+    abandoned() {
+        this.pagePresenter.abandoned();
     }
 }

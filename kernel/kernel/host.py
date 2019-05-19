@@ -99,19 +99,18 @@ class Host:
         try:
             while True:
                 message = json.loads(await self.websocket.recv())
-                print("<< ---------- RECV ---------- << " + json.dumps(message, indent=2))
+                # print("<< ---------- RECV ---------- << " + json.dumps(message, indent=2))
                 await self.dispatch(message)
         except websockets.exceptions.ConnectionClosed:
-            print("Connection closed")
+            # print("Connection closed")
+            pass
 
     async def send(self, value: object) -> None:
-        print(">> ---------- SEND ---------- >> " + json.dumps(value, indent=2))
+        # print(">> ---------- SEND ---------- >> " + json.dumps(value, indent=2))
         await self.websocket.send(json.dumps(value))
 
     async def broadcast(self, trans: Transaction) -> None:
         model = trans.model()
-        print("Broadcasting transaction: ")
-        print(model)
         await self.clientService.send('broadcast', [model])
 
     async def clientCall(self, targetId: int, selector: str, arguments: List[object]) -> object:

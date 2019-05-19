@@ -1,5 +1,14 @@
-import Proxy from './proxy';
-import { Proxyable, Argument, mapObjValues } from './interfaces';
+import { Proxy } from './state';
+import { mapObjValues } from './interfaces';
+
+export interface Proxyable {
+    proxyableId: number | null;
+}
+
+export type Argument = {
+    type: string;
+    value: any;
+}
 
 class TagCache<T>
 {
@@ -70,6 +79,11 @@ class ProxyMap
     }
 }
 
+type TransactionModel = {
+    id: number,
+    subject: Proxy
+}
+
 export default class Client
 {
     websocket: WebSocket;
@@ -79,10 +93,10 @@ export default class Client
     localObjects: ProxyableTable;
     foreignObjects: ProxyMap;
 
-    constructor(connected: Function, disconnected: Function, broadcast: Function) {
+    constructor(connected: Function, disconnected: Function) {
         let clientService = {
-            proxyableId: 0,
-            broadcast: broadcast
+            proxyableId: null,
+            broadcast: (trans: TransactionModel) => trans.subject.broadcast()
         };
         this.localObjects = new ProxyableTable(clientService);
 

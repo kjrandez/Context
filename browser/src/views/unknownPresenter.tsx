@@ -1,6 +1,6 @@
 import ElementPresenter from '../elementPresenter';
 import React, { ReactElement } from 'react';
-import Proxy from '../proxy';
+import { Proxy } from '../state';
 import UnknownView from './unknownView';
 
 export default class UnknownPresenter extends ElementPresenter
@@ -18,9 +18,7 @@ export default class UnknownPresenter extends ElementPresenter
         this.type = await this.element.call('type');
     }
 
-    async onChange(subject: Proxy): Promise<void> {
-        if (subject === this.element) {
-            this.type = await this.element.call('type');
-        }
+    async onUpdate(_: Proxy): Promise<void> {
+        this.type = await this.element.call('type');
     }
 }

@@ -1,12 +1,3 @@
-export interface Proxyable {
-    proxyableId: number | null;
-}
-
-export type Argument = {
-    type: string;
-    value: any;
-}
-
 export type Model<T> = {
     id: number;
     type: string;

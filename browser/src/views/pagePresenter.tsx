@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import Proxy from '../proxy';
+import { Proxy } from '../state';
 import ElementPresenter from '../elementPresenter';
 import UnknownPresenter from './unknownPresenter';
 import TextPresenter from './textPresenter';
@@ -19,12 +19,12 @@ export default class PagePresenter extends ElementPresenter
 
     childOrder: string[] | null = null;
 
-    orphaned() {
+    abandoned() {
         if (this.children != null)
             for (const child of Object.values(this.children))
-                child.orphaned();
+                child.abandoned();
         
-        super.orphaned()
+        super.abandoned()
     }
 
     view(): ReactElement {
@@ -48,18 +48,8 @@ export default class PagePresenter extends ElementPresenter
         await this.fetchChildren();
     }
 
-    async onChange(subject: Proxy): Promise<void> {
-        if (subject === this.element) {
-            await this.fetchChildren();
-        }
-
-        if (this.childOrder != null) {
-            for (const key of this.childOrder) {
-                let child = this.children[key]
-                if (child != null)
-                    await child.onChange(subject);
-            }
-        }
+    async onUpdate(_: Proxy): Promise<void> {
+        await this.fetchChildren();
     }
 
     private async fetchChildren(): Promise<void> {
@@ -72,7 +62,7 @@ export default class PagePresenter extends ElementPresenter
         let prevEntries = Object.entries(this.children);
         for (const [key, child] of prevEntries) {
             if (!this.childOrder.includes(key)) {
-                child.orphaned();
+                child.abandoned();
                 delete this.children[key];
             }
         }
@@ -90,9 +80,9 @@ export default class PagePresenter extends ElementPresenter
 
     presenterForEntry(key: number, type: string, element: Proxy): ElementPresenter {
         switch(type) {
-            case 'Text': return new TextPresenter(this.path, key, element);
-            case 'Page': return new PagePresenter(this.path, key, element);
-            default: return new UnknownPresenter(this.path, key, element);
+            case 'Text': return new TextPresenter(this.state, this.path, key, element);
+            case 'Page': return new PagePresenter(this.state, this.path, key, element);
+            default: return new UnknownPresenter(this.state, this.path, key, element);
         }
     }
 }
