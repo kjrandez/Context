@@ -48,8 +48,6 @@ export abstract class Presenter
 
 export interface AsyncPresenterArgs
 {
-    state: AppState;
-    parentPath: AsyncPresenter[];
     key: number;
 }
 
@@ -58,26 +56,18 @@ export abstract class AsyncPresenter extends Presenter
     parentPath: AsyncPresenter[];
     path: AsyncPresenter[];
 
-    constructor(args: AsyncPresenterArgs) {
-        super(args.state, args.parentPath, args.key);
-        this.parentPath = args.parentPath;
-        this.path = args.parentPath.concat(this);
+    constructor(state: AppState, parentPath: AsyncPresenter[], args: AsyncPresenterArgs) {
+        super(state, parentPath, args.key);
+        this.parentPath = parentPath;
+        this.path = parentPath.concat(this);
     }
 
     async make<T extends AsyncPresenter, A extends AsyncPresenterArgs>(
-        ctor: {new (args: A): T}, args: A): Promise<T> {
+        ctor: {new (_: AppState, __: AsyncPresenter[], ___: A): T}, args: A): Promise<T> {
             
-        let inst = new ctor(args);
+        let inst = new ctor(this.state, this.path, args);
         await inst.load();
         return inst;
-    }
-
-    def(key: number): AsyncPresenterArgs {
-        return {
-            state: this.state,
-            parentPath: this.path,
-            key: key
-        }
     }
 
     abstract async load(): Promise<void>;

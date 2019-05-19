@@ -71,11 +71,11 @@ export default class PagePresenter extends ElementPresenter
     async presenterForEntry(key: number, type: string, element: Proxy): Promise<ElementPresenter> {
         switch(type) {
             case 'Text':
-                return this.make(TextPresenter, {...this.def(key), subject: element});
+                return this.make(TextPresenter, {key: key, subject: element});
             case 'Page':
-                return this.make(PagePresenter, {...this.def(key), subject: element});
+                return this.make(PagePresenter, {key: key, subject: element});
             default:
-                return this.make(UnknownPresenter, {...this.def(key), subject: element});
+                return this.make(UnknownPresenter, {key: key, subject: element});
         }
     }
 

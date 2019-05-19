@@ -58,12 +58,7 @@ export default class App
             this.top.abandoned();
 
         this.state = new AppState(this.setPage.bind(this));
-        this.top = new TopPresenter({
-            state: this.state,
-            parentPath: [],
-            key: 0,
-            page: page
-        });
+        this.top = new TopPresenter(this.state, [], {key: 0, page: page});
         await this.top.load();
         
         ReactDOM.render(this.top.render(), document.getElementById('root'));
