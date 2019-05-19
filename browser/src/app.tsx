@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import TopPresenter from './topPresenter';
 import Client from './client';
@@ -7,17 +6,19 @@ import { Container, Proxy } from './state';
 
 export class AppState
 {
-    private setPage: (_:Proxy<any>) => void;
-
+    topPage: Container<Proxy<any> | null>
     selection: Container<Presenter[]>
 
-    constructor(setPage: (_:Proxy<any>) => void) {
-        this.setPage = setPage;
+    constructor() {
+        this.topPage = new Container<Proxy<any> | null>(null);
         this.selection = new Container<Presenter[]>([])
     }
 
-    navigate(page: Proxy<any>) {
-        this.setPage(page);
+    navigate(page: Proxy<any> | null) {
+        Container.setMany(
+            this.topPage.setter(page),
+            this.selection.setter([])
+        )
     }
 
     elementClicked(element: Presenter, ctrlDown: boolean) {
@@ -34,36 +35,25 @@ export class AppState
 
 export default class App
 {
-    state: AppState | null = null;
-    top: TopPresenter | null = null;
+    state: AppState;
 
     constructor() {
-        this.clearPage();
+        this.state = new AppState();
         new Client(this.connected.bind(this), this.disconnected.bind(this));
     }
 
     async connected(host: Proxy<never>) {
         let rootPage = await host.call<Proxy<any>>('rootPage', []);
-        await this.setPage(rootPage);
+        this.state.navigate(rootPage);
+
+        let top = new TopPresenter(this.state, [], {key: 0});
+        await top.load();
+
+        ReactDOM.render(top.render(), document.getElementById('root'));
     }
 
     disconnected() {
-        this.clearPage();
-    }
-
-    async setPage(page: Proxy<any>) {
-        if (this.top != null)
-            this.top.abandoned();
-
-        this.state = new AppState(this.setPage.bind(this));
-        this.top = new TopPresenter(this.state, [], {key: 0, page: page});
-        await this.top.load();
-        
-        ReactDOM.render(this.top.render(), document.getElementById('root'));
-    }
-    
-    clearPage() {
-        ReactDOM.render(<div>No root</div>, document.getElementById('root'));
+        this.state.navigate(null);
     }
 }
 

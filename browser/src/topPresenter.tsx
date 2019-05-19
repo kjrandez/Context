@@ -2,22 +2,32 @@ import React, { ReactElement } from 'react';
 import { Proxy } from './state';
 import { AsyncPresenter, AsyncPresenterArgs } from './presenter';
 import PagePresenter from './views/pagePresenter';
-import { AppState } from './app';
 
 export interface TopPresenterArgs extends AsyncPresenterArgs { page: Proxy<any>; }
 
 export default class TopPresenter extends AsyncPresenter
 {
-    page: Proxy<any>;
     pagePresenter: PagePresenter | null = null;
 
-    constructor(state: AppState, parentPath: AsyncPresenter[], args: TopPresenterArgs) {
-        super(state, parentPath, args);
-        this.page = args.page;
+    async load(): Promise<void> {
+        let initialPage = this.state.topPage.get();
+        this.state.topPage.attachAsync(this.path, this.onPageChanged.bind(this))
+
+        await this.setPagePresenter(initialPage);
     }
 
-    async load(): Promise<void> {
-        this.pagePresenter = await this.make(PagePresenter, {key: 0, subject: this.page});
+    async onPageChanged(page: Proxy<any> | null): Promise<void> {
+        await this.setPagePresenter(page);
+    }
+
+    async setPagePresenter(page: Proxy<any> | null) {
+        if (this.pagePresenter != null)
+            this.pagePresenter.abandoned();
+
+        if (page != null)
+            this.pagePresenter = await this.make(PagePresenter, {key: 0, subject: page});
+        else
+            this.pagePresenter = null;
     }
 
     view(): ReactElement {

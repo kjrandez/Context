@@ -46,11 +46,15 @@ type SetAction = {
 
 export class Container<T> extends Subscribable<T>
 {
-    state: T;
+    private state: T;
 
     constructor(initial: T) {
         super();
         this.state = initial;
+    }
+
+    get(): T {
+        return this.state;
     }
 
     set(newState: T, filter: PathFilter<T> = () => true) {
