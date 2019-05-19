@@ -3,22 +3,32 @@ import ReactDOM from 'react-dom';
 import TopPresenter from './topPresenter';
 import Client from './client';
 import Presenter from './presenter';
-import { Container, Proxy } from './state';
+import { Subscriber, Container, Proxy } from './state';
 
 export class AppState
 {
-    navigate: (_:Proxy) => void;
+    private setPage: (_:Proxy) => void;
 
     selection: Container<Presenter[]>
 
-    constructor(navigate: (_:Proxy) => void) {
-        this.navigate = navigate;
-        
+    constructor(setPage: (_:Proxy) => void) {
+        this.setPage = setPage;
         this.selection = new Container<Presenter[]>([])
     }
 
+    navigate(page: Proxy) {
+        this.setPage(page);
+    }
+
     elementClicked(element: Presenter, ctrlDown: boolean) {
-        this.selection.set([element]);
+        let newState: Presenter[] = [element];
+
+        this.selection.set(newState, (path, prevState) => {
+            let target = path.slice(-1)[0];
+            let added = (newState.includes(target) && !prevState.includes(target));
+            let removed = (!newState.includes(target) && prevState.includes(target));
+            return added || removed;
+        });
     }
 }
 

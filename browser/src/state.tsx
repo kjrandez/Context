@@ -1,13 +1,16 @@
 import Presenter from './presenter';
 
+export type Subscriber<T> = {
+    path: Presenter[],
+    callback: (_:T) => void
+}
+
+export type SubscriberFilter<T> = (path: Presenter[], prevState: T) => boolean;
+
 export class Container<T>
 {
     state: T;
-
-    subscribers: {
-        path: Presenter[],
-        callback: (_:T) => void
-    }[];
+    subscribers: Subscriber<T>[];
 
     constructor(initial: T) {
         this.state = initial;
@@ -27,14 +30,15 @@ export class Container<T>
             this.subscribers.splice(index, 1);
     }
 
-    set(newState: T) {
+    set(newState: T, filter: SubscriberFilter<T> = () => true) {
+        let receivers = this.subscribers.filter(subscriber => filter(subscriber.path, this.state));
         this.state = newState;
-
-        let paths = this.subscribers.map(X => X.path);
+        receivers.forEach(receiver => receiver.callback(this.state))
+        
+        let paths = receivers.map(X => X.path);
         let changeRoot = commonRoot(paths); 
 
         if (changeRoot != null) {
-            this.subscribers.forEach(entry => entry.callback(this.state))
             changeRoot.refresh();
         }
     }
