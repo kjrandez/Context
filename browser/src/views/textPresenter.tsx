@@ -38,10 +38,10 @@ export default class TextPresenter extends ElementPresenter
     async onLoad(): Promise<void> {
         this.state.selection.attach(this.path, this.selectionChanged.bind(this))
 
-        this.value = await this.element.call<TextValue>('value');
+        this.value = await this.subject.call<TextValue>('value');
     }
 
     async onUpdate(_: Proxy): Promise<void> {
-        this.value = await this.element.call<TextValue>('value');
+        this.value = await this.subject.call<TextValue>('value');
     }
 }

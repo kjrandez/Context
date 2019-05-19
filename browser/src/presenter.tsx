@@ -1,5 +1,4 @@
 import React, { ReactElement, Component } from "react";
-import { Proxy } from "./state";
 import View from './view';
 import { AppState } from "./app";
 
@@ -24,9 +23,6 @@ export default abstract class Presenter
 
     // Populate state asynchronously on load
     abstract async onLoad(): Promise<void>;
-
-    // Update state asynchronously when a foreign object updates
-    abstract async onUpdate(subject: Proxy): Promise<void>;
 
     render(): ReactElement {
         return <View presenter={this} key={this.key} _key={this.key} />

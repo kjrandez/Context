@@ -53,7 +53,7 @@ export default class PagePresenter extends ElementPresenter
     }
 
     private async fetchChildren(): Promise<void> {
-        let pageValue: PageValue = await this.element.call('value');
+        let pageValue: PageValue = await this.subject.call('value');
 
         // Object.entries has trouble with number-keyed objects in Typescript
         this.childOrder = pageValue.entries.map(X => X.key.toString());

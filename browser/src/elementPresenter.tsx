@@ -4,16 +4,19 @@ import { AppState } from "./app";
 
 export default abstract class ElementPresenter extends Presenter
 {
-    element: Proxy;
+    subject: Proxy;
 
     constructor(state: AppState, parentPath: Presenter[], key: number, element: Proxy) {
         super(state, parentPath, key);
 
-        this.element = element;
-        this.element.attach(this.path);
+        this.subject = element;
+        this.subject.attach(this.path, this.onUpdate.bind(this));
     }
 
     abandoned() {
-        this.element.detach(this.path);
+        this.subject.detach(this.path);
     }
+
+    // Update state asynchronously when a foreign object updates
+    abstract async onUpdate(subject: Proxy): Promise<void>;
 }

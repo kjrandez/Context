@@ -10,9 +10,11 @@ export default class UnknownView extends Component<TextProps>
 {
     render(): ReactElement {
         let style: CSSProperties = {};
-        if (this.props.selected)
+        if (this.props.selected) {
+            style.color = 'white';
             style.backgroundColor = 'blue';
+        }
         
-        return <div style={style} onClick={this.props.onClick}>Text: {this.props.content}</div>
+        return <div style={style} onMouseDown={this.props.onClick}>Text: {this.props.content}</div>
     }
 }

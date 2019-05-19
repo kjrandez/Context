@@ -15,10 +15,10 @@ export default class UnknownPresenter extends ElementPresenter
     }
 
     async onLoad(): Promise<void> {
-        this.type = await this.element.call('type');
+        this.type = await this.subject.call('type');
     }
 
     async onUpdate(_: Proxy): Promise<void> {
-        this.type = await this.element.call('type');
+        this.type = await this.subject.call('type');
     }
 }

@@ -1,23 +1,15 @@
 import Presenter from './presenter';
 
-export type Subscriber<T> = {
+type Subscriber<T, R> = {
     path: Presenter[],
-    callback: (_:T) => void
+    callback: (_:T) => R
 }
 
-export type SubscriberFilter<T> = (path: Presenter[], prevState: T) => boolean;
-
-export class Container<T>
+class Subscribable<T, R>
 {
-    state: T;
-    subscribers: Subscriber<T>[];
+    subscribers: Subscriber<T, R>[] = [];
 
-    constructor(initial: T) {
-        this.state = initial;
-        this.subscribers = [];
-    }
-
-    attach(path: Presenter[], callback: (_:T) => void) {
+    attach(path: Presenter[], callback: (_:T) => R) {
         this.subscribers.push({
             path: path,
             callback: callback
@@ -29,31 +21,42 @@ export class Container<T>
         if(index >= 0)
             this.subscribers.splice(index, 1);
     }
+}
 
-    set(newState: T, filter: SubscriberFilter<T> = () => true) {
+export type PathFilter<T> = (path: Presenter[], prevState: T) => boolean;
+
+export class Container<T> extends Subscribable<T, void>
+{
+    state: T;
+
+    constructor(initial: T) {
+        super();
+        this.state = initial;
+    }
+
+    set(newState: T, filter: PathFilter<T> = () => true) {
         let receivers = this.subscribers.filter(subscriber => filter(subscriber.path, this.state));
         this.state = newState;
-        receivers.forEach(receiver => receiver.callback(this.state))
         
         let paths = receivers.map(X => X.path);
         let changeRoot = commonRoot(paths); 
 
         if (changeRoot != null) {
+            receivers.forEach(receiver => receiver.callback(this.state))
             changeRoot.refresh();
         }
     }
 }
 
-export class Proxy
+export class Proxy extends Subscribable<Proxy, Promise<void>>
 {
     immId: number;
     dispatchCall: Function;
-    paths: Presenter[][] = [];
 
     constructor(tag: number, dispatcher: Function) {
+        super();
         this.dispatchCall = dispatcher
         this.immId = tag;
-        this.paths = [];
     }
 
     id() {
@@ -68,27 +71,14 @@ export class Proxy
         this.dispatchCall(this.immId, selector, args, false);
     }
 
-    sensitivePaths() {
-        return this.paths;
-    }
-
-    attach(path: Presenter[]) {
-        this.paths.push(path);
-    }
-
-    detach(path: Presenter[]) {
-        var index = this.paths.findIndex(entry => entry === path);
-        if(index >= 0)
-            this.paths.splice(index, 1);
-    }
-
     broadcast() {
-        let changeRoot = commonRoot(this.paths); 
+        let paths = this.subscribers.map(X => X.path);
+        let changeRoot = commonRoot(paths);
 
         if (changeRoot != null) {
             (async () => {
-                for (const path of this.paths)
-                    await path.slice(-1)[0].onUpdate(this);
+                for (const subscriber of this.subscribers)
+                    await subscriber.callback(this);
                 changeRoot.refresh();
             })();
         }

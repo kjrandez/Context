@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TopPresenter from './topPresenter';
 import Client from './client';
 import Presenter from './presenter';
-import { Subscriber, Container, Proxy } from './state';
+import { Container, Proxy } from './state';
 
 export class AppState
 {
