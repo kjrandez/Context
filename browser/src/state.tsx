@@ -75,7 +75,7 @@ export class DualContainer<T> extends GenericContainer<Presenter, T, void>
     }
 }
 
-export class Proxy extends Subscribable<AsyncPresenter, Proxy, Promise<void>>
+export class Proxy<T> extends Subscribable<AsyncPresenter, T, Promise<void>>
 {
     immId: number;
     dispatchCall: Function;
@@ -98,8 +98,8 @@ export class Proxy extends Subscribable<AsyncPresenter, Proxy, Promise<void>>
         this.dispatchCall(this.immId, selector, args, false);
     }
 
-    broadcast() {
-        dispatchAsync(this.subscribers, this);
+    broadcast(value: T) {
+        dispatchAsync(this.subscribers, value);
     }
 }
 

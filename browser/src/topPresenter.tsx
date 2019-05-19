@@ -4,11 +4,11 @@ import { AsyncPresenter, AsyncPresenterArgs } from './presenter';
 import PagePresenter from './views/pagePresenter';
 import { AppState } from './app';
 
-export interface TopPresenterArgs extends AsyncPresenterArgs { page: Proxy; }
+export interface TopPresenterArgs extends AsyncPresenterArgs { page: Proxy<any>; }
 
 export default class TopPresenter extends AsyncPresenter
 {
-    page: Proxy;
+    page: Proxy<any>;
     pagePresenter: PagePresenter | null = null;
 
     constructor(state: AppState, parentPath: AsyncPresenter[], args: TopPresenterArgs) {

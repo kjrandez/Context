@@ -67,6 +67,8 @@ class Element:
             self.observer.transactionCancelled(trans)
 
     def completeTransaction(self, trans: 'Transaction') -> None:
+        trans.result(self.value())
+
         if self.observer is not None:
             self.observer.transactionCompleted(trans)
 
@@ -77,15 +79,21 @@ class Transaction:
         self.others: List[Element] = []
         self.reverseOp: Callable[[], None]
         self.id: Optional[int] = None
+        self.value: Optional[object] = None
+
         if IObserver.singleton is not None:
             self.id = IObserver.singleton.transactionStarted(self)
 
     def reference(self, element: Element) -> None:
         self.others.append(element)
 
+    def result(self, value: object) -> None:
+        self.value = object;
+
     def model(self) -> Model:
         return {
             'id': self.id,
             'subject': self.element,
-            'others': self.others
+            'others': self.others,
+            'value': self.value
         }

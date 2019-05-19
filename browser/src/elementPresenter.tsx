@@ -2,11 +2,11 @@ import { AsyncPresenter, AsyncPresenterArgs } from "./presenter";
 import { Proxy } from "./state";
 import { AppState } from "./app";
 
-export interface ElementPresenterArgs extends AsyncPresenterArgs { subject: Proxy };
+export interface ElementPresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
 
 export default abstract class ElementPresenter extends AsyncPresenter
 {
-    subject: Proxy;
+    subject: Proxy<any>;
 
     constructor(state: AppState, parentPath: AsyncPresenter[], args: ElementPresenterArgs) {
         super(state, parentPath, args);
@@ -19,5 +19,5 @@ export default abstract class ElementPresenter extends AsyncPresenter
     }
 
     // Update state asynchronously when a foreign object updates
-    abstract async onUpdate(subject: Proxy): Promise<void>;
+    abstract async onUpdate(value: any): Promise<void>;
 }

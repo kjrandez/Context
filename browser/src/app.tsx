@@ -7,16 +7,16 @@ import { Container, Proxy } from './state';
 
 export class AppState
 {
-    private setPage: (_:Proxy) => void;
+    private setPage: (_:Proxy<any>) => void;
 
     selection: Container<Presenter[]>
 
-    constructor(setPage: (_:Proxy) => void) {
+    constructor(setPage: (_:Proxy<any>) => void) {
         this.setPage = setPage;
         this.selection = new Container<Presenter[]>([])
     }
 
-    navigate(page: Proxy) {
+    navigate(page: Proxy<any>) {
         this.setPage(page);
     }
 
@@ -42,8 +42,8 @@ export default class App
         new Client(this.connected.bind(this), this.disconnected.bind(this));
     }
 
-    async connected(host: Proxy) {
-        let rootPage = await host.call<Proxy>('rootPage', []);
+    async connected(host: Proxy<never>) {
+        let rootPage = await host.call<Proxy<any>>('rootPage', []);
         await this.setPage(rootPage);
     }
 
@@ -51,7 +51,7 @@ export default class App
         this.clearPage();
     }
 
-    async setPage(page: Proxy) {
+    async setPage(page: Proxy<any>) {
         if (this.top != null)
             this.top.abandoned();
 

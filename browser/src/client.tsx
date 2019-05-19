@@ -63,7 +63,7 @@ class ProxyableTable
 class ProxyMap
 {
     make: Function;
-    refs: { [_: number]: Proxy } = {};
+    refs: { [_: number]: Proxy<any> } = {};
 
     constructor(makeProxy: Function) {
         this.make = makeProxy;
@@ -81,7 +81,8 @@ class ProxyMap
 
 type TransactionModel = {
     id: number,
-    subject: Proxy
+    subject: Proxy<any>,
+    value: any
 }
 
 export default class Client
@@ -93,7 +94,7 @@ export default class Client
     localObjects: ProxyableTable;
     foreignObjects: ProxyMap;
 
-    constructor(connected: (_: Proxy) => Promise<void>, disconnected: () => void) {
+    constructor(connected: (_: Proxy<never>) => Promise<void>, disconnected: () => void) {
         let clientService = {
             proxyableId: null,
             broadcast: (trans: TransactionModel) => this.handleBroadcast(trans)
@@ -175,7 +176,7 @@ export default class Client
         resolve(result);
     }
 
-    handleConnected(connected: (_:Proxy) => Promise<void>, hostService: Proxy) {
+    handleConnected(connected: (_:Proxy<never>) => Promise<void>, hostService: Proxy<never>) {
         (async () => {
             await connected(hostService)
         })();
@@ -183,7 +184,7 @@ export default class Client
 
     handleBroadcast(trans: TransactionModel) {
         (async () => {
-            await trans.subject.broadcast();
+            await trans.subject.broadcast(trans.value);
         })();
     }
 

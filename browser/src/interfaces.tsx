@@ -1,9 +1,3 @@
-export type Model<T> = {
-    id: number;
-    type: string;
-    value: T
-}
-
 export type Dict<T> = { [_: string]: T }
 
 export type Mapping<T> = (_: T) => T;

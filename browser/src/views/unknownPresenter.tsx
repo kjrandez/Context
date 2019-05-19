@@ -1,6 +1,5 @@
 import ElementPresenter from '../elementPresenter';
 import React, { ReactElement } from 'react';
-import { Proxy } from '../state';
 import UnknownView from './unknownView';
 
 export default class UnknownPresenter extends ElementPresenter
@@ -11,7 +10,7 @@ export default class UnknownPresenter extends ElementPresenter
         this.type = await this.subject.call('type');
     }
 
-    async onUpdate(_: Proxy): Promise<void> {
+    async onUpdate(_: never): Promise<void> {
         this.type = await this.subject.call('type');
     }
 

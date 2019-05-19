@@ -1,6 +1,5 @@
 import ElementPresenter from '../elementPresenter';
 import React, { ReactElement } from 'react';
-import { Proxy } from '../state';
 import TextView from './textView';
 import { Presenter } from '../presenter';
 
@@ -18,8 +17,8 @@ export default class TextPresenter extends ElementPresenter
         this.value = await this.subject.call<TextValue>('value');
     }
 
-    async onUpdate(_: Proxy): Promise<void> {
-        this.value = await this.subject.call<TextValue>('value');
+    async onUpdate(value: TextValue): Promise<void> {
+        this.value = value;
     }
 
     view(): ReactElement {

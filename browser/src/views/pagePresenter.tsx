@@ -8,9 +8,9 @@ import PageView from './pageView';
 type PageValue = {
     entries: {
         key: number,
-        element: Proxy
+        element: Proxy<any>
     }[];
-    latestEntry: Proxy | null;
+    latestEntry: Proxy<any> | null;
 }
 
 export default class PagePresenter extends ElementPresenter
@@ -19,11 +19,12 @@ export default class PagePresenter extends ElementPresenter
     childOrder: string[] | null = null;
 
     async load(): Promise<void> {
-        await this.fetchChildren();
+        let value: PageValue = await this.subject.call('value');
+        await this.fetchChildren(value);
     }
 
-    async onUpdate(_: Proxy): Promise<void> {
-        await this.fetchChildren();
+    async onUpdate(value: PageValue): Promise<void> {
+        await this.fetchChildren(value);
     }
 
     view(): ReactElement {
@@ -43,9 +44,7 @@ export default class PagePresenter extends ElementPresenter
         }
     }
 
-    private async fetchChildren(): Promise<void> {
-        let pageValue: PageValue = await this.subject.call('value');
-
+    private async fetchChildren(pageValue: PageValue): Promise<void> {
         // Object.entries has trouble with number-keyed objects in Typescript
         this.childOrder = pageValue.entries.map(X => X.key.toString());
 
@@ -68,7 +67,7 @@ export default class PagePresenter extends ElementPresenter
         }
     }
 
-    async presenterForEntry(key: number, type: string, element: Proxy): Promise<ElementPresenter> {
+    async presenterForEntry(key: number, type: string, element: Proxy<any>): Promise<ElementPresenter> {
         switch(type) {
             case 'Text':
                 return this.make(TextPresenter, {key: key, subject: element});
