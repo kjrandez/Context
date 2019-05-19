@@ -1,15 +1,19 @@
-import Presenter from "./presenter";
+import { AsyncPresenter, AsyncPresenterArgs } from "./presenter";
 import { Proxy } from "./state";
-import { AppState } from "./app";
 
-export default abstract class ElementPresenter extends Presenter
+export interface ElementPresenterArgs extends AsyncPresenterArgs
+{
+    subject: Proxy
+};
+
+export default abstract class ElementPresenter extends AsyncPresenter
 {
     subject: Proxy;
 
-    constructor(state: AppState, parentPath: Presenter[], key: number, element: Proxy) {
-        super(state, parentPath, key);
+    constructor(args: ElementPresenterArgs) {
+        super(args);
 
-        this.subject = element;
+        this.subject = args.subject;
         this.subject.attach(this.path, this.onUpdate.bind(this));
     }
 

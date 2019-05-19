@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TopPresenter from './topPresenter';
 import Client from './client';
-import Presenter from './presenter';
+import { Presenter } from './presenter';
 import { Container, Proxy } from './state';
 
 export class AppState
@@ -58,9 +58,14 @@ export default class App
             this.top.abandoned();
 
         this.state = new AppState(this.setPage.bind(this));
-        this.top = new TopPresenter(this.state, page);
-
-        await this.top.onLoad();
+        this.top = new TopPresenter({
+            state: this.state,
+            parentPath: [],
+            key: 0,
+            page: page
+        });
+        await this.top.load();
+        
         ReactDOM.render(this.top.render(), document.getElementById('root'));
     }
     

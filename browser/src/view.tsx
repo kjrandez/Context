@@ -1,5 +1,5 @@
 import React, { ReactElement, Component } from 'react';
-import Presenter from './presenter';
+import { Presenter } from './presenter';
 
 type ViewProps = {
     _key: number,

@@ -2,7 +2,7 @@ import ElementPresenter from '../elementPresenter';
 import React, { ReactElement } from 'react';
 import { Proxy } from '../state';
 import TextView from './textView';
-import Presenter from '../presenter';
+import { Presenter } from '../presenter';
 
 type TextValue = {
     content: string;
@@ -12,6 +12,15 @@ export default class TextPresenter extends ElementPresenter
 {
     value: TextValue | null = null;
     selected = false;
+    
+    async load(): Promise<void> {
+        this.state.selection.attach(this.path, this.selectionChanged.bind(this))
+        this.value = await this.subject.call<TextValue>('value');
+    }
+
+    async onUpdate(_: Proxy): Promise<void> {
+        this.value = await this.subject.call<TextValue>('value');
+    }
 
     view(): ReactElement {
         if (this.value == null)
@@ -33,15 +42,5 @@ export default class TextPresenter extends ElementPresenter
             this.selected = true;
         else   
             this.selected = false;
-    }
-
-    async onLoad(): Promise<void> {
-        this.state.selection.attach(this.path, this.selectionChanged.bind(this))
-
-        this.value = await this.subject.call<TextValue>('value');
-    }
-
-    async onUpdate(_: Proxy): Promise<void> {
-        this.value = await this.subject.call<TextValue>('value');
     }
 }

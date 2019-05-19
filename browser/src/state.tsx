@@ -1,22 +1,22 @@
-import Presenter from './presenter';
+import { AsyncPresenter, Presenter } from './presenter';
 
-type Subscriber<T, R> = {
-    path: Presenter[],
+type Subscriber<S extends Presenter, T, R> = {
+    path: S[],
     callback: (_:T) => R
 }
 
-class Subscribable<T, R>
+class Subscribable<S extends Presenter, T, R>
 {
-    subscribers: Subscriber<T, R>[] = [];
+    subscribers: Subscriber<S, T, R>[] = [];
 
-    attach(path: Presenter[], callback: (_:T) => R) {
+    attach(path: S[], callback: (_:T) => R) {
         this.subscribers.push({
             path: path,
             callback: callback
         });
     }
 
-    detach(path: Presenter[]) {
+    detach(path: S[]) {
         var index = this.subscribers.findIndex(entry => entry.path === path);
         if(index >= 0)
             this.subscribers.splice(index, 1);
@@ -25,7 +25,7 @@ class Subscribable<T, R>
 
 export type PathFilter<T> = (path: Presenter[], prevState: T) => boolean;
 
-export class Container<T> extends Subscribable<T, void>
+export class Container<T> extends Subscribable<Presenter, T, void>
 {
     state: T;
 
@@ -48,7 +48,7 @@ export class Container<T> extends Subscribable<T, void>
     }
 }
 
-export class Proxy extends Subscribable<Proxy, Promise<void>>
+export class Proxy extends Subscribable<AsyncPresenter, Proxy, Promise<void>>
 {
     immId: number;
     dispatchCall: Function;
