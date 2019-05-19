@@ -93,10 +93,10 @@ export default class Client
     localObjects: ProxyableTable;
     foreignObjects: ProxyMap;
 
-    constructor(connected: Function, disconnected: Function) {
+    constructor(connected: (_: Proxy) => Promise<void>, disconnected: () => void) {
         let clientService = {
             proxyableId: null,
-            broadcast: (trans: TransactionModel) => trans.subject.broadcast()
+            broadcast: (trans: TransactionModel) => this.handleBroadcast(trans)
         };
         this.localObjects = new ProxyableTable(clientService);
 
@@ -104,18 +104,30 @@ export default class Client
         this.foreignObjects = new ProxyMap((tag: number) => new Proxy(tag, dispatcher));
         
         this.websocket = new WebSocket("ws://localhost:8085/broadcast");
-        this.websocket.onmessage = event => this.websocketReceive(event);
-        this.websocket.onclose = (_) => disconnected;
+        this.websocket.onmessage = event => this.handleWebsocketReceive(event);
+        this.websocket.onclose = (_) => disconnected();
 
         let hostService = this.foreignObjects.getObject(0);
-        this.websocket.onopen = (_) => { connected(hostService) };
+        this.websocket.onopen = (_) => this.handleConnected(connected, hostService);
     }
 
-    websocketSend(data: object) {
+    dispatchWebsocketSend(data: object) {
         this.websocket.send(JSON.stringify(data));
     }
 
-    websocketReceive(event: MessageEvent) {
+    dispatchCall(targetId: number, selector: string, args: any[]) {
+        let argDescs: Argument[] = args.map((X: any) => this.encodedArgument(X));
+        
+        return new Promise<any>((resolve, reject) => this.dispatchWebsocketSend({
+            type: 'call',
+            id: this.pendingCalls.assignTag(resolve),
+            target: targetId,
+            selector: selector,
+            arguments: argDescs
+        }));
+    }
+
+    handleWebsocketReceive(event: MessageEvent) {
         var msg = JSON.parse(event.data);
 
         switch(msg.type) {
@@ -135,18 +147,6 @@ export default class Client
         }
     }
 
-    dispatchCall(targetId: number, selector: string, args: any[]) {
-        let argDescs: Argument[] = args.map((X: any) => this.encodedArgument(X));
-        
-        return new Promise<any>((resolve, reject) => this.websocketSend({
-            type: 'call',
-            id: this.pendingCalls.assignTag(resolve),
-            target: targetId,
-            selector: selector,
-            arguments: argDescs
-        }));
-    }
-
     handleSend(targetId: number, selector: string, argDescs: Argument[]) {
         let target: Proxyable = this.localObjects.getObject(targetId);
         let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
@@ -160,7 +160,7 @@ export default class Client
 
         let result = (target as any)[selector].apply(target, args)
 
-        this.websocketSend({
+        this.dispatchWebsocketSend({
             type: 'return',
             id: foreignId,
             result: this.encodedArgument(result)
@@ -173,6 +173,18 @@ export default class Client
         this.pendingCalls.freeTag(localId);
 
         resolve(result);
+    }
+
+    handleConnected(connected: (_:Proxy) => Promise<void>, hostService: Proxy) {
+        (async () => {
+            await connected(hostService)
+        })();
+    }
+
+    handleBroadcast(trans: TransactionModel) {
+        (async () => {
+            await trans.subject.broadcast();
+        })();
     }
 
     decodedArgument(argDesc: Argument): any {

@@ -53,6 +53,7 @@ export interface AsyncPresenterArgs
 
 export abstract class AsyncPresenter extends Presenter
 {
+    isAsyncPresenter: boolean = true;
     parentPath: AsyncPresenter[];
     path: AsyncPresenter[];
 

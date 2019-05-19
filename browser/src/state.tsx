@@ -1,5 +1,4 @@
 import { AsyncPresenter, Presenter } from './presenter';
-import { unaryExpression } from '@babel/types';
 
 type Subscriber<S extends Presenter, T, R> = {
     path: S[],
@@ -19,14 +18,14 @@ class Subscribable<S extends Presenter, T, R>
 
     detach(path: S[]) {
         var index = this.subscribers.findIndex(entry => entry.path === path);
-        if(index >= 0)
+        if (index >= 0)
             this.subscribers.splice(index, 1);
     }
 }
 
 export type PathFilter<T> = (path: Presenter[], prevState: T) => boolean;
 
-export class Container<T> extends Subscribable<Presenter, T, void>
+class GenericContainer<S extends Presenter, T, R> extends Subscribable<S, T, R>
 {
     state: T;
 
@@ -38,14 +37,41 @@ export class Container<T> extends Subscribable<Presenter, T, void>
     set(newState: T, filter: PathFilter<T> = () => true) {
         let receivers = this.subscribers.filter(subscriber => filter(subscriber.path, this.state));
         this.state = newState;
-        
-        let paths = receivers.map(X => X.path);
-        let changeRoot = commonRoot(paths); 
+        dispatch(receivers, this.state);
+    }
+}
 
-        if (changeRoot != null) {
-            receivers.forEach(receiver => receiver.callback(this.state))
-            changeRoot.refresh();
-        }
+export class Container<T> extends GenericContainer<Presenter, T, void> {}
+
+export class AsyncContainer<T> extends GenericContainer<AsyncPresenter, T, Promise<void>>
+{
+    async set(newState: T, filter: PathFilter<T> = () => true) {
+        let receivers = this.subscribers.filter(subscriber => filter(subscriber.path, this.state));
+        this.state = newState;
+        await dispatchAsync(receivers, this.state);
+    }
+}
+
+export class DualContainer<T> extends GenericContainer<Presenter, T, void>
+{
+    delayedSubscribers: Subscriber<AsyncPresenter, T, Promise<void>>[] = [];
+
+    attachDelayed(path: AsyncPresenter[], callback: (_:T) => Promise<void>) {
+        this.delayedSubscribers.push({path: path, callback: callback});
+    }
+
+    detachDelayed(path: AsyncPresenter[]) {
+        var index = this.delayedSubscribers.findIndex(entry => entry.path === path);
+        if (index >= 0)
+            this.delayedSubscribers.splice(index, 1);
+    }
+
+    async set(newState: T, filter: PathFilter<T> = () => true) {
+        let oldState = this.state;
+        super.set(newState, filter);
+
+        let delayedReceivers = this.delayedSubscribers.filter(subs => filter(subs.path, oldState));
+        await dispatchAsync(delayedReceivers, this.state);
     }
 }
 
@@ -73,16 +99,32 @@ export class Proxy extends Subscribable<AsyncPresenter, Proxy, Promise<void>>
     }
 
     broadcast() {
-        let paths = this.subscribers.map(X => X.path);
-        let changeRoot = commonRoot(paths);
+        dispatchAsync(this.subscribers, this);
+    }
+}
 
-        if (changeRoot != null) {
-            (async () => {
-                for (const subscriber of this.subscribers)
-                    await subscriber.callback(this);
-                changeRoot.refresh();
-            })();
-        }
+function dispatch<S extends Presenter, T, R>(
+    receivers: Subscriber<S, T, R>[], result: T)
+{
+    let paths = receivers.map(X => X.path);
+    let changeRoot = commonRoot(paths); 
+
+    if (changeRoot != null) {
+        receivers.forEach(receiver => receiver.callback(result))
+        changeRoot.refresh();
+    }
+}
+
+async function dispatchAsync<S extends AsyncPresenter, T, R>(
+    receivers: Subscriber<S, T, Promise<R>>[], result: T)
+{
+    let paths = receivers.map(X => X.path);
+    let changeRoot = commonRoot(paths);
+
+    if (changeRoot != null) {
+        for (const subscriber of receivers)
+            await subscriber.callback(result);
+        changeRoot.refresh();
     }
 }
 

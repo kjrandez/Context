@@ -42,11 +42,9 @@ export default class App
         new Client(this.connected.bind(this), this.disconnected.bind(this));
     }
 
-    connected(host: Proxy) {
-        (async () => {
-            let rootPage = await host.call<Proxy>('rootPage', []);
-            await this.setPage(rootPage);
-        })();
+    async connected(host: Proxy) {
+        let rootPage = await host.call<Proxy>('rootPage', []);
+        await this.setPage(rootPage);
     }
 
     disconnected() {
