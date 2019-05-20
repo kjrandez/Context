@@ -18,9 +18,13 @@ export abstract class Presenter
         this.component = null;
     }
 
-    abstract view(): ReactElement;
+    abstract viewElement(): ReactElement;
 
-    render(): ReactElement {
+    wrappedViewElement(viewElement: ReactElement): ReactElement {
+        return <>{viewElement}</>
+    }
+
+    view(): ReactElement {
         return <View presenter={this} key={this.key} _key={this.key} />
     }
 

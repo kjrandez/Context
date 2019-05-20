@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { Proxy } from '../state';
-import ElementPresenter from '../elementPresenter';
+import ElementPresenter from './elementPresenter';
 import UnknownPresenter from './unknownPresenter';
 import TextPresenter from './textPresenter';
 import PageView from './pageView';
@@ -27,7 +27,7 @@ export default class PagePresenter extends ElementPresenter
         await this.fetchChildren(value);
     }
 
-    view(): ReactElement {
+    viewElement(): ReactElement {
         if (this.childOrder == null) {
             return <div>No content loaded</div>;
         }
@@ -37,7 +37,7 @@ export default class PagePresenter extends ElementPresenter
                 
                 let child = this.children[key];
                 if (child != null) 
-                    content.push(child.render());
+                    content.push(child.view());
             }
 
             return <PageView key={this.key} title="Page Title" content={content} />

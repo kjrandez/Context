@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import TopPresenter from './topPresenter';
+import TopPresenter from './visuals/topPresenter';
 import Client from './client';
 import { Presenter } from './presenter';
 import { Container, Proxy } from './state';
@@ -49,7 +49,7 @@ export default class App
         let top = new TopPresenter(this.state, [], {key: 0});
         await top.load();
 
-        ReactDOM.render(top.render(), document.getElementById('root'));
+        ReactDOM.render(top.view(), document.getElementById('root'));
     }
 
     disconnected() {

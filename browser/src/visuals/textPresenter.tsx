@@ -1,4 +1,4 @@
-import ElementPresenter from '../elementPresenter';
+import ElementPresenter from './elementPresenter';
 import React, { ReactElement } from 'react';
 import TextView from './textView';
 import { Presenter } from '../presenter';
@@ -21,7 +21,7 @@ export default class TextPresenter extends ElementPresenter
         this.value = value;
     }
 
-    view(): ReactElement {
+    viewElement(): ReactElement {
         if (this.value == null)
             return <div>Unloaded Text Element</div>
         else
@@ -32,7 +32,6 @@ export default class TextPresenter extends ElementPresenter
     }
 
     onClick(): void {
-
         this.state.elementClicked(this, false);
     }
 

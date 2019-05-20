@@ -1,4 +1,4 @@
-import ElementPresenter from '../elementPresenter';
+import ElementPresenter from './elementPresenter';
 import React, { ReactElement } from 'react';
 import UnknownView from './unknownView';
 
@@ -14,7 +14,7 @@ export default class UnknownPresenter extends ElementPresenter
         this.type = await this.subject.call('type');
     }
 
-    view(): ReactElement {
+    viewElement(): ReactElement {
         if (this.type == null)
             return <div>Unknown element</div>
         else
