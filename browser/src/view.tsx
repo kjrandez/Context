@@ -17,9 +17,7 @@ export default class View extends Component<ViewProps>
     }
 
     render(): ReactElement {
-        let leaf = this.props.presenter.viewElement();
-        let wrapped = this.props.presenter.wrappedViewElement(leaf);
-
-        return <div key={this.props._key}>{wrapped}</div>;
+        let viewElement = this.props.presenter.viewElement();
+        return <div key={this.props._key}>{viewElement}</div>;
     }
 }

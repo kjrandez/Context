@@ -1,6 +1,9 @@
 import React, { ReactElement, Component } from "react";
 import View from './view';
 import { AppState } from "./app";
+import { Subscribable } from "./state";
+
+export type Attacher = <T>(subscribable: Subscribable<T>, callback: (_: T) => void) => void;
 
 export abstract class Presenter
 {
@@ -9,6 +12,8 @@ export abstract class Presenter
     path: Presenter[];
     key: number;
     component: Component | null;
+    mountActions: (() => void)[] = [];
+    unmountActions: (() => void)[] = [];
 
     constructor(state: AppState, parentPath: Presenter[], key: number) {
         this.state = state;
@@ -16,12 +21,17 @@ export abstract class Presenter
         this.path = parentPath.concat(this);
         this.key = key;
         this.component = null;
+
+        this.init(this.attach.bind(this));
     }
+
+    abstract init(attach: Attacher): void;
 
     abstract viewElement(): ReactElement;
 
-    wrappedViewElement(viewElement: ReactElement): ReactElement {
-        return <>{viewElement}</>
+    private attach<T>(subscribable: Subscribable<T>, callback: (_:T) => void) {
+        this.mountActions.push(() => { subscribable.attach(this.path, callback) });
+        this.unmountActions.push(() => { subscribable.detach(this.path) });
     }
 
     view(): ReactElement {
@@ -30,11 +40,13 @@ export abstract class Presenter
 
     mount(component: Component) {
         this.component = component;
+        this.mountActions.forEach(X => X());
     }
 
     unmount(component: Component) {
         if (this.component === component)
             this.component = null;
+        this.unmountActions.forEach(X => X());
     }
 
     refresh() {
@@ -50,30 +62,52 @@ export abstract class Presenter
 // See both answers:
 // https://stackoverflow.com/questions/42804182/generic-factory-parameters-in-typescript
 
-export interface AsyncPresenterArgs
-{
-    key: number;
+export interface AsyncPresenterArgs {
+    state: AppState,
+    parentPath: AsyncPresenter[],
+    key: number
 }
+
+export type AsyncAttacher = <T>(subscribable: Subscribable<T>, callback: (_: T) => Promise<void>) => void
 
 export abstract class AsyncPresenter extends Presenter
 {
-    isAsyncPresenter: boolean = true;
     parentPath: AsyncPresenter[];
     path: AsyncPresenter[];
 
-    constructor(state: AppState, parentPath: AsyncPresenter[], args: AsyncPresenterArgs) {
-        super(state, parentPath, args.key);
-        this.parentPath = parentPath;
-        this.path = parentPath.concat(this);
+    constructor(args: AsyncPresenterArgs) {
+        super(args.state, args.parentPath, args.key);
+        this.parentPath = args.parentPath;
+        this.path = args.parentPath.concat(this);
     }
 
-    async make<T extends AsyncPresenter, A extends AsyncPresenterArgs>(
-        ctor: {new (_: AppState, __: AsyncPresenter[], ___: A): T}, args: A): Promise<T> {
+    abstract async initAsync(attach: AsyncAttacher): Promise<void>;
+
+    private attachAsync<T>(subscribable: Subscribable<T>, callback: (_:T) => Promise<void>) {
+        this.mountActions.push(() => { subscribable.attachAsync(this.path, callback) });
+        this.unmountActions.push(() => { subscribable.detachAsync(this.path) });
+    }
+
+    async make<T extends AsyncPresenter, A extends AsyncPresenterArgs>
+    (   ctor: {new (_: A): T},
+        args: A
+    ): Promise<T> {
             
-        let inst = new ctor(this.state, this.path, args);
+        let inst = new ctor(args);
         await inst.load();
         return inst;
     }
 
-    abstract async load(): Promise<void>;
+    // Child Constructor Args
+    ccargs(key: number): AsyncPresenterArgs {
+        return {
+            state: this.state,
+            parentPath: this.path,
+            key: key
+        }
+    }
+
+    async load() {
+        await this.initAsync(this.attachAsync.bind(this));
+    }
 }

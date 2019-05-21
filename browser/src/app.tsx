@@ -46,7 +46,11 @@ export default class App
         let rootPage = await host.call<Proxy<any>>('rootPage', []);
         this.state.navigate(rootPage);
 
-        let top = new TopPresenter(this.state, [], {key: 0});
+        let top = new TopPresenter({
+            state: this.state,
+            parentPath: [],
+            key: 0
+        });
         await top.load();
 
         ReactDOM.render(top.view(), document.getElementById('root'));

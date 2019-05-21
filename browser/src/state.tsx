@@ -5,7 +5,7 @@ type Subscriber<S extends Presenter, T, R> = {
     callback: (_:T) => R
 }
 
-class Subscribable<T>
+export class Subscribable<T>
 {
     syncSubscribers: Subscriber<Presenter, T, void>[] = [];
     asyncSubscribers: Subscriber<AsyncPresenter, T, Promise<void>>[] = [];

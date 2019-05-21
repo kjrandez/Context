@@ -1,16 +1,21 @@
-import ElementPresenter from './elementPresenter';
 import React, { ReactElement } from 'react';
 import UnknownView from './unknownView';
+import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
+import { Proxy } from '../state';
 
-export default class UnknownPresenter extends ElementPresenter
+export default class UnknownPresenter extends ASpecializedPresenter
 {
+    subject: Proxy<any>;
     type: string | null = null;
 
-    async load(): Promise<void> {
-        this.type = await this.subject.call('type');
+    constructor(args: ASpecializedPresenterArgs) {
+        super(args);
+        this.subject = args.subject;
     }
 
-    async onUpdate(_: never): Promise<void> {
+    init() {}
+
+    async initAsync(): Promise<void> {
         this.type = await this.subject.call('type');
     }
 
@@ -20,4 +25,6 @@ export default class UnknownPresenter extends ElementPresenter
         else
             return <UnknownView key={this.key} type={this.type} />
     }
+ 
+    abandoned() {}
 }

@@ -1,29 +1,38 @@
-import React, { ReactElement } from 'react';
-import { AsyncPresenter, AsyncPresenterArgs } from "../presenter";
+import React from 'react';
+import { AsyncPresenter, AsyncPresenterArgs, Attacher } from "../presenter";
 import { Proxy } from "../state";
-import { AppState } from "../app";
 import ElementView from './elementView';
 import { Presenter } from '../presenter';
+import TextPresenter from './textPresenter';
+import PagePresenter from './pagePresenter';
+import UnknownPresenter from './unknownPresenter';
+import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
 
 export interface ElementPresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
 
-export default abstract class ElementPresenter extends AsyncPresenter
+export default class ElementPresenter extends AsyncPresenter
 {
     selected: boolean = false;
     subject: Proxy<any>;
     currentRef: HTMLDivElement | null = null;
+    specialized: ASpecializedPresenter | null = null;
 
-    constructor(state: AppState, parentPath: AsyncPresenter[], args: ElementPresenterArgs) {
-        super(state, parentPath, args);
+    constructor(args: ElementPresenterArgs) {
+        super(args);
         this.subject = args.subject;
-        this.subject.attachAsync(this.path, this.onUpdate.bind(this));
-        this.state.selection.attach(this.path, this.selectionChanged.bind(this))
+    }
+
+    init(attach: Attacher) {
+        attach(this.state.selection, this.selectionChanged.bind(this));
+    }
+
+    async initAsync(): Promise<void> {
+        this.specialized = await this.specializedPresenter(this.key, this.subject);
     }
 
     onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         event.stopPropagation();
-        //this.props.app.selected(this.uniqueSelection, event.ctrlKey);
-        this.state.elementClicked(this, false);
+        this.state.elementClicked(this, event.ctrlKey);
     }
 
     selectionChanged(selection: Presenter[]) {
@@ -34,31 +43,41 @@ export default abstract class ElementPresenter extends AsyncPresenter
     }
 
     setRefNode(node: HTMLDivElement | null) {
-        //this.uniqueSelection.ref.current = node;
         this.currentRef = node;
     }
 
-    wrappedViewElement(viewElement: ReactElement) {
-        return super.wrappedViewElement(
+    viewElement() {
+        if(this.specialized == null)
+            return <div>Nothing loaded</div>
+
+        return(
             <ElementView
                 selected={this.selected}
-                hide={false}
                 onMouseDown={this.onMouseDown.bind(this)}
                 setRefNode={this.setRefNode.bind(this)}>
 
-                {viewElement}
-                
+                {this.specialized.view()}
+
             </ElementView>
         );
     }
 
-    abandoned() {
-        this.subject.detach(this.path);
-    }
+    async specializedPresenter(key: number, subject: Proxy<any>)  {
+        let type = await subject.call<string>('type');
 
-    // Update state asynchronously when a foreign object updates
-    abstract async onUpdate(value: any): Promise<void>;
+        var cons: new (_: ASpecializedPresenterArgs) => ASpecializedPresenter;
+        
+        switch(type) {
+            case 'Text': cons = TextPresenter; break;
+            case 'Page': cons = PagePresenter; break;
+            default: cons = UnknownPresenter; break;
+        }
+
+        return await this.make(cons, {...this.ccargs(key), subject: subject});
+    }
 }
+
+
 
 /* Major original callbacks:
 
