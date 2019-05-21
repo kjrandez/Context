@@ -1,15 +1,21 @@
 import React, { Component, ReactElement } from 'react';
+import { DragSource, DropTarget, DragSourceConnector, DragSourceMonitor, DropTargetMonitor, DropTargetConnector, ConnectDragSource, ConnectDropTarget, ConnectDragPreview } from 'react-dnd';
+import { Presenter } from '../presenter';
 
 interface ElementProps {
     selected: boolean;
     hide: boolean;
-    isDragging: boolean; // Fulfilled by ReactDND
-    isOver: boolean; // Fulfilled by ReactDND
     onMouseDown: (_: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     setRefNode: (_: HTMLDivElement | null) => void;
+
+    isDragging: boolean;
+    isOver: boolean;
+    dragSource: ConnectDragSource;
+    dropTarget: ConnectDropTarget;
+    dragPreview: ConnectDragPreview;
 }
 
-export default class ElementView extends Component<ElementProps>
+class ElementView extends Component<ElementProps>
 {
     isSelected() {
         return this.props.selected;
@@ -30,7 +36,7 @@ export default class ElementView extends Component<ElementProps>
         return this.props.isOver ? "element-spacer expanded" : "element-spacer";
     }
 
-    renderHandle(dragSource: any) {
+    renderHandle(dragSource: ConnectDragSource) {
         var handle = <div className="element-box-handle"></div>;
 
         if(this.isSelected()) 
@@ -39,13 +45,8 @@ export default class ElementView extends Component<ElementProps>
         return null;
     }
 
-    render(): ReactElement {
-        // Fulfilled by ReactDND
-        let dragSource = (X: any) => <>{X}</>
-        let dropTarget = (X: any) => <>{X}</>
-        let dragPreview = (X: any) => <>{X}</>
-
-        return dropTarget(dragPreview(
+    render(): ReactElement | null {
+        return this.props.dropTarget(this.props.dragPreview(
             <div className={this.elementClass()}
             onMouseDown={this.props.onMouseDown}
             ref={this.props.setRefNode}>
@@ -54,7 +55,7 @@ export default class ElementView extends Component<ElementProps>
 
                 <div className="element-box">
 
-                    {this.renderHandle(dragSource)}
+                    {this.renderHandle(this.props.dragSource)}
 
                     <div className="element-box-content"> {this.props.children} </div>
 
@@ -63,16 +64,18 @@ export default class ElementView extends Component<ElementProps>
             </div>
         ));
     }
+
+    droppedAt(newPath: Presenter[][], beforeKey: number) {
+        alert("Dropped");
+    }
 }
 
-/* Major Original ReactDND Stuff
-
 const dragSource = {
-    beginDrag(props) {
+    beginDrag(props: ElementProps) {
         return {};
     },
 
-    endDrag(props, monitor, component) {
+    endDrag(props: ElementProps, monitor: DragSourceMonitor, component: ElementView) {
         var result = monitor.getDropResult();
         if(result == null)
             return;
@@ -81,7 +84,7 @@ const dragSource = {
     }
 };
 
-function dragCollect(connect, monitor) {
+function dragCollect(connect: DragSourceConnector, monitor: DragSourceMonitor) {
     return {
         dragSource: connect.dragSource(),
         dragPreview: connect.dragPreview(),
@@ -90,27 +93,25 @@ function dragCollect(connect, monitor) {
 }
 
 const dropTarget = {
-    drop(props, monitor) {
+    drop(props: ElementProps, monitor: DropTargetMonitor) {
         if(monitor.getDropResult() != null)
             return;
 
         return { 
-            path: props.tag.path,
-            key: props.tag.key
+            path: [] as Presenter[][],
+            key: 0 as number
         };
     }
 };
 
-function dropCollect(connect, monitor) {
+function dropCollect(connect: DropTargetConnector, monitor: DropTargetMonitor) {
     return {
         dropTarget: connect.dropTarget(),
         isOver: monitor.isOver({ shallow: true }) 
     }
 }
 
-Element = DragSource("element", dragSource, dragCollect)(Element);
-Element = DropTarget("element", dropTarget, dropCollect)(Element);
+let ExportClass = DragSource("element", dragSource, dragCollect)(ElementView);
+ExportClass = DropTarget("element", dropTarget, dropCollect)(ExportClass);
 
-export default Element;
-
-*/
+export default ExportClass;

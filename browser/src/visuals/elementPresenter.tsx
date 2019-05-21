@@ -3,11 +3,13 @@ import { AsyncPresenter, AsyncPresenterArgs } from "../presenter";
 import { Proxy } from "../state";
 import { AppState } from "../app";
 import ElementView from './elementView';
+import { Presenter } from '../presenter';
 
 export interface ElementPresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
 
 export default abstract class ElementPresenter extends AsyncPresenter
 {
+    selected: boolean = false;
     subject: Proxy<any>;
     currentRef: HTMLDivElement | null = null;
 
@@ -15,11 +17,20 @@ export default abstract class ElementPresenter extends AsyncPresenter
         super(state, parentPath, args);
         this.subject = args.subject;
         this.subject.attachAsync(this.path, this.onUpdate.bind(this));
+        this.state.selection.attach(this.path, this.selectionChanged.bind(this))
     }
 
     onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         event.stopPropagation();
         //this.props.app.selected(this.uniqueSelection, event.ctrlKey);
+        this.state.elementClicked(this, false);
+    }
+
+    selectionChanged(selection: Presenter[]) {
+        if (selection.includes(this))
+            this.selected = true;
+        else   
+            this.selected = false;
     }
 
     setRefNode(node: HTMLDivElement | null) {
@@ -30,10 +41,8 @@ export default abstract class ElementPresenter extends AsyncPresenter
     wrappedViewElement(viewElement: ReactElement) {
         return super.wrappedViewElement(
             <ElementView
-                selected={false}
+                selected={this.selected}
                 hide={false}
-                isDragging={false}
-                isOver={false}
                 onMouseDown={this.onMouseDown.bind(this)}
                 setRefNode={this.setRefNode.bind(this)}>
 
