@@ -1,17 +1,19 @@
 import React, { ReactElement } from 'react';
 import { Proxy } from '../state';
-import { Presenter, PresenterArgs, Attacher, AsyncAttacher } from '../presenter';
+import { AsyncPresenter, AsyncPresenterArgs, AsyncAttacher } from '../presenter';
 import PagePresenter from './pagePresenter';
 import TopView from './topView';
 
-export interface TopPresenterArgs extends PresenterArgs { page: Proxy<any>; }
+export interface TopPresenterArgs extends AsyncPresenterArgs { page: Proxy<any>; }
 
-export default class TopPresenter extends Presenter
+export default class TopPresenter extends AsyncPresenter
 {
     pagePresenter: PagePresenter | null = null;
 
-    async init(_: Attacher, attachAsync: AsyncAttacher): Promise<void> {
-        attachAsync(this.state.topPage, this.onPageChanged.bind(this));
+    init() {}
+
+    async initAsync(attach: AsyncAttacher): Promise<void> {
+        attach(this.state.topPage, this.onPageChanged.bind(this));
 
         let initialPage = this.state.topPage.get();
         await this.setPagePresenter(initialPage);

@@ -1,4 +1,4 @@
-import { Presenter } from './presenter';
+import { AsyncPresenter, Presenter } from './presenter';
 
 type Subscriber<S extends Presenter, T, R> = {
     path: S[],
@@ -8,7 +8,7 @@ type Subscriber<S extends Presenter, T, R> = {
 export class Subscribable<T>
 {
     syncSubscribers: Subscriber<Presenter, T, void>[] = [];
-    asyncSubscribers: Subscriber<Presenter, T, Promise<void>>[] = [];
+    asyncSubscribers: Subscriber<AsyncPresenter, T, Promise<void>>[] = [];
 
     attach(path: Presenter[], callback: (_:T) => void) {
         this.syncSubscribers.push({
@@ -23,11 +23,11 @@ export class Subscribable<T>
             this.syncSubscribers.splice(index, 1);
     }
 
-    attachAsync(path: Presenter[], callback: (_:T) => Promise<void>) {
+    attachAsync(path: AsyncPresenter[], callback: (_:T) => Promise<void>) {
         this.asyncSubscribers.push({path: path, callback: callback});
     }
 
-    detachAsync(path: Presenter[]) {
+    detachAsync(path: AsyncPresenter[]) {
         var index = this.asyncSubscribers.findIndex(entry => entry.path === path);
         if (index >= 0)
             this.asyncSubscribers.splice(index, 1);
@@ -39,7 +39,7 @@ export type PathFilter<T> = (path: Presenter[], prevState: T) => boolean;
 type SetAction = {
     setStateAction: () => void;
     syncPaths: Presenter[][];
-    asyncPaths: Presenter[][];
+    asyncPaths: AsyncPresenter[][];
     dispatchSyncAction: () => void;
     dispatchAsyncAction: () => Promise<void>;
 }
@@ -142,7 +142,7 @@ function dispatchSync<T>(receivers: Subscriber<Presenter, T, void>[], result: T)
     receivers.forEach(receiver => receiver.callback(result))
 }
 
-async function dispatchAsync<T>(receivers: Subscriber<Presenter, T, Promise<void>>[], result: T) {
+async function dispatchAsync<T>(receivers: Subscriber<AsyncPresenter, T, Promise<void>>[], result: T) {
     for (const subscriber of receivers)
         await subscriber.callback(result);
 }

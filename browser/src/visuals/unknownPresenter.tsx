@@ -13,7 +13,9 @@ export default class UnknownPresenter extends ASpecializedPresenter
         this.subject = args.subject;
     }
 
-    async init(): Promise<void> {
+    init() {}
+
+    async initAsync(): Promise<void> {
         this.type = await this.subject.call('type');
     }
 
@@ -23,4 +25,6 @@ export default class UnknownPresenter extends ASpecializedPresenter
         else
             return <UnknownView key={this.key} type={this.type} />
     }
+ 
+    abandoned() {}
 }
