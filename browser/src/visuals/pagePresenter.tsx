@@ -3,7 +3,7 @@ import { Proxy } from '../state';
 import ElementPresenter from './elementPresenter';
 import PageView from './pageView';
 import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
-import { AsyncAttacher } from '../presenter';
+import { Attacher, AsyncAttacher } from '../presenter';
 
 type PageValue = {
     entries: {
@@ -24,10 +24,8 @@ export default class PagePresenter extends ASpecializedPresenter
         this.subject = args.subject;
     }
 
-    init() {}
-
-    async initAsync(attach: AsyncAttacher): Promise<void> {
-        attach(this.subject, this.onUpdate.bind(this));
+    async init(_: Attacher, attachAsync: AsyncAttacher): Promise<void> {
+        attachAsync(this.subject, this.onUpdate.bind(this));
         let value: PageValue = await this.subject.call('value');
         await this.fetchChildren(value);
     }

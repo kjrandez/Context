@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import TextView from './textView';
 import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
 import { Proxy } from '../state';
-import { AsyncAttacher } from '../presenter';
+import { Attacher, AsyncAttacher } from '../presenter';
 
 type TextValue = {
     content: string;
@@ -18,11 +18,9 @@ export default class TextPresenter extends ASpecializedPresenter
         super(args);
         this.subject = args.subject;
     }
-    
-    init() {}
 
-    async initAsync(attach: AsyncAttacher): Promise<void> {
-        attach(this.subject, this.onUpdate.bind(this));
+    async init(async: Attacher, attachAsync: AsyncAttacher): Promise<void> {
+        attachAsync(this.subject, this.onUpdate.bind(this));
         this.value = await this.subject.call<TextValue>('value');
     }
 

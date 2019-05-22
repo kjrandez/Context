@@ -3,7 +3,15 @@ import View from './view';
 import { AppState } from "./app";
 import { Subscribable } from "./state";
 
+export interface PresenterArgs {
+    state: AppState,
+    parentPath: Presenter[],
+    key: number
+}
+
 export type Attacher = <T>(subscribable: Subscribable<T>, callback: (_: T) => void) => void;
+
+export type AsyncAttacher = <T>(subscribable: Subscribable<T>, callback: (_: T) => Promise<void>) => void
 
 export abstract class Presenter
 {
@@ -15,24 +23,21 @@ export abstract class Presenter
     mountActions: (() => void)[] = [];
     unmountActions: (() => void)[] = [];
 
-    constructor(state: AppState, parentPath: Presenter[], key: number) {
-        this.state = state;
-        this.parentPath = parentPath;
-        this.path = parentPath.concat(this);
-        this.key = key;
+    constructor(args: PresenterArgs) {
+        this.state = args.state;
+        this.parentPath = args.parentPath;
+        this.path = args.parentPath.concat(this);
+        this.key = args.key;
         this.component = null;
-
-        this.init(this.attach.bind(this));
     }
 
-    abstract init(attach: Attacher): void;
+    async load() {
+        await this.init(this.attach.bind(this), this.attachAsync.bind(this));
+    }
+
+    abstract async init(attach: Attacher, attachAsync: AsyncAttacher): Promise<void>;
 
     abstract viewElement(): ReactElement;
-
-    private attach<T>(subscribable: Subscribable<T>, callback: (_:T) => void) {
-        this.mountActions.push(() => { subscribable.attach(this.path, callback) });
-        this.unmountActions.push(() => { subscribable.detach(this.path) });
-    }
 
     view(): ReactElement {
         return <View presenter={this} key={this.key} _key={this.key} />
@@ -57,38 +62,11 @@ export abstract class Presenter
     parent() {
         return this.parentPath.slice(-1)[0]
     }
-}
+    
+    // See both answers:
+    // https://stackoverflow.com/questions/42804182/generic-factory-parameters-in-typescript
 
-// See both answers:
-// https://stackoverflow.com/questions/42804182/generic-factory-parameters-in-typescript
-
-export interface AsyncPresenterArgs {
-    state: AppState,
-    parentPath: AsyncPresenter[],
-    key: number
-}
-
-export type AsyncAttacher = <T>(subscribable: Subscribable<T>, callback: (_: T) => Promise<void>) => void
-
-export abstract class AsyncPresenter extends Presenter
-{
-    parentPath: AsyncPresenter[];
-    path: AsyncPresenter[];
-
-    constructor(args: AsyncPresenterArgs) {
-        super(args.state, args.parentPath, args.key);
-        this.parentPath = args.parentPath;
-        this.path = args.parentPath.concat(this);
-    }
-
-    abstract async initAsync(attach: AsyncAttacher): Promise<void>;
-
-    private attachAsync<T>(subscribable: Subscribable<T>, callback: (_:T) => Promise<void>) {
-        this.mountActions.push(() => { subscribable.attachAsync(this.path, callback) });
-        this.unmountActions.push(() => { subscribable.detachAsync(this.path) });
-    }
-
-    async make<T extends AsyncPresenter, A extends AsyncPresenterArgs>
+    protected async make<T extends Presenter, A extends PresenterArgs>
     (   ctor: {new (_: A): T},
         args: A
     ): Promise<T> {
@@ -99,7 +77,7 @@ export abstract class AsyncPresenter extends Presenter
     }
 
     // Child Constructor Args
-    ccargs(key: number): AsyncPresenterArgs {
+    protected ccargs(key: number): PresenterArgs {
         return {
             state: this.state,
             parentPath: this.path,
@@ -107,7 +85,13 @@ export abstract class AsyncPresenter extends Presenter
         }
     }
 
-    async load() {
-        await this.initAsync(this.attachAsync.bind(this));
+    private attach<T>(subscribable: Subscribable<T>, callback: (_:T) => void) {
+        this.mountActions.push(() => { subscribable.attach(this.path, callback) });
+        this.unmountActions.push(() => { subscribable.detach(this.path) });
+    }
+
+    private attachAsync<T>(subscribable: Subscribable<T>, callback: (_:T) => Promise<void>) {
+        this.mountActions.push(() => { subscribable.attachAsync(this.path, callback) });
+        this.unmountActions.push(() => { subscribable.detachAsync(this.path) });
     }
 }

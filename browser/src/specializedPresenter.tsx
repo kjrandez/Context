@@ -1,8 +1,8 @@
 import { Proxy } from './state';
-import { AsyncPresenterArgs, AsyncPresenter } from "./presenter";
+import { PresenterArgs, Presenter } from "./presenter";
 
-export interface ASpecializedPresenterArgs extends AsyncPresenterArgs {
+export interface ASpecializedPresenterArgs extends PresenterArgs {
     subject: Proxy<any>
 }
 
-export default abstract class ASpecializedPresenter extends AsyncPresenter {}
+export default abstract class ASpecializedPresenter extends Presenter {}

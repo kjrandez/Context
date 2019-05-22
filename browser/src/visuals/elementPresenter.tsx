@@ -1,16 +1,15 @@
 import React from 'react';
-import { AsyncPresenter, AsyncPresenterArgs, Attacher } from "../presenter";
+import { Presenter, PresenterArgs, Attacher, AsyncAttacher } from "../presenter";
 import { Proxy } from "../state";
 import ElementView from './elementView';
-import { Presenter } from '../presenter';
 import TextPresenter from './textPresenter';
 import PagePresenter from './pagePresenter';
 import UnknownPresenter from './unknownPresenter';
 import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
 
-export interface ElementPresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
+export interface ElementPresenterArgs extends PresenterArgs { subject: Proxy<any> };
 
-export default class ElementPresenter extends AsyncPresenter
+export default class ElementPresenter extends Presenter
 {
     selected: boolean = false;
     subject: Proxy<any>;
@@ -22,11 +21,8 @@ export default class ElementPresenter extends AsyncPresenter
         this.subject = args.subject;
     }
 
-    init(attach: Attacher) {
+    async init(attach: Attacher, _: AsyncAttacher) {
         attach(this.state.selection, this.selectionChanged.bind(this));
-    }
-
-    async initAsync(): Promise<void> {
         this.specialized = await this.specializedPresenter(this.key, this.subject);
     }
 
