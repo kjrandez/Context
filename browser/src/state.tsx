@@ -1,20 +1,14 @@
 import { AsyncPresenter, Presenter } from './presenter';
 
-type Subscriber<S extends Presenter, T, R> = {
-    path: S[],
-    callback: (_:T) => R
-}
+type Subscriber<S extends Presenter> = { path: S[] }
 
-export class Subscribable<T>
+export class Subscribable
 {
-    syncSubscribers: Subscriber<Presenter, T, void>[] = [];
-    asyncSubscribers: Subscriber<AsyncPresenter, T, Promise<void>>[] = [];
+    syncSubscribers: Subscriber<Presenter>[] = [];
+    asyncSubscribers: Subscriber<AsyncPresenter>[] = [];
 
-    attach(path: Presenter[], callback: (_:T) => void) {
-        this.syncSubscribers.push({
-            path: path,
-            callback: callback
-        });
+    attach(path: Presenter[]) {
+        this.syncSubscribers.push({path: path});
     }
 
     detach(path: Presenter[]) {
@@ -23,8 +17,8 @@ export class Subscribable<T>
             this.syncSubscribers.splice(index, 1);
     }
 
-    attachAsync(path: AsyncPresenter[], callback: (_:T) => Promise<void>) {
-        this.asyncSubscribers.push({path: path, callback: callback});
+    attachAsync(path: AsyncPresenter[]) {
+        this.asyncSubscribers.push({path: path});
     }
 
     detachAsync(path: AsyncPresenter[]) {
@@ -44,7 +38,7 @@ type SetAction = {
     dispatchAsyncAction: () => Promise<void>;
 }
 
-export class Container<T> extends Subscribable<T>
+export class Container<T> extends Subscribable
 {
     private state: T;
 
@@ -104,7 +98,7 @@ export class Container<T> extends Subscribable<T>
     }
 }
 
-export class Proxy<T> extends Subscribable<T>
+export class Proxy<T> extends Subscribable
 {
     id: number;
     dispatchCall: Function;
@@ -115,7 +109,7 @@ export class Proxy<T> extends Subscribable<T>
         this.id = tag;
     }
 
-    attach(_: Presenter[], __: (_:T) => void) {
+    attach(_: Presenter[]) {
         throw new Error("Proxy ignores synchronous subscribers.");
     }
 
@@ -138,13 +132,13 @@ export class Proxy<T> extends Subscribable<T>
     }
 }
 
-function dispatchSync<T>(receivers: Subscriber<Presenter, T, void>[], result: T) {
-    receivers.forEach(receiver => receiver.callback(result))
+function dispatchSync<T>(receivers: Subscriber<Presenter>[], result: T) {
+    receivers.forEach(receiver => receiver.path.slice(-1)[0].update())
 }
 
-async function dispatchAsync<T>(receivers: Subscriber<AsyncPresenter, T, Promise<void>>[], result: T) {
+async function dispatchAsync<T>(receivers: Subscriber<AsyncPresenter>[], result: T) {
     for (const subscriber of receivers)
-        await subscriber.callback(result);
+        await subscriber.path.slice(-1)[0].updateAsync();
 }
 
 function refresh(paths: Presenter[][]) {

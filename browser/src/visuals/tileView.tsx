@@ -2,7 +2,7 @@ import React, { Component, ReactElement } from 'react';
 import { DragSource, DropTarget, DragSourceConnector, DragSourceMonitor, DropTargetMonitor, DropTargetConnector, ConnectDragSource, ConnectDropTarget, ConnectDragPreview } from 'react-dnd';
 import { Presenter } from '../presenter';
 
-interface ElementProps {
+interface TileProps {
     selected: boolean;
     hide: boolean;
     onMouseDown: (_: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -15,7 +15,7 @@ interface ElementProps {
     dragPreview: ConnectDragPreview;
 }
 
-class ElementView extends Component<ElementProps>
+class TileView extends Component<TileProps>
 {
     isSelected() {
         return this.props.selected;
@@ -71,11 +71,11 @@ class ElementView extends Component<ElementProps>
 }
 
 const dragSource = {
-    beginDrag(props: ElementProps) {
+    beginDrag(props: TileProps) {
         return {};
     },
 
-    endDrag(props: ElementProps, monitor: DragSourceMonitor, component: ElementView) {
+    endDrag(props: TileProps, monitor: DragSourceMonitor, component: TileView) {
         var result = monitor.getDropResult();
         if(result == null)
             return;
@@ -93,7 +93,7 @@ function dragCollect(connect: DragSourceConnector, monitor: DragSourceMonitor) {
 }
 
 const dropTarget = {
-    drop(props: ElementProps, monitor: DropTargetMonitor) {
+    drop(props: TileProps, monitor: DropTargetMonitor) {
         if(monitor.getDropResult() != null)
             return;
 
@@ -111,7 +111,7 @@ function dropCollect(connect: DropTargetConnector, monitor: DropTargetMonitor) {
     }
 }
 
-let ExportClass = DragSource("element", dragSource, dragCollect)(ElementView);
+let ExportClass = DragSource("element", dragSource, dragCollect)(TileView);
 ExportClass = DropTarget("element", dropTarget, dropCollect)(ExportClass);
 
 export default ExportClass;

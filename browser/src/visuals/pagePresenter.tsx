@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
 import { Proxy } from '../state';
-import ElementPresenter from './elementPresenter';
+import TilePresenter from './tilePresenter';
 import PageView from './pageView';
 import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
-import { AsyncAttacher } from '../presenter';
+import { make } from '../presenter';
 
 type PageValue = {
     entries: {
@@ -16,7 +16,7 @@ type PageValue = {
 export default class PagePresenter extends ASpecializedPresenter
 {
     subject: Proxy<PageValue>;
-    children: {[_: string]: ElementPresenter} = {};
+    children: {[_: string]: TilePresenter} = {};
     childOrder: string[] | null = null;
 
     constructor(args: ASpecializedPresenterArgs) {
@@ -24,15 +24,10 @@ export default class PagePresenter extends ASpecializedPresenter
         this.subject = args.subject;
     }
 
-    init() {}
+    subscriptionsAsync() { return [this.subject]; }
 
-    async initAsync(attach: AsyncAttacher): Promise<void> {
-        attach(this.subject, this.onUpdate.bind(this));
+    async updateAsync() {
         let value: PageValue = await this.subject.call('value');
-        await this.fetchChildren(value);
-    }
-
-    async onUpdate(value: PageValue): Promise<void> {
         await this.fetchChildren(value);
     }
 
@@ -69,7 +64,7 @@ export default class PagePresenter extends ASpecializedPresenter
         for (const entry of pageValue.entries) {
             if (!(entry.key in this.children)) {
                 let subject = entry.element;
-                let child = await this.make(ElementPresenter, {...this.ccargs(entry.key), subject});
+                let child = await make(TilePresenter, {...this.ccargs(entry.key), subject});
                 this.children[entry.key] = child;
             }
         }

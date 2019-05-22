@@ -1,45 +1,44 @@
 import React from 'react';
-import { AsyncPresenter, AsyncPresenterArgs, Attacher } from "../presenter";
+import { AsyncPresenter, AsyncPresenterArgs } from "../presenter";
 import { Proxy } from "../state";
-import ElementView from './elementView';
-import { Presenter } from '../presenter';
+import TileView from './tileView';
+import { make } from '../presenter';
 import TextPresenter from './textPresenter';
 import PagePresenter from './pagePresenter';
 import UnknownPresenter from './unknownPresenter';
 import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
 
-export interface ElementPresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
+export interface TilePresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
 
-export default class ElementPresenter extends AsyncPresenter
+export default class TilePresenter extends AsyncPresenter
 {
     selected: boolean = false;
     subject: Proxy<any>;
     currentRef: HTMLDivElement | null = null;
     specialized: ASpecializedPresenter | null = null;
 
-    constructor(args: ElementPresenterArgs) {
+    constructor(args: TilePresenterArgs) {
         super(args);
         this.subject = args.subject;
     }
 
-    init(attach: Attacher) {
-        attach(this.state.selection, this.selectionChanged.bind(this));
+    subscriptions() { return [this.state.selection]; }
+
+    update() {
+        let selection = this.state.selection.get();
+        if (selection.includes(this))
+            this.selected = true;
+        else   
+            this.selected = false;
     }
 
-    async initAsync(): Promise<void> {
+    async updateAsync() {
         this.specialized = await this.specializedPresenter(this.key, this.subject);
     }
 
     onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         event.stopPropagation();
         this.state.elementClicked(this, event.ctrlKey);
-    }
-
-    selectionChanged(selection: Presenter[]) {
-        if (selection.includes(this))
-            this.selected = true;
-        else   
-            this.selected = false;
     }
 
     setRefNode(node: HTMLDivElement | null) {
@@ -51,14 +50,14 @@ export default class ElementPresenter extends AsyncPresenter
             return <div>Nothing loaded</div>
 
         return(
-            <ElementView
+            <TileView
                 selected={this.selected}
                 onMouseDown={this.onMouseDown.bind(this)}
                 setRefNode={this.setRefNode.bind(this)}>
 
                 {this.specialized.view()}
 
-            </ElementView>
+            </TileView>
         );
     }
 
@@ -73,11 +72,9 @@ export default class ElementPresenter extends AsyncPresenter
             default: cons = UnknownPresenter; break;
         }
 
-        return await this.make(cons, {...this.ccargs(key), subject: subject});
+        return await make(cons, {...this.ccargs(key), subject: subject});
     }
 }
-
-
 
 /* Major original callbacks:
 

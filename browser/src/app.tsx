@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import TopPresenter from './visuals/topPresenter';
 import Client from './client';
-import { Presenter } from './presenter';
+import { Presenter, make } from './presenter';
 import { Container, Proxy } from './state';
 
 export class AppState
@@ -46,12 +46,11 @@ export default class App
         let rootPage = await host.call<Proxy<any>>('rootPage', []);
         this.state.navigate(rootPage);
 
-        let top = new TopPresenter({
+        let top = await make(TopPresenter, {
             state: this.state,
             parentPath: [],
             key: 0
         });
-        await top.load();
 
         ReactDOM.render(top.view(), document.getElementById('root'));
     }
