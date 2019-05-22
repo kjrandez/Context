@@ -39,12 +39,12 @@ export abstract class Presenter
     }
 
     subscriptions(): Subscribable[] { return []; }
-    update(): void {}
+    stateChanged(): void {}
     abstract viewElement(): ReactElement;
 
     load() {
         this.sensitivities = this.subscriptions();
-        this.update();
+        this.stateChanged();
     }
 
     view(): ReactElement {
@@ -101,11 +101,11 @@ export abstract class AsyncPresenter extends Presenter
     async load(): Promise<void> {
         super.load();
         this.sensitivitiesAsync = this.subscriptionsAsync();
-        await this.updateAsync();
+        await this.stateChangedAsync();
     }
 
     subscriptionsAsync(): Subscribable[] { return []; }
-    async updateAsync(): Promise<void> {};
+    async stateChangedAsync(): Promise<void> {};
 
     mount(component: Component) {
         super.mount(component);

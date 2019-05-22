@@ -1,19 +1,19 @@
 import React, { ReactElement } from 'react';
 import UnknownView from './unknownView';
-import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
+import ElementPresenter, { ElementPresenterArgs } from '../elementPresenter';
 import { Proxy } from '../state';
 
-export default class UnknownPresenter extends ASpecializedPresenter
+export default class UnknownPresenter extends ElementPresenter
 {
     subject: Proxy<any>;
     type: string | null = null;
 
-    constructor(args: ASpecializedPresenterArgs) {
+    constructor(args: ElementPresenterArgs) {
         super(args);
         this.subject = args.subject;
     }
 
-    async updateAsync(): Promise<void> {
+    async stateChangedAsync(): Promise<void> {
         this.type = await this.subject.call('type');
     }
 

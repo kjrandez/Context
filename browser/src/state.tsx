@@ -133,12 +133,12 @@ export class Proxy<T> extends Subscribable
 }
 
 function dispatchSync<T>(receivers: Subscriber<Presenter>[], result: T) {
-    receivers.forEach(receiver => receiver.path.slice(-1)[0].update())
+    receivers.forEach(receiver => receiver.path.slice(-1)[0].stateChanged())
 }
 
 async function dispatchAsync<T>(receivers: Subscriber<AsyncPresenter>[], result: T) {
     for (const subscriber of receivers)
-        await subscriber.path.slice(-1)[0].updateAsync();
+        await subscriber.path.slice(-1)[0].stateChangedAsync();
 }
 
 function refresh(paths: Presenter[][]) {

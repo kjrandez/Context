@@ -1,26 +1,26 @@
 import React, { ReactElement } from 'react';
 import TextView from './textView';
-import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
+import ElementPresenter, { ElementPresenterArgs } from '../elementPresenter';
 import { Proxy } from '../state';
 
 type TextValue = {
     content: string;
 }
 
-export default class TextPresenter extends ASpecializedPresenter
+export default class TextPresenter extends ElementPresenter
 {
     value: TextValue | null = null;
     selected = false;
     subject: Proxy<TextValue>;
 
-    constructor(args: ASpecializedPresenterArgs) {
+    constructor(args: ElementPresenterArgs) {
         super(args);
         this.subject = args.subject;
     }
 
     subscriptionsAsync() { return [this.subject]; }
 
-    async updateAsync(): Promise<void> {
+    async stateChangedAsync(): Promise<void> {
         this.value = await this.subject.call<TextValue>('value');
     }
 

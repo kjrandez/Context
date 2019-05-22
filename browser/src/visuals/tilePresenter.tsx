@@ -6,7 +6,7 @@ import { make } from '../presenter';
 import TextPresenter from './textPresenter';
 import PagePresenter from './pagePresenter';
 import UnknownPresenter from './unknownPresenter';
-import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
+import ElementPresenter, { ElementPresenterArgs } from '../elementPresenter';
 
 export interface TilePresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
 
@@ -15,7 +15,7 @@ export default class TilePresenter extends AsyncPresenter
     selected: boolean = false;
     subject: Proxy<any>;
     currentRef: HTMLDivElement | null = null;
-    specialized: ASpecializedPresenter | null = null;
+    specialized: ElementPresenter | null = null;
 
     constructor(args: TilePresenterArgs) {
         super(args);
@@ -24,7 +24,7 @@ export default class TilePresenter extends AsyncPresenter
 
     subscriptions() { return [this.state.selection]; }
 
-    update() {
+    stateChanged() {
         let selection = this.state.selection.get();
         if (selection.includes(this))
             this.selected = true;
@@ -32,7 +32,7 @@ export default class TilePresenter extends AsyncPresenter
             this.selected = false;
     }
 
-    async updateAsync() {
+    async stateChangedAsync() {
         this.specialized = await this.specializedPresenter(this.key, this.subject);
     }
 
@@ -64,7 +64,7 @@ export default class TilePresenter extends AsyncPresenter
     async specializedPresenter(key: number, subject: Proxy<any>)  {
         let type = await subject.call<string>('type');
 
-        var cons: new (_: ASpecializedPresenterArgs) => ASpecializedPresenter;
+        var cons: new (_: ElementPresenterArgs) => ElementPresenter;
         
         switch(type) {
             case 'Text': cons = TextPresenter; break;

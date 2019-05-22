@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import { Proxy } from '../state';
 import TilePresenter from './tilePresenter';
 import PageView from './pageView';
-import ASpecializedPresenter, { ASpecializedPresenterArgs } from '../specializedPresenter';
+import ElementPresenter, { ElementPresenterArgs } from '../elementPresenter';
 import { make } from '../presenter';
 
 type PageValue = {
@@ -13,20 +13,20 @@ type PageValue = {
     latestEntry: Proxy<any> | null;
 }
 
-export default class PagePresenter extends ASpecializedPresenter
+export default class PagePresenter extends ElementPresenter
 {
     subject: Proxy<PageValue>;
     children: {[_: string]: TilePresenter} = {};
     childOrder: string[] | null = null;
 
-    constructor(args: ASpecializedPresenterArgs) {
+    constructor(args: ElementPresenterArgs) {
         super(args);
         this.subject = args.subject;
     }
 
     subscriptionsAsync() { return [this.subject]; }
 
-    async updateAsync() {
+    async stateChangedAsync() {
         let value: PageValue = await this.subject.call('value');
         await this.fetchChildren(value);
     }

@@ -14,7 +14,7 @@ export default class TopPresenter extends AsyncPresenter
         return [this.state.topPage]
     }
 
-    async updateAsync(): Promise<void> {
+    async stateChangedAsync(): Promise<void> {
         let page = this.state.topPage.get();
         await this.setPagePresenter(page);
     }
