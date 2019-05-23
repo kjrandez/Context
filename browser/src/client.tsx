@@ -1,5 +1,5 @@
 import { Proxy } from './state';
-import { mapObjValues } from './interfaces';
+import { mapObj } from './interfaces';
 
 export interface Proxyable {
     proxyableId: number | null;
@@ -184,7 +184,7 @@ export default class Client
         else if (argDesc.type === 'list')
             return argDesc.value.map((X: any) => this.decodedArgument(X))
         else if (argDesc.type === 'dictionary')
-            return mapObjValues(argDesc.value, (X: any) => this.decodedArgument(X))
+            return mapObj(argDesc.value, (X: any) => this.decodedArgument(X))
         else
             return argDesc.value;
     }
@@ -197,7 +197,7 @@ export default class Client
         else if (arg instanceof Array)
             return { type: 'list', value: arg.map(X => this.encodedArgument(X))}
         else if (arg instanceof Object)
-            return { type: 'dictionary', value: mapObjValues(arg, X => this.encodedArgument(X))}
+            return { type: 'dictionary', value: mapObj(arg, X => this.encodedArgument(X))}
         else
             return { type: 'primitive', value: arg };
     }

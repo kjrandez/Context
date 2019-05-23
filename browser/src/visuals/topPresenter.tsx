@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { Proxy } from '../state';
-import { AsyncPresenter, AsyncPresenterArgs, make } from '../presenter';
+import { AsyncPresenter, AsyncPresenterArgs } from '../presenter';
 import PagePresenter from './pagePresenter';
 import TopView from './topView';
 
@@ -20,24 +20,17 @@ export default class TopPresenter extends AsyncPresenter
     }
 
     async setPagePresenter(page: Proxy<any> | null) {
+        this.removeChildIfPresent("page");
         if (page != null)
-            this.pagePresenter = await make(PagePresenter, {...this.ccargs(0), subject: page});
-        else
-            this.pagePresenter = null;
+            await this.addNewChildAsync(PagePresenter, {...this.ccargs("page"), subject: page});
     }
 
     onMouseDown() {}
 
     viewElement(): ReactElement {
-        let props = {
-            onMouseDown: this.onMouseDown.bind(this),
-            pageContent: (this.pagePresenter == null) ? <></> :this.pagePresenter.view()
-        }
-        
-        return <TopView 
-            sidePanelContent={<div>Side Panel</div>}
-            toolbarContent={<div>Toolbar</div>}
-            pageHeader={<div>Page Header</div>}
-            {...props} />
+        return React.createElement(TopView, {
+            onMouseDown: () => this.onMouseDown,
+            content: this.content()
+        });
     }
 }

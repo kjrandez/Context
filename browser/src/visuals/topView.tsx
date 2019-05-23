@@ -4,32 +4,34 @@ import HTML5Backend from 'react-dnd-html5-backend';
 
 interface TopProps {
     onMouseDown: () => void,
-    sidePanelContent: ReactElement,
-    pageHeader: ReactElement,
-    pageContent: ReactElement,
-    toolbarContent: ReactElement
+    content: {[_: string]: ReactElement}
 }
 
 class TopView extends Component<TopProps>
 {
     render(): ReactElement {
+        let sidePanel = this.props.content.sidePanel;
+        let pageHeader = this.props.content.pageHeader;
+        let page = this.props.content.page;
+        let toolbar = this.props.content.toolbar;
+
         return (
             <div id="scene" onMouseDown={this.props.onMouseDown}>
                 <div id="left-column">
-                    {this.props.sidePanelContent}
+                    {sidePanel}
                 </div>
                 <div id="center-column">
                     <div id="page">
                         <div id="top-spacer"></div>
-                        {this.props.pageHeader}
+                        {pageHeader}
                         <div id="page-elements">
-                            {this.props.pageContent}
+                            {page}
                         </div>
                         <div id="bottom-spacer"></div>
                     </div>
                 </div>
                 <div id="right-column">
-                    {this.props.toolbarContent}
+                    {toolbar}
                 </div>
             </div>
         );

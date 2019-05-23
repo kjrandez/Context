@@ -2,11 +2,21 @@ import React, { ReactElement, Component } from "react";
 import View from './view';
 import { AppState } from "./app";
 import { Subscribable } from "./state";
+import { mapObj } from "./interfaces";
 
 // See both answers:
 // https://stackoverflow.com/questions/42804182/generic-factory-parameters-in-typescript
 
-export async function make<T extends Presenter, A extends PresenterArgs>
+export function make<T extends Presenter, A extends PresenterArgs>
+(   ctor: {new (_: A): T},
+    args: A
+): T {
+    let inst = new ctor(args);
+    inst.load();
+    return inst;
+}
+
+export async function makeAsync<T extends Presenter, A extends PresenterArgs>
 (   ctor: {new (_: A): T},
     args: A
 ): Promise<T> {
@@ -18,7 +28,7 @@ export async function make<T extends Presenter, A extends PresenterArgs>
 export interface PresenterArgs {
     state: AppState,
     parentPath: Presenter[],
-    key: number
+    key: string
 }
 
 export abstract class Presenter
@@ -26,9 +36,10 @@ export abstract class Presenter
     state: AppState;
     parentPath: Presenter[];
     path: Presenter[];
-    key: number;
+    key: string;
     component: Component | null;
     sensitivities: Subscribable[] = [];
+    children: {[_:string]: Presenter} = {};
     
     constructor(args: PresenterArgs) {
         this.state = args.state;
@@ -44,7 +55,12 @@ export abstract class Presenter
 
     load() {
         this.sensitivities = this.subscriptions();
+        this.sensitivities.forEach(X => X.attach(this.path));
         this.stateChanged();
+    }
+
+    unload() {
+        this.sensitivities.forEach(X => X.detach(this.path));
     }
 
     view(): ReactElement {
@@ -53,13 +69,11 @@ export abstract class Presenter
 
     mount(component: Component) {
         this.component = component;
-        this.sensitivities.forEach(X => X.attach(this.path));
     }
 
     unmount(component: Component) {
         if (this.component === component)
             this.component = null;
-        this.sensitivities.forEach(X => X.detach(this.path));
     }
 
     refresh() {
@@ -71,7 +85,42 @@ export abstract class Presenter
         return this.parentPath.slice(-1)[0]
     }
 
-    protected ccargs(key: number): PresenterArgs {
+    content() {
+        return mapObj(this.children, (child) => child.view());
+    }
+
+    removeChild(key: string) {
+        if (!(key in this.children))
+            throw new Error("No child added with that key.");
+        this.children[key].unload();
+        delete this.children[key];
+    }
+
+    removeChildIfPresent(key: string) {
+        let child = this.children[key]
+        if (child != null) {
+            child.unload();
+            delete this.children[key];
+        }
+    }
+
+    addChild(child: Presenter) {
+        if (child.key in this.children)
+            throw new Error("Child already added with that key.");
+        this.children[child.key] = child;
+    }
+
+    addNewChild<T extends Presenter, A extends PresenterArgs>(
+        ctor: {new (_: A): T},
+        args: A
+    ) : T
+    {
+        let child = make(ctor, args);
+        this.addChild(child);
+        return child;
+    }
+
+    protected ccargs(key: string): PresenterArgs {
         return {
             state: this.state,
             parentPath: this.path,
@@ -83,7 +132,7 @@ export abstract class Presenter
 export interface AsyncPresenterArgs extends PresenterArgs {
     state: AppState,
     parentPath: AsyncPresenter[],
-    key: number
+    key: string
 }
 
 export abstract class AsyncPresenter extends Presenter
@@ -117,7 +166,17 @@ export abstract class AsyncPresenter extends Presenter
         this.sensitivitiesAsync.forEach(X => X.detachAsync(this.path));
     }
 
-    protected ccargs(key: number): AsyncPresenterArgs {
+    async addNewChildAsync<T extends Presenter, A extends PresenterArgs>(
+        ctor: {new (_: A): T},
+        args: A
+    ) : Promise<T>
+    {
+        let child = await makeAsync(ctor, args);
+        this.addChild(child);
+        return child;
+    }
+
+    protected ccargs(key: string): AsyncPresenterArgs {
         return {
             state: this.state,
             parentPath: this.path,

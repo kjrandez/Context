@@ -2,11 +2,11 @@ import React from 'react';
 import { AsyncPresenter, AsyncPresenterArgs } from "../presenter";
 import { Proxy } from "../state";
 import TileView from './tileView';
-import { make } from '../presenter';
 import TextPresenter from './textPresenter';
 import PagePresenter from './pagePresenter';
 import UnknownPresenter from './unknownPresenter';
 import ElementPresenter, { ElementPresenterArgs } from '../elementPresenter';
+import { makeAsync } from '../presenter';
 
 export interface TilePresenterArgs extends AsyncPresenterArgs { subject: Proxy<any> };
 
@@ -15,7 +15,6 @@ export default class TilePresenter extends AsyncPresenter
     selected: boolean = false;
     subject: Proxy<any>;
     currentRef: HTMLDivElement | null = null;
-    specialized: ElementPresenter | null = null;
 
     constructor(args: TilePresenterArgs) {
         super(args);
@@ -33,7 +32,9 @@ export default class TilePresenter extends AsyncPresenter
     }
 
     async stateChangedAsync() {
-        this.specialized = await this.specializedPresenter(this.key, this.subject);
+        this.removeChildIfPresent("specialized");
+        let specialized = await this.specializedPresenter(this.key, this.subject);
+        this.addChild(specialized);
     }
 
     onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
@@ -46,22 +47,16 @@ export default class TilePresenter extends AsyncPresenter
     }
 
     viewElement() {
-        if(this.specialized == null)
-            return <div>Nothing loaded</div>
-
         return(
             <TileView
                 selected={this.selected}
                 onMouseDown={this.onMouseDown.bind(this)}
-                setRefNode={this.setRefNode.bind(this)}>
-
-                {this.specialized.view()}
-
-            </TileView>
+                setRefNode={this.setRefNode.bind(this)}
+                content={this.content()} />
         );
     }
 
-    async specializedPresenter(key: number, subject: Proxy<any>)  {
+    async specializedPresenter(key: string, subject: Proxy<any>)  {
         let type = await subject.call<string>('type');
 
         var cons: new (_: ElementPresenterArgs) => ElementPresenter;
@@ -72,7 +67,7 @@ export default class TilePresenter extends AsyncPresenter
             default: cons = UnknownPresenter; break;
         }
 
-        return await make(cons, {...this.ccargs(key), subject: subject});
+        return await makeAsync(cons, {...this.ccargs("specialized"), subject: subject});
     }
 }
 

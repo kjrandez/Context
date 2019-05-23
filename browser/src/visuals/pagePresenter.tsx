@@ -3,7 +3,6 @@ import { Proxy } from '../state';
 import TilePresenter from './tilePresenter';
 import PageView from './pageView';
 import ElementPresenter, { ElementPresenterArgs } from '../elementPresenter';
-import { make } from '../presenter';
 
 type PageValue = {
     entries: {
@@ -16,8 +15,7 @@ type PageValue = {
 export default class PagePresenter extends ElementPresenter
 {
     subject: Proxy<PageValue>;
-    children: {[_: string]: TilePresenter} = {};
-    childOrder: string[] | null = null;
+    childOrder: string[] = [];
 
     constructor(args: ElementPresenterArgs) {
         super(args);
@@ -32,20 +30,11 @@ export default class PagePresenter extends ElementPresenter
     }
 
     viewElement(): ReactElement {
-        if (this.childOrder == null) {
-            return <div>No content loaded</div>;
-        }
-        else {
-            let content: ReactElement[] = [];
-            for (const key of this.childOrder) {
-                
-                let child = this.children[key];
-                if (child != null) 
-                    content.push(child.view());
-            }
-
-            return <PageView key={this.key} title="Page Title" content={content} />
-        }
+        return <PageView
+            key={this.key}
+            title="Page Title"
+            order={this.childOrder}
+            content={this.content()} />
     }
 
     private async fetchChildren(pageValue: PageValue): Promise<void> {
@@ -55,17 +44,16 @@ export default class PagePresenter extends ElementPresenter
         // Remove the entries which are no longer part of the page's value
         let prevEntries = Object.keys(this.children);
         for (const key of prevEntries) {
-            if (!this.childOrder.includes(key)) {
-                delete this.children[key];
-            }
+            if (!this.childOrder.includes(key))
+                this.removeChild(key)
         }
 
         // Create presenters for those children which are not yet populated
         for (const entry of pageValue.entries) {
-            if (!(entry.key in this.children)) {
+            let key = entry.key.toString();
+            if (!(key in this.children)) {
                 let subject = entry.element;
-                let child = await make(TilePresenter, {...this.ccargs(entry.key), subject});
-                this.children[entry.key] = child;
+                await this.addNewChildAsync(TilePresenter, {...this.ccargs(key), subject});
             }
         }
     }

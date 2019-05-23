@@ -7,7 +7,7 @@ interface TileProps {
     hide: boolean;
     onMouseDown: (_: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     setRefNode: (_: HTMLDivElement | null) => void;
-
+    content: {[_: string]: ReactElement};
     isDragging: boolean;
     isOver: boolean;
     dragSource: ConnectDragSource;
@@ -57,7 +57,7 @@ class TileView extends Component<TileProps>
 
                     {this.renderHandle(this.props.dragSource)}
 
-                    <div className="element-box-content"> {this.props.children} </div>
+                    <div className="element-box-content"> {this.props.content.specialized} </div>
 
                 </div>
 
