@@ -1,5 +1,25 @@
-import { Proxy } from './state';
 import { mapObj } from './interfaces';
+
+export class Proxy<T>
+{
+    id: number;
+    dispatchCall: Function;
+
+    constructor(tag: number, dispatcher: Function) {
+        this.dispatchCall = dispatcher
+        this.id = tag;
+    }
+
+    async call<T>(selector: string, args: any[] = []): Promise<T> {
+        return await this.dispatchCall(this.id, selector, args, true);
+    }
+
+    send(selector: string, args: any[] = []) {
+        this.dispatchCall(this.id, selector, args, false);
+    }
+
+    async broadcast(value: T): Promise<void> {}
+}
 
 export interface Proxyable {
     proxyableId: number | null;
@@ -94,10 +114,14 @@ export default class Client
     localObjects: ProxyableTable;
     foreignObjects: ProxyMap;
 
-    constructor(connected: (_: Proxy<never>) => Promise<void>, disconnected: () => void) {
+    constructor(
+        connected: (_: Proxy<never>) => Promise<void>,
+        disconnected: () => void,
+        broadcast: (_: Proxy<any>, __: any) => void
+        ) {
         let clientService = {
             proxyableId: null,
-            broadcast: (trans: TransactionModel) => trans.subject.broadcast(trans.value).then()
+            broadcast: (trans: TransactionModel) => broadcast(trans.subject, trans.value)
         };
         this.localObjects = new ProxyableTable(clientService);
 

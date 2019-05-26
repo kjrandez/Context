@@ -1,63 +1,33 @@
+import React from 'react';
 import ReactDOM from 'react-dom';
-import TopPresenter from './visuals/topPresenter';
-import Client from './client';
-import { Presenter, makeAsync } from './presenter';
-import { Container, Proxy } from './state';
-
-export class AppState
-{
-    topPage: Container<Proxy<any> | null>
-    selection: Container<Presenter[]>
-
-    constructor() {
-        this.topPage = new Container<Proxy<any> | null>(null);
-        this.selection = new Container<Presenter[]>([])
-    }
-
-    navigate(page: Proxy<any> | null) {
-        Container.setMany(
-            this.topPage.setter(page),
-            this.selection.setter([])
-        )
-    }
-
-    elementClicked(element: Presenter, ctrlDown: boolean) {
-        let newState: Presenter[] = [element];
-
-        this.selection.set(newState, (path, prevState) => {
-            let target = path.slice(-1)[0];
-            let added = (newState.includes(target) && !prevState.includes(target));
-            let removed = (!newState.includes(target) && prevState.includes(target));
-            return added || removed;
-        });
-    }
-}
+import Client, { Proxy } from './client';
+import ViewState from './state/viewState';
+import Top from './components/top';
 
 export default class App
 {
-    state: AppState;
+    viewState: ViewState;
 
     constructor() {
-        this.state = new AppState();
-        new Client(this.connected.bind(this), this.disconnected.bind(this));
+        this.viewState = new ViewState();
+        new Client(
+            this.connected.bind(this),
+            this.disconnected.bind(this),
+            this.broadcast.bind(this)
+        );
+        ReactDOM.render(<Top viewState={this.viewState} />, document.getElementById('root'));
+    }
+
+    broadcast(proxy: Proxy<any>, value: any) {
+        this.viewState.modelUpdated(proxy, value);
     }
 
     async connected(host: Proxy<never>) {
         let rootPage = await host.call<Proxy<any>>('rootPage', []);
-        this.state.navigate(rootPage);
-
-        let top = await makeAsync(TopPresenter, {
-            state: this.state,
-            parentPath: [],
-            key: "top"
-        });
-
-        ReactDOM.render(top.view(), document.getElementById('root'));
+        this.viewState.navigate(rootPage);
     }
 
-    disconnected() {
-        this.state.navigate(null);
-    }
+    disconnected() {}
 }
 
 

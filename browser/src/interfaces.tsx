@@ -1,3 +1,5 @@
+export type StrDict<T> = {[_: string]: T};
+export type NumDict<T> = {[_: number]: T};
 
 export function mapObj<T, R>(
     obj: { [_: string]: T},
