@@ -1,7 +1,7 @@
 import { configure, observable } from 'mobx';
-import { Proxy } from './client';
+import { Proxy } from '../client';
 
-interface IElementModel {
+export interface IElementModel {
     id: number,
     type: string,
     value: any

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import ViewState from '../state/viewState';
 import ElementList from './elementList';
-import { ElementModel, PageValue } from '../models';
+import { ElementModel, PageValue } from '../state/models';
 import { Proxy } from '../client';
 
 interface TopProps {
@@ -15,10 +15,7 @@ interface TopProps {
 
     }
 
-    renderPopulatedPage(topPage: Proxy<any>) {
-        let topPageModel: ElementModel = this.props.viewState.models[topPage.id];
-        let topPageEntries = topPageModel.value.entries;
-
+    render() {
         let sidePanel = <></>;
         let pageHeader = <></>;
         let toolbar = <></>;
@@ -33,7 +30,7 @@ interface TopProps {
                         <div id="top-spacer"></div>
                         {pageHeader}
                         <div id="page-elements">
-                            <ElementList viewState={this.props.viewState} entries={topPageEntries} />
+                            {this.renderPageElements()}
                         </div>
                         <div id="bottom-spacer"></div>
                     </div>
@@ -45,15 +42,17 @@ interface TopProps {
         )
     }
 
-    renderEmptyPage() {
-        return <div>Nothing loaded</div>;
-    }
-
-    render() {
+    renderPageElements() {
         let topPage = this.props.viewState.topPage;
         if (topPage == null)
-            return this.renderEmptyPage();
+            return <></>
 
-        return this.renderPopulatedPage(topPage);
+        let topPageModel: ElementModel = this.props.viewState.models[topPage.id];
+        let topPageEntries = topPageModel.value.entries;
+        
+        return <ElementList
+            viewState={this.props.viewState}
+            entries={topPageEntries}
+            pagePath={[]} />
     }
 }
