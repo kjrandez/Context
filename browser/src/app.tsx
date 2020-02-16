@@ -1,8 +1,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Client, { Proxy } from './client';
+import {initialize} from './store';
 import {Page} from './elements';
 
 export default class App
+{
+    constructor() {
+        new Client(
+            this.connected.bind(this),
+            this.disconnected.bind(this),
+            this.broadcast.bind(this)
+        );
+    }
+
+    broadcast(proxy: Proxy<any>, value: any) {
+        //this.viewState.modelUpdated(proxy, value);
+    }
+
+    async connected(host: Proxy<never>) {
+        let rootPage = await host.call<Proxy<any>>('rootPage', []);
+        
+        let store = await initialize(rootPage);
+        
+        ReactDOM.render(
+            <Page store={store} model={store.db[rootPage.id]} path={[]} />,
+            document.getElementById('root')
+        );
+    }
+
+    disconnected() {}
+}
+
+
+/*export default class Appwef
 {
     constructor() {
         let db = {
@@ -37,3 +68,4 @@ export default class App
         );
     }
 }
+*/

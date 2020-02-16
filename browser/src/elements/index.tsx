@@ -1,4 +1,5 @@
-import {Store} from '../types';
+import {Model, Value} from '../types';
+import {Store} from '../store';
 
 export {default as Page} from './page';
 export {default as Text} from './text';
@@ -6,6 +7,6 @@ export {default as Unknown} from './unknown';
 
 export interface ElementProps {
     store: Store;
-    eid: number;
+    model: Model<Value>
     path: number[];
 }

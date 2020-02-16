@@ -1,6 +1,7 @@
-import React, { Component, ReactElement } from 'react';
-import { ElementProps, Text, Unknown } from '.';
-import { Store, ViewNode, PageModel } from '../types';
+import React, {Component, ReactElement} from 'react';
+import {ElementProps, Text, Unknown} from '.';
+import {Store, ViewNode} from '../store';
+import {Model, PageValue} from '../types';
 
 function traverse(node: ViewNode, path: number[]): ViewNode {
     if (node === undefined || path.length === 0)
@@ -14,38 +15,35 @@ function element(store: Store, path: number[], eid: number)
 {
     let model = store.db[eid];
     if (model === undefined)
-        return <p>&lt;!&gt; Element not in local database</p>
+        return <p>&lt;!&gt; Element model missing from database</p>
 
-    let childProps = {store, eid, path, key: path.slice(-1)[0]}
+    let childProps = {store, model, path, key: path.slice(-1)[0]}
     switch (model.type) {
-        case "page": return <Page {...childProps} />
-        case "text": return <Text {...childProps} />
+        case "Page": return <Page {...childProps} />
+        case "Text": return <Text {...childProps} />
         default: return <Unknown {...childProps} />
     }
 }
 
-function test()
-{
-    console.log("sawefaw")
-}
+interface PageProps extends ElementProps { model: Model<PageValue> }
 
-export default class Page extends Component<ElementProps>
+export default class Page extends Component<PageProps>
 {
     render(): ReactElement {
-        const {props: {store, eid, path}} = this;
+        const {props: {store, model, path}} = this;
 
         let node = traverse(store.root, path);
         if (node === undefined)
             return <p>&lt;!&gt; Page path {path.toString()} not in hierarchy</p>
 
-        let model = store.db[eid] as PageModel;
+        let {value: {entries}} = model;
         let contents = (node.expanded) ?
-            model.entries.map(entry => element(store, [...path, entry.index], entry.eid)) :
+            entries.map(entry => element(store, [...path, entry.key], entry.element.id)) :
             <p>-> Expand</p>;
 
         return(
             <div style={{marginLeft: "2px"}}>
-                <p onClick={() => test()}>Page:</p>
+                <p>Page ({this.props.model.id}):</p>
                 <div
                     style={{
                         borderLeft: "1px solid black",

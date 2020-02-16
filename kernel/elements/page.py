@@ -5,7 +5,7 @@ from ..element import Element, Model
 
 
 class PageEntry:
-    nextKey = 0
+    nextKey = 100
 
     def __init__(self, element: Element) -> None:
         self.element = element

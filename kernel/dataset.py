@@ -13,7 +13,7 @@ class Dataset:
         self.objMap: Dict[int, Element] = {}
         self.root: Optional[Page] = None
         self.clipboard: Optional[Page] = None
-        self.nextIndex = 1
+        self.nextIndex = 0
 
     def lookup(self, instId: int) -> Optional[Element]:
         if instId in self.objMap:

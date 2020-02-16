@@ -1,13 +1,11 @@
+import {Proxy} from './client';
+
 export type StrDict<T> = {[_: string]: T};
 export type NumDict<T> = {[_: number]: T};
 
-export interface Model { type: string }
+export type Value = {[_: string]: any}
+export interface Model<T extends Value> {id: number, type: string, value: T}
 
-type PageEntry = {index: number, eid: number}
-export interface PageModel extends Model {
-    entries: PageEntry[]
-}
-
-export interface TextModel extends Model {
-    text: string
-}
+export type PageEntry = {key: number, element: Proxy<any>};
+export type PageValue = {entries: PageEntry[]}
+export type TextValue = {content: string}
