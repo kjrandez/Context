@@ -1,345 +1,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Client, { Proxy } from './client';
-import ViewState from './state/viewState';
-import Top from './components/top';
+import {Page} from './elements';
 
 export default class App
 {
-    viewState: ViewState;
-
     constructor() {
-        this.viewState = new ViewState();
-        new Client(
-            this.connected.bind(this),
-            this.disconnected.bind(this),
-            this.broadcast.bind(this)
+        let db = {
+            0x10000000: {type: "text", text: "hello world!"},
+            0x10000001: {type: "text", text: "how are you today?"},
+            0x10000002: {type: "page", entries: [
+                {index: 100, eid: 0x10000000},
+                {index: 101, eid: 0x10000001},
+                {index: 102, eid: 0x10000004},
+                {index: 103, eid: 0x10000003},
+            ]},
+            0x10000003: {type: "text", text: "this is fun"},
+            0x10000004: {type: "page", entries: [
+                {index: 100, eid: 0x10000005},
+                {index: 101, eid: 0x10000007},
+                {index: 102, eid: 0x10000006}
+            ]},
+            0x10000005: {type: "text", text: "text on a diff page"},
+            0x10000006: {type: "text", text: "and some more for good measure"},
+            0x10000007: {type: "image"}
+        }
+        let root = {
+            expanded: true,
+            children: {
+                102: {expanded: true, children: {}}
+            }
+        }
+
+        ReactDOM.render(
+            <Page store={{db, root}} eid={0x10000002} path={[]} />,
+            document.getElementById('root')
         );
-        ReactDOM.render(<Top viewState={this.viewState} />, document.getElementById('root'));
     }
-
-    broadcast(proxy: Proxy<any>, value: any) {
-        this.viewState.modelUpdated(proxy, value);
-    }
-
-    async connected(host: Proxy<never>) {
-        let rootPage = await host.call<Proxy<any>>('rootPage', []);
-        this.viewState.navigate(rootPage);
-    }
-
-    disconnected() {}
 }
-
-
-
-        //this.top = null;
-        //this.selection = new Map();
-        //this.currentPath = null;
-        //this.pathPages = new Map();
-        //this.grabPath = null;
-        //this.keyListeners = []
-        //this.shiftDown = false;
-        //this.ctrlDown = false;
-
-/*
-
-                var rootPageId = message.arguments[0];
-                var clipboardId = message.arguments[1];
-
-                var rootPage = this.store.fragment(rootPageId);
-                var clipboard = this.store.fragment(clipboardId);
-
-                this.setPage(rootPage, clipboard);
-                break;
-            case 'model':
-                this.store.model(...message.arguments);
-                break;
-            case 'update':
-                this.store.update(...message.arguments);
-                break;
-
-
-    connectKeyListener(listener) {
-        this.keyListeners.push(listener);
-    }
-
-    disconnectKeyListener(listener) {
-        var index = this.keyListeners.indexOf(listener);
-        this.keyListeners.splice(index, 1);
-    }
-
-    startup(component) {
-        this.top = component;
-        this.kernel.onmessage = event => this.kernelMessage(event);
-        document.onkeydown = event => this.documentKeyDown(event);
-        document.onkeyup = event => this.documentKeyUp(event);
-    } 
-
-    notifyShiftKey(down) {
-        this.keyListeners.forEach(listener => listener.shiftKey(down));
-    }
-
-    notifyCtrlKey(down) {
-        this.keyListeners.forEach(listener => listener.ctrlKey(down));
-    }
-
-    actionUndo() {
-        this.kernelSend("undo", null);
-    }
-
-    actionRedo() {
-        this.kernelSend("redo", null);
-    }
-    
-    documentKeyDown(event) {
-        if(event.keyCode === 89 && this.ctrlDown) {
-            this.actionRedo();
-            event.preventDefault();
-        } 
-        else if(event.keyCode === 90 && this.ctrlDown) {
-            this.actionUndo();
-            event.preventDefault();
-        }
-        else if(event.keyCode === 16 && !this.shiftDown) {
-            this.shiftDown = true;
-            this.notifyShiftKey(true);
-        }
-        else if(event.keyCode === 17 && !this.ctrlDown) {
-            this.ctrlDown = true;
-            this.notifyCtrlKey(true);
-        }
-        if(event.keyCode === 27) {
-            this.deselectedAll();
-        }
-    }
-
-    documentKeyUp(event) {
-        if(event.keyCode === 16 && this.shiftDown) {
-            this.shiftDown = false;
-            this.notifyShiftKey(false);
-        }
-        else if(event.keyCode === 17 && this.ctrlDown) {
-            this.ctrlDown = false;
-            this.notifyCtrlKey(false);
-        }
-    }
-*/
-
-/*
-    pathContent() {
-        return this.currentPath.map(pageId => {
-            var content = this.pathPages.get(pageId);
-            return {
-                pageId: pageId,
-                fragment: content.fragment,
-                value: content.value
-            }
-        });
-    }
-
-    pathPageFilled(pageId, value) {
-        var content = this.pathPages.get(pageId)
-        
-        // We receive these updates even for keystrokes, short-circuit, or else everything
-        // slows way down.
-        if(content.value != null)
-            return;
-
-        content.value = value;
-
-        if(this.pathPagesComplete()) {
-            this.top.setPathContent(this.pathContent());
-        }
-    }
-
-    pathPagesComplete() {
-        var complete = true;
-        for(let content of this.pathPages.values()) {
-            if(content.value == null) {
-                complete = false;
-                break;
-            }
-        }
-
-        return complete;
-    }
-
-    enterRoot() {
-        window.location.hash = "";
-        this.setPage(this.rootPage, []);
-    }
-
-    enterPage(path, pageId) {
-        var newHash = "#" + path.join(",");
-        if(path.length > 0)
-            newHash += ",";
-        newHash += pageId;
-
-        window.location.hash = newHash;
-        this.setPage(this.store.fragment(pageId), path);
-    }
-
-    setGrabPath(path) {
-        // Loose end if a call fails.
-        this.grabPath = path;
-    }
-
-    getGrabPath() {
-        return this.grabPath;
-    }
-
-    grabSelection(newSelection) {
-        this.selected(newSelection, false);
-        this.grabPath = null;
-    }
-
-    clearSelections() {
-        this.selection.forEach(selContent => selContent.fragment.detach(this));
-        this.selection.clear();
-    }
-
-    removeSelection(selection) {
-        this.selection.get(selection).fragment.detach(this);
-        this.selection.delete(selection);
-    }
-
-    addSelection(selection) {
-        var fragment = this.store.fragment(selection.tag.id);
-
-        this.selection.set(selection, {
-            tag: selection.tag,
-            ref: selection.ref,
-            fragment: fragment,
-            value: null,
-            type: null
-        });
-
-        fragment.attach(
-            this,
-            (value, type) => this.selectionFilled(selection, value, type)
-        );
-    }
-
-    selectionList() {
-        return [...this.selection.keys()];
-    }
-
-    selectionContent() {
-        return [...this.selection.values()];
-    }
-
-    selectionFilled(selection, value, type) {
-        var selContent = this.selection.get(selection);
-
-        // We receive these updates even for keystrokes, short-circuit, or else everything
-        // slows way down.
-        if(selContent.value != null)
-            return;
-
-        selContent.value = value;
-        selContent.type = type;
-
-        if(this.selectionComplete())
-            this.top.setSelectionContent(this.selectionContent());
-    }
-
-    selectionComplete() {
-        var complete = true;
-        for(let selContent of this.selection.values()) {
-            if(selContent.value == null) {
-                complete = false;
-                break;
-            }
-        }
-
-        return complete;
-    }
-
-    selected(newSelection, ctrlDown) {
-        if(ctrlDown) {
-            if(this.selection.has(newSelection)) {
-                this.removeSelection(newSelection);
-                this.top.setSelectionContent(this.selectionContent());
-            }
-            else {
-                this.addSelection(newSelection);
-                // selectionContent gets updated later
-            }
-        }
-        else {
-            if(this.selection.size === 1 && this.selection.has(newSelection))
-                return;
-            this.clearSelections();
-            this.addSelection(newSelection);
-            // selectionContent gets updated later
-        }
-
-        this.top.setSelection(this.selectionList());
-    }
-
-    deselected(selection) {
-        if(this.selection.has(selection))
-            this.removeSelection(selection);
-
-        this.top.setSelection(this.selectionList());
-        this.top.setSelectionContent(this.selectionContent());
-    }
-
-    deselectedAll() {
-        if(this.selection.size === 0)
-            return;
-        this.clearSelections();
-
-        this.top.setSelection([]);
-        this.top.setSelectionContent([]);
-    }
-
-*/
-
-        /* FROM KERNELOPEN
-        var pathString = window.location.hash.substr(1);
-        var splitPath = pathString.split(",");
-
-        if(pathString.length === 0 || splitPath.length === 0) {
-            this.openingPage = null;
-            this.openingPath = [];
-        }
-        else {
-            var path = splitPath.map(segment => parseInt(segment, 10));
-            var pageId = path.pop();
-            this.openingPage = pageId;
-            this.openingPath = path;
-        }*/
-
-        /* FROM SETPAGE
-        
-        this.currentPath = path;
-
-        // Detach page fragments of previous path which aren't in new path
-        var prevPathIds = [...this.pathPages.keys()];
-        prevPathIds.forEach(pathId => {
-            if(path.indexOf(pathId) < 0) {
-                this.pathPages.get(pathId).fragment.detach(this);
-                this.pathPages.delete(pathId);
-            }
-        });
-
-        // Attach page fragments of current path, if not already in dictionary
-        var pathUnchanged = true;
-        path.forEach(pageId => {
-            if(!this.pathPages.has(pageId)) {
-                var fragment = this.store.fragment(pageId);
-                this.pathPages.set(pageId, {
-                    fragment: fragment,
-                    value: null
-                });
-
-                fragment.attach(this, value => this.pathPageFilled(pageId, value));
-                pathUnchanged = false;
-            }
-        });
-
-        this.top.setPage(page, this.clipboard, path);
-        if(pathUnchanged) {
-            this.top.setPathContent(this.pathContent());
-        }*/
