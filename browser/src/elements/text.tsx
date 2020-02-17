@@ -4,7 +4,7 @@ import {Model, TextValue} from '../types';
 
 interface TextProps extends ElementProps { model: Model<TextValue> }
 
-export default class Text extends Component<ElementProps>
+export default class Text extends Component<TextProps>
 {
     render(): ReactElement {
         let {value: {content}} = this.props.model;

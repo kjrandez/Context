@@ -1,4 +1,5 @@
-import { mapObj } from './interfaces';
+import {Value} from './types';
+import {mapObj} from './interfaces';
 
 export class Proxy<T>
 {
@@ -101,7 +102,8 @@ class ProxyMap
 
 type TransactionModel = {
     id: number,
-    subject: Proxy<any>,
+    subject: Proxy<Value>,
+    others: Proxy<Value>[],
     value: any
 }
 
@@ -117,12 +119,13 @@ export default class Client
     constructor(
         connected: (_: Proxy<never>) => Promise<void>,
         disconnected: () => void,
-        broadcast: (_: Proxy<any>, __: any) => void
-        ) {
+        broadcast: (_: Proxy<Value>) => Promise<void>
+    ) {
         let clientService = {
             proxyableId: null,
-            broadcast: (trans: TransactionModel) => broadcast(trans.subject, trans.value)
+            broadcast: (trans: TransactionModel) => broadcast(trans.subject).then()
         };
+
         this.localObjects = new ProxyableTable(clientService);
 
         let dispatcher = this.dispatchCall.bind(this);
