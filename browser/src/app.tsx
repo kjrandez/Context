@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Client, {Proxy} from './client';
-import {Value} from './types';
 import {newStore, Store} from './store';
 import Element from './elements';
 
@@ -20,14 +19,14 @@ export default class App
         this.store = null;
     }
 
-    async broadcast(element: Proxy<Value>) {
+    async broadcast(element: Proxy) {
         if (this.store != null) {
             await this.store.broadcast(element);
         }
     }
 
-    async connected(host: Proxy<never>) {
-        let rootPage = await host.call<Proxy<any>>('rootPage', []);
+    async connected(host: Proxy) {
+        let rootPage = await host.call('rootPage', []) as Proxy;
         
         this.store = await newStore(rootPage);
         

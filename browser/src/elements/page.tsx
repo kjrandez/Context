@@ -1,6 +1,5 @@
 import React, {Component, ReactElement} from 'react';
 import Element, {ElementProps} from '.';
-import {traverse} from '../store';
 import {Model, PageValue} from '../types';
 
 
@@ -33,7 +32,7 @@ export default class Page extends Component<PageProps>
     render(): ReactElement {
         const {store, path} = this.props;
 
-        let node = traverse(store.root, path);
+        let node = store.viewNode(path);
 
         return(
             <div style={{marginLeft: "2px"}}>

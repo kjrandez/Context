@@ -7,13 +7,13 @@ class ViewNode
     public children: NumDict<ViewNode>;
     public component: Component | null;
 
-    constructor(public element: Proxy<Value>, public expanded: boolean) {
+    constructor(public element: Proxy, public expanded: boolean) {
         this.children = {};
         this.component = null;
     }
 }
 
-export async function newStore(rootPage: Proxy<PageValue>) {
+export async function newStore(rootPage: Proxy) {
     let store = new Store(new ViewNode(rootPage, true), {});
     await store.initialize();
     return store;
@@ -27,9 +27,13 @@ export class Store
 
     async initialize() {
         await this.refreshHierarchy(this.root, 0); 
-    }    
+    }
 
-    bind(path: number[], component: Component) {
+    viewNode(path: number[]) {
+        return traverse(this.root, path);
+    }
+
+    mount(path: number[], component: Component) {
         let node = traverseOptional(this.root, path);
         if (node === undefined) {
             console.log("WARNING: Tried binding to node not present in hierarchy.");
@@ -40,7 +44,7 @@ export class Store
         node.component = component;
     }
 
-    unbind(path: number[], component: Component) {
+    unmount(path: number[], component: Component) {
         let node = traverseOptional(this.root, path);
 
         // Hieararchy was likely refreshed prior to a re-render causing component to unmount
@@ -91,7 +95,7 @@ export class Store
         this.refreshComponentAtPath(path);
     }
 
-    async broadcast(element: Proxy<Value>) {
+    async broadcast(element: Proxy) {
         if (this.db[element.id] === undefined) {
             console.log("Broadcast for element not in database");
             return;
@@ -131,10 +135,10 @@ export class Store
             node.component.forceUpdate();
     }
 
-    private async fetchModel<T>(element: Proxy<T>) {
-        let model = this.db[element.id] as Model<any>;
+    private async fetchModel(element: Proxy) {
+        let model = this.db[element.id] as Model<Value>;
         if (model === undefined) {
-            model = await element.call<Model<any>>('model', []);
+            model = await element.call<Model<Value>>('model', []);
             this.db[element.id] = model;
         }
         return model;
@@ -142,7 +146,7 @@ export class Store
     
     private async refreshHierarchy(node: ViewNode, collapsedDepth: number) {
         // Lookup model, pulling from kernel if not yet present
-        let {type, value} = await this.fetchModel<Model<PageValue>>(node.element);
+        let {type, value} = await this.fetchModel(node.element) as Model<PageValue>;
     
         // No further refresh if this is a leaf node
         if (type !== "Page")
@@ -165,7 +169,7 @@ export class Store
     }
 }
 
-export function traverse(node: ViewNode, path: number[]): ViewNode {
+function traverse(node: ViewNode, path: number[]): ViewNode {
     if (path.length === 0)
         return node;
 

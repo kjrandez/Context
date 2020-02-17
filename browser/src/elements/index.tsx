@@ -18,14 +18,14 @@ export default class Element extends Component<{store: Store; path: number[]; ei
 {
     componentDidMount() {
         let {store, path, eid} = this.props;
-        store.bind(path, this);
+        store.mount(path, this);
         store.subscribe(path, eid);
     }
 
     componentWillUnmount() {
         let {store, path, eid} = this.props;
         store.unsubscribe(path, eid);
-        store.unbind(path, this);
+        store.unmount(path, this);
     }
 
     componentDidUpdate() {}

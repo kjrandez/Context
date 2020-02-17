@@ -1,7 +1,6 @@
-import {Value} from './types';
 import {mapObj} from './interfaces';
 
-export class Proxy<T>
+export class Proxy
 {
     id: number;
     dispatchCall: Function;
@@ -18,8 +17,6 @@ export class Proxy<T>
     send(selector: string, args: any[] = []) {
         this.dispatchCall(this.id, selector, args, false);
     }
-
-    async broadcast(value: T): Promise<void> {}
 }
 
 export interface Proxyable {
@@ -84,7 +81,7 @@ class ProxyableTable
 class ProxyMap
 {
     make: Function;
-    refs: { [_: number]: Proxy<any> } = {};
+    refs: { [_: number]: Proxy } = {};
 
     constructor(makeProxy: Function) {
         this.make = makeProxy;
@@ -102,8 +99,8 @@ class ProxyMap
 
 type TransactionModel = {
     id: number,
-    subject: Proxy<Value>,
-    others: Proxy<Value>[],
+    subject: Proxy,
+    others: Proxy[],
     value: any
 }
 
@@ -117,9 +114,9 @@ export default class Client
     foreignObjects: ProxyMap;
 
     constructor(
-        connected: (_: Proxy<never>) => Promise<void>,
+        connected: (_: Proxy) => Promise<void>,
         disconnected: () => void,
-        broadcast: (_: Proxy<Value>) => Promise<void>
+        broadcast: (_: Proxy) => Promise<void>
     ) {
         let clientService = {
             proxyableId: null,
@@ -212,7 +209,7 @@ export default class Client
             return argDesc.value.map((X: any) => this.decodedArgument(X))
         else if (argDesc.type === 'dictionary')
             return mapObj(argDesc.value, (X: any) => this.decodedArgument(X))
-        else
+        else // primitive
             return argDesc.value;
     }
 
