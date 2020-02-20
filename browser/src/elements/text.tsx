@@ -2,13 +2,13 @@ import React, {Component, ReactElement} from 'react';
 import {ElementProps} from '.';
 import {Model, TextValue} from '../types';
 
-interface TextProps extends ElementProps { model: Model<TextValue> }
+interface TextProps extends ElementProps { value: TextValue }
 
 export default class Text extends Component<TextProps>
 {
     render(): ReactElement {
-        let {value: {content}} = this.props.model;
+        let {content} = this.props.value;
         
-        return <p>Text [{this.props.model.id}]: {content} </p>
+        return <p>Text [{this.props.eid}]: {content} </p>
     }
 }

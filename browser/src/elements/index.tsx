@@ -1,6 +1,7 @@
-import React, {Component, ReactElement} from 'react';
-import {Model, Value, TextValue, PageValue} from '../types';
-import {Store} from '../store';
+import {observer} from 'mobx-react';
+import React, {Component, ReactElement, MouseEvent} from 'react';
+import {Value, TextValue, PageValue} from '../types';
+import {Store, findPath} from '../store';
 
 import Text from './text';
 import Page from './page';
@@ -10,37 +11,45 @@ export {Page};
 
 export interface ElementProps {
     store: Store;
-    model: Model<Value>
+    type: string;
+    eid: number;
+    value: Value;
     path: number[];
 }
 
-export default class Element extends Component<{store: Store; path: number[]; eid: number}>
+class Element extends Component<{store: Store; path: number[]; eid: number}>
 {
-    componentDidMount() {
-        let {store, path, eid} = this.props;
-        store.mount(path, this);
-        store.subscribe(path, eid);
+    onMouseDown(event: MouseEvent) {
+        this.props.store.select(this.props.path, event.ctrlKey);
+        event.stopPropagation();
     }
-
-    componentWillUnmount() {
-        let {store, path, eid} = this.props;
-        store.unsubscribe(path, eid);
-        store.unmount(path, this);
-    }
-
-    componentDidUpdate() {}
 
     render(): ReactElement {
         let {store, path, eid} = this.props;
         let model = store.db[eid];
         if (model === undefined)
-        return <p>&lt;!&gt; Element model missing from database</p>
+            return <p>&lt;!&gt; Element model missing from database</p>
 
-        let childProps = {store, path, key: path.slice(-1)[0]}
-        switch (model.type) {
-            case "Text": return <Text model={model as Model<TextValue>} {...childProps} />
-            case "Page": return <Page model={model as Model<PageValue>} {...childProps} />
-            default: return <Unknown model={model} {...childProps} />
+        let {type, value} = model;
+        let childProps = {store, path, type, eid: model.id, key: path.slice(-1)[0]}
+        let visual = null;
+        
+        let selected = store.lookupNode(path).selected;
+
+        switch (type) {
+            case "Text": visual = <Text value={value as TextValue} {...childProps} />; break;
+            case "Page": visual = <Page value={value as PageValue} {...childProps} />; break;
+            default: visual = <Unknown value={value} {...childProps} />; break;
         }
+
+        return (
+            <div 
+                style={{backgroundColor: selected ? "black" : "white"}}
+                onMouseDown={(ev) => this.onMouseDown(ev)}>
+                {visual}
+            </div>
+        );
     }
 }
+
+export default observer(Element);
