@@ -1,6 +1,6 @@
 import React, {Component, ReactElement} from 'react';
 import {ElementProps} from '.';
-import {Model, TextValue} from '../types';
+import {TextValue} from '../types';
 
 interface TextProps extends ElementProps { value: TextValue }
 

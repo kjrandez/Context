@@ -1,5 +1,5 @@
 import {Component} from 'react';
-import {observable, autorun} from 'mobx';
+import {observable} from 'mobx';
 import {Proxy} from './client';
 import {NumDict, Model, Value, PageValue} from './types';
 
@@ -59,8 +59,6 @@ export class Store
     }
 
     select(path: number[], ctrlDown: boolean) {
-        let refreshPaths = [...this.selection, path];
-
         if (ctrlDown) {
             let index = findPath(this.selection, path);
             if (index !== null) {

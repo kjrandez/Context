@@ -106,38 +106,41 @@ type TransactionModel = {
 
 export default class Client
 {
-    websocket: WebSocket;
-
+    websocket: WebSocket | null;
     pendingCalls: TagCache<Function> = new TagCache<Function>();
-
     localObjects: ProxyableTable;
     foreignObjects: ProxyMap;
 
     constructor(
-        connected: (_: Proxy) => Promise<void>,
-        disconnected: () => void,
+        private connected: (_: Proxy) => Promise<void>,
+        private disconnected: () => void,
         broadcast: (_: Proxy) => Promise<void>
     ) {
-        let clientService = {
-            proxyableId: null,
-            broadcast: (trans: TransactionModel) => broadcast(trans.subject).then()
-        };
-
-        this.localObjects = new ProxyableTable(clientService);
+        this.websocket = null;
 
         let dispatcher = this.dispatchCall.bind(this);
         this.foreignObjects = new ProxyMap((tag: number) => new Proxy(tag, dispatcher));
         
-        this.websocket = new WebSocket("ws://localhost:8085/broadcast");
-        this.websocket.onmessage = event => this.handleWebsocketReceive(event);
-        this.websocket.onclose = (_) => disconnected();
+        let clientService = {
+            proxyableId: null,
+            broadcast: (trans: TransactionModel) => broadcast(trans.subject).then()
+        };
+        this.localObjects = new ProxyableTable(clientService);
+    }
 
+    connect() {
         let hostService = this.foreignObjects.getObject(0);
-        this.websocket.onopen = (_) => connected(hostService).then();
+
+        this.websocket = new WebSocket("ws://localhost:8085/broadcast");
+
+        this.websocket.onmessage = event => this.handleWebsocketReceive(event);
+        this.websocket.onclose = (_) => this.disconnected();
+        this.websocket.onopen = (_) => this.connected(hostService).then();
     }
 
     dispatchWebsocketSend(data: object) {
-        this.websocket.send(JSON.stringify(data));
+        if (this.websocket !== null)
+            this.websocket.send(JSON.stringify(data));
     }
 
     dispatchCall(targetId: number, selector: string, args: any[]) {

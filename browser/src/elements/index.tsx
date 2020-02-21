@@ -1,13 +1,12 @@
 import {observer} from 'mobx-react';
 import React, {Component, ReactElement, MouseEvent} from 'react';
 import {Value, TextValue, PageValue} from '../types';
-import {Store, findPath} from '../store';
+import {Store} from '../store';
 
 import Text from './text';
-import Page from './page';
+import NestedPage from './nestedPage';
 import Unknown from './unknown';
-
-export {Page};
+export {default as Page} from './page';
 
 export interface ElementProps {
     store: Store;
@@ -38,7 +37,7 @@ class Element extends Component<{store: Store; path: number[]; eid: number}>
 
         switch (type) {
             case "Text": visual = <Text value={value as TextValue} {...childProps} />; break;
-            case "Page": visual = <Page value={value as PageValue} {...childProps} />; break;
+            case "Page": visual = <NestedPage value={value as PageValue} {...childProps} />; break;
             default: visual = <Unknown value={value} {...childProps} />; break;
         }
 
