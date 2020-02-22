@@ -3,6 +3,7 @@ import Client, {Proxy} from './client';
 import {newStore, Store} from './store';
 import {Page} from './elements';
 import {Model, PageValue} from './types';
+import Toolbar from './toolbar';
 
 interface IAppProps {}
 interface IAppState {store: Store | null}
@@ -41,7 +42,10 @@ export default class App extends Component<IAppProps, IAppState>
             let {db, root: {element: rootPage}} = store;
             let {id: eid, type, value} = db[rootPage.id] as Model<PageValue>;
 
-            return <Page {...{store, type, eid, value, path: []}} />
+            return <>
+                <Toolbar />
+                <Page {...{store, type, eid, value, path: []}} />
+            </>
         } else {
             return <p>Connecting to host...</p>
         }

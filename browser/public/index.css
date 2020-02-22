@@ -1,10 +1,56 @@
+button { font-size: 10pt; }
+
+#root {
+	font-family: "Source Serif Pro";
+	font-size: 12pt;
+}
+
 div {
 	padding: 0;
 	margin: 0;
+}
+
+span.script-text {
+	font-family: "Consolas";
+}
+
+#root div {
 	overflow: auto;
 }
 
 p {
 	padding: 0;
-	margin: 2px;
+	margin: 0;
+}
+
+div.selected {
+	background-color: black;
+	color: white;
+	cursor: grab;
+}
+
+div.selected div {
+	border-color: white;
+}
+
+div.element-content {
+	margin: 5px;
+	cursor: initial;
+}
+
+button:focus { 
+    outline: none; 
+}
+
+button::-moz-focus-inner {
+	border: 0;
+}
+
+div.toolbar {
+	position: -webkit-sticky; /* Safari */
+	position: sticky;
+	overflow: initial;
+	background-color: white;
+	padding: 5px;
+	font-family: 'Arial';
 }

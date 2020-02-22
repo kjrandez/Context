@@ -19,7 +19,7 @@ class Page extends Component<PageProps>
                     key={key} />
         );
 
-        return <>{elements}</>
+        return <>{elements}<button style={{marginLeft: "5px"}}>+ Insert</button></>
     }
 }
 

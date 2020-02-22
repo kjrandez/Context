@@ -9,6 +9,13 @@ export default class Text extends Component<TextProps>
     render(): ReactElement {
         let {content} = this.props.value;
         
-        return <p>Text [{this.props.eid}]: {content} </p>
+        return <div contentEditable={true}>{content}</div>
+    }
+}
+
+export class Script extends Component<TextProps>
+{
+    render() {
+        return <span className="script-text"><Text {...this.props} /></span>;
     }
 }
