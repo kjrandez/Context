@@ -219,7 +219,7 @@ export default class Client
     encodedArgument(arg: any): Argument {
         if (arg instanceof Proxy) 
             return { type: 'hostObject', value: arg.id };
-        else if ('proxyableId' in arg) // "instanceof Proxyable"
+        else if (Object(arg) === arg && 'proxyableId' in arg) // "instanceof Proxyable"
             return { type: 'clientObject', value: this.localObjects.getTag(arg) };
         else if (arg instanceof Array)
             return { type: 'list', value: arg.map(X => this.encodedArgument(X))}

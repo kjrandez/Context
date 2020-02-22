@@ -1,3 +1,5 @@
+body {background-color: white;}
+
 button { font-size: 10pt; }
 
 #root {
@@ -12,6 +14,10 @@ div {
 
 span.script-text {
 	font-family: "Consolas";
+	white-space: pre-wrap;
+    -moz-tab-size: 4;
+    -o-tab-size:   4;
+    tab-size:      4;
 }
 
 #root div {
@@ -23,7 +29,7 @@ p {
 	margin: 0;
 }
 
-div.selected {
+div.element.selected {
 	background-color: black;
 	color: white;
 	cursor: grab;
@@ -49,7 +55,7 @@ button::-moz-focus-inner {
 div.toolbar {
 	position: -webkit-sticky; /* Safari */
 	position: sticky;
-	overflow: initial;
+	top: 0px;
 	background-color: white;
 	padding: 5px;
 	font-family: 'Arial';

@@ -3,7 +3,7 @@ import React, {Component, ReactElement, MouseEvent} from 'react';
 import {Value, TextValue, PageValue} from '../types';
 import {Store} from '../store';
 
-import Text, {Script} from './text';
+import {Script, Markdown} from './text';
 import NestedPage from './nestedPage';
 import Unknown from './unknown';
 export {default as Page} from './page';
@@ -18,9 +18,12 @@ export interface ElementProps {
 
 class Element extends Component<{store: Store; path: number[]; eid: number}>
 {
-    onMouseDown(event: MouseEvent) {
-        console.log("click!");
-        this.props.store.select(this.props.path, event.ctrlKey);
+    onClick(event: MouseEvent) {
+        // Select element if click was not due to text range selection
+        var selection = window.getSelection();
+        if(selection !== null && selection.type !== "Range")
+            this.props.store.select(this.props.path, event.ctrlKey);
+        
         event.stopPropagation();
     }
 
@@ -37,7 +40,7 @@ class Element extends Component<{store: Store; path: number[]; eid: number}>
         let selected = store.lookupNode(path).selected;
 
         switch (type) {
-            case "Text": visual = <Text value={value as TextValue} {...childProps} />; break;
+            case "Text": visual = <Markdown value={value as TextValue} {...childProps} />; break;
             case "Page": visual = <NestedPage value={value as PageValue} {...childProps} />; break;
             case "Script": visual = <Script value={value as TextValue} {...childProps} />; break;
             default: visual = <Unknown value={value} {...childProps} />; break;
@@ -46,7 +49,7 @@ class Element extends Component<{store: Store; path: number[]; eid: number}>
         return (
             <div
                 className={"element" + (selected ? " selected" : "")}
-                onMouseDown={(ev) => this.onMouseDown(ev)}>
+                onClick={(ev) => this.onClick(ev)}> 
                 <div className="element-content">
                     {visual}
                 </div>

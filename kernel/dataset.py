@@ -40,9 +40,9 @@ class Dataset:
 
         self.root = Page([
             Text("Hello world"),
-            Text("How are you doing today?"),
+            Text("How are you doing **today**?"),
             Text("I'm doing just fine thank you very much."),
-            Script("print('Hello world!')"),
+            Script("def something():\n\tprint('Hello world!')"),
             Page([
                 Text("Introduction"),
                 Text(lorem1)
