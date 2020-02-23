@@ -1,22 +1,20 @@
 import {observer} from 'mobx-react';
 import React, {Component, ReactElement, MouseEvent} from 'react';
-import {Value, TextValue, PageValue} from '../types';
-import {Store} from '../store';
+import {Model, Value, TextValue, PageValue} from '../../types';
+import {Store} from '../../store';
 
-import {Script, Markdown} from './text';
+import {Script, Text} from './text';
 import NestedPage from './nestedPage';
 import Unknown from './unknown';
 export {default as Page} from './page';
 
 export interface ElementProps {
     store: Store;
-    type: string;
-    eid: number;
-    value: Value;
     path: number[];
+    model: Model<Value>;
 }
 
-class Element extends Component<{store: Store; path: number[]; eid: number}>
+class PageEntry extends Component<{store: Store; path: number[]; eid: number}>
 {
     onClick(event: MouseEvent) {
         // Select element if click was not due to text range selection
@@ -29,22 +27,22 @@ class Element extends Component<{store: Store; path: number[]; eid: number}>
 
     render(): ReactElement {
         let {store, path, eid} = this.props;
-        let model = store.db[eid];
-        if (model === undefined)
-            return <p>&lt;!&gt; Element model missing from database</p>
+        let model = store.lookupModel(eid);
 
-        let {type, value} = model;
-        let childProps = {store, path, type, eid: model.id, key: path.slice(-1)[0]}
-        let visual = null;
-        
+        let childProps = {store, path, key: path.slice(-1)[0]}
         let selected = store.lookupNode(path).selected;
-
-        switch (type) {
-            case "Text": visual = <Markdown value={value as TextValue} {...childProps} />; break;
-            case "Page": visual = <NestedPage value={value as PageValue} {...childProps} />; break;
-            case "Script": visual = <Script value={value as TextValue} {...childProps} />; break;
-            default: visual = <Unknown value={value} {...childProps} />; break;
-        }
+        let visual = (() => {
+            switch (model.type) {
+                case "Text":
+                    return <Text model={model as Model<TextValue>} {...childProps} />;
+                case "Page":
+                    return <NestedPage model={model as Model<PageValue>} {...childProps} />;
+                case "Script":
+                    return <Script model={model as Model<TextValue>} {...childProps} />;
+                default:
+                    return <Unknown model={model} {...childProps} />;
+            }
+        })();
 
         return (
             <div
@@ -58,4 +56,4 @@ class Element extends Component<{store: Store; path: number[]; eid: number}>
     }
 }
 
-export default observer(Element);
+export default observer(PageEntry);

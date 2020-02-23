@@ -9,3 +9,13 @@ export interface Model<T extends Value> {id: number, type: string, value: T}
 export type PageEntry = {key: number, element: Proxy};
 export type PageValue = {entries: PageEntry[]}
 export type TextValue = {content: string}
+
+export function mapObj<T, R>(
+    obj: { [_: string]: T},
+    valueMapping: (_: T) => R,
+    keyMapping: (_: string) => string = (K) => K,
+) {
+    return Object.assign({}, ...Object.entries(obj).map(
+         ([K, V]: [string, T]) => ({[keyMapping(K)]: valueMapping(V)}) 
+    ));
+}

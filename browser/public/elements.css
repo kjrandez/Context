@@ -1,4 +1,4 @@
-.text-edit {
+/*.text-edit {
 	outline: 0;
 	white-space: pre-wrap;
 	padding-top: 3px;
@@ -32,14 +32,14 @@
 	margin: 0;
 	padding: 0;
 	height: 0px;
-    -webkit-transition: height 0.08s; /* Safari */
+    -webkit-transition: height 0.08s;
     transition: height 0.08s;
     transition-timing-function: linear;
 }
 
 .element-spacer.expanded {
 	height: 25px;
-	-webkit-transition: height 0.08s; /* Safari */
+	-webkit-transition: height 0.08s;
     transition: height 0.08s;
 	transition-timing-function: linear;
 }
@@ -160,3 +160,4 @@
 #page-elements .page-body .append-button {
 	margin-top: 3px;
 }
+*/

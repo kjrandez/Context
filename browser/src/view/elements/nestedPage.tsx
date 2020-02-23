@@ -8,9 +8,9 @@ class NestedPage extends Component<PageProps>
         let {store, path} = this.props;
 
         if (!expanded)
-            return <button onClick={()=>store.expand(path)}>-</button>
+            return <button onClick={()=>store.hierarchyAction.expand(path)}>-</button>
         else
-            return <button onClick={()=>store.collapse(path)}>|</button>
+            return <button onClick={()=>store.hierarchyAction.collapse(path)}>|</button>
     }
 
     render(): ReactElement {
@@ -20,7 +20,10 @@ class NestedPage extends Component<PageProps>
 
         return(
             <div>
-                <p>{this.expandLink(node.expanded)} Page({this.props.eid})</p>
+                <p>
+                    {this.expandLink(node.expanded)}
+                    <span className="title">Page({this.props.model.id})</span>
+                </p>
                 <div
                     style={{
                         borderLeft: "1px solid",

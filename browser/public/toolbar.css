@@ -1,4 +1,4 @@
-
+/*
 #toolbar {
     z-index: 1;
     top: 0;
@@ -12,7 +12,7 @@
 }
 
 .toolbar-hidden {
-	right: -300px; /* 0 width - change this with JavaScript */
+	right: -300px; 0 width - change this with JavaScript
 }
 
 .toolbar-visible {
@@ -35,3 +35,4 @@
 	padding: 8px;
 }
 
+*/

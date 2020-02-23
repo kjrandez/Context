@@ -1,4 +1,4 @@
-#page {
+/*#page {
 	min-height: 100%;
 	max-width: 900px;
 	margin: 0 auto;
@@ -24,8 +24,8 @@
 	margin-bottom: 10px;
 	border-radius: 7px;
 
-	/* Miraculously discovered as fixing the breadcrumbs */
-	/*max-width: calc(100% - 0.1px);*/
+	Miraculously discovered as fixing the breadcrumbs 
+	max-width: calc(100% - 0.1px);
 }
 
 .append-button {
@@ -79,3 +79,4 @@
 .link-add-popover {
 	padding: 7px;
 }
+*/

@@ -1,4 +1,4 @@
-
+/*
 #sidepanel-outer {
 	height: 100%;
 }
@@ -91,14 +91,14 @@
 
 .clipboard-entry-spacer {
 	height: 9px;
-	-webkit-transition: height 0.08s; /* Safari */
+	-webkit-transition: height 0.08s;
     transition: height 0.08s;
 	transition-timing-function: linear;
 }
 
 .clipboard-entry-spacer.expanded {
 	height: 25px;
-	-webkit-transition: height 0.08s; /* Safari */
+	-webkit-transition: height 0.08s;
     transition: height 0.08s;
 	transition-timing-function: linear;
 }
@@ -140,4 +140,4 @@
 
 .clipboard-entry img {
 	opacity: 0.9;
-}
+}*/

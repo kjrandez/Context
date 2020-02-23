@@ -1,4 +1,4 @@
-import {mapObj} from './interfaces';
+import {mapObj} from './types';
 
 export class Proxy
 {

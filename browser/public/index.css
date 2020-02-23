@@ -1,10 +1,5 @@
-body {background-color: white;}
-
-button { font-size: 10pt; }
-
-#root {
-	font-family: "Source Serif Pro";
-	font-size: 12pt;
+body, html {
+	height:100%
 }
 
 div {
@@ -12,21 +7,46 @@ div {
 	margin: 0;
 }
 
+p {
+	padding: 0;
+	margin: 0;
+}
+
+#root {
+	font-family: "Roboto Slab";
+	font-size: 15px;
+	height: 100%;
+}
+
+.title, header, h1, h2, h3, h4, h5, h6, button {
+	font-family: "Roboto";
+}
+
+#app {
+	min-height: 100%;
+}
+
+#app div {
+	overflow: auto;
+}
+
+#toolbar {
+	position: -webkit-sticky; /* Safari */
+	position: sticky;
+	top: 0px;
+	background-color: white;
+	padding: 5px;
+	font-family: 'Roboto';
+	height: 40px;
+}
+
 span.script-text {
-	font-family: "Consolas";
+	font-family: "Roboto Mono";
+	font-size: 14px;
 	white-space: pre-wrap;
     -moz-tab-size: 4;
     -o-tab-size:   4;
     tab-size:      4;
-}
-
-#root div {
-	overflow: auto;
-}
-
-p {
-	padding: 0;
-	margin: 0;
 }
 
 div.element.selected {
@@ -44,19 +64,13 @@ div.element-content {
 	cursor: initial;
 }
 
+button {
+}
+
 button:focus { 
     outline: none; 
 }
 
 button::-moz-focus-inner {
 	border: 0;
-}
-
-div.toolbar {
-	position: -webkit-sticky; /* Safari */
-	position: sticky;
-	top: 0px;
-	background-color: white;
-	padding: 5px;
-	font-family: 'Arial';
 }
