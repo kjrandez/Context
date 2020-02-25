@@ -1,16 +1,23 @@
-import React, {Component, ReactElement} from 'react';
+import React, {Component, ReactElement, MouseEvent} from 'react';
 import Page, {PageProps} from './page';
 import {observer} from 'mobx-react';
 
 class NestedPage extends Component<PageProps>
 {
-    expandLink(expanded: boolean) {
-        let {store, path} = this.props;
+    onClick(ev: MouseEvent<HTMLButtonElement>, expand: boolean) {
+        ev.stopPropagation();
+        
+        const {store, path} = this.props;
+        const action = expand ? 'expand' : 'collapse';
 
+        store.hierarchyAction[action](path);
+    }
+
+    expandLink(expanded: boolean) {
         if (!expanded)
-            return <button onClick={()=>store.hierarchyAction.expand(path)}>-</button>
+            return <button onClick={(ev) => this.onClick(ev, true)}>-</button>
         else
-            return <button onClick={()=>store.hierarchyAction.collapse(path)}>|</button>
+            return <button onClick={(ev) => this.onClick(ev, false)}>|</button>
     }
 
     render(): ReactElement {

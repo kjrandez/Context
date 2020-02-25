@@ -6,6 +6,8 @@ import {Store} from '../../store';
 import {Script, Text} from './text';
 import NestedPage from './nestedPage';
 import Unknown from './unknown';
+import {DragDropNode} from '../dragDrop';
+
 export {default as Page} from './page';
 
 export interface ElementProps {
@@ -14,23 +16,29 @@ export interface ElementProps {
     model: Model<Value>;
 }
 
-class PageEntry extends Component<{store: Store; path: number[]; eid: number}>
+interface PageEntryProps {
+    store: Store;
+    path: number[];
+    eid: number;
+}
+
+class PageEntry extends Component<PageEntryProps>
 {
     onClick(event: MouseEvent) {
         // Select element if click was not due to text range selection
         var selection = window.getSelection();
         if(selection !== null && selection.type !== "Range")
-            this.props.store.select(this.props.path, event.ctrlKey);
+            this.props.store.select(this.props.path);
         
         event.stopPropagation();
     }
 
-    render(): ReactElement {
+    render(): ReactElement | null {
         let {store, path, eid} = this.props;
         let model = store.lookupModel(eid);
 
         let childProps = {store, path, key: path.slice(-1)[0]}
-        let selected = store.lookupNode(path).selected;
+        let {selected, expanded} = store.lookupNode(path);
         let visual = (() => {
             switch (model.type) {
                 case "Text":
@@ -44,14 +52,22 @@ class PageEntry extends Component<{store: Store; path: number[]; eid: number}>
             }
         })();
 
-        return (
-            <div
-                className={"element" + (selected ? " selected" : "")}
-                onClick={(ev) => this.onClick(ev)}> 
-                <div className="element-content">
-                    {visual}
+        let elementClass = "element" + (selected ? " selected" : "");
+        let elementContentClass = "element-content" + (!expanded ? ' leaf' : '');
+        return(
+            <DragDropNode path={path} store={store}>
+                <div
+                    className={elementClass}
+                    onClick={(ev) => this.onClick(ev)}> 
+                    <div 
+                        draggable
+                        onDragStart={(ev) => {ev.stopPropagation(); ev.preventDefault();}}
+                        style={{userSelect: "initial"}}
+                        className={elementContentClass}>
+                        {visual}
+                    </div>
                 </div>
-            </div>
+            </DragDropNode>
         );
     }
 }

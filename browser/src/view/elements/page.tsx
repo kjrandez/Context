@@ -1,6 +1,7 @@
 import React, {Component, ReactElement} from 'react';
 import PageEntry, {ElementProps} from '.';
 import {Model, PageValue} from '../../types';
+import AppendButton from '../append';
 import {observer} from 'mobx-react';
 
 export interface PageProps extends ElementProps { model: Model<PageValue> }
@@ -16,10 +17,10 @@ class Page extends Component<PageProps>
                     store={store}
                     path={[...path, key]}
                     eid={element.id}
-                    key={key} />
+                    key={key}/>
         );
 
-        return <>{elements}<button style={{marginLeft: "5px"}}>+ Insert</button></>
+        return <>{elements}<AppendButton {...{store, path}}/></>
     }
 }
 

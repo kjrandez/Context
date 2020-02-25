@@ -5,7 +5,6 @@ import marked from 'marked';
 import {observer} from 'mobx-react';
 
 interface TextProps extends ElementProps {model: Model<TextValue>}
-interface TextState {content: string}
 
 export class Text extends Component<TextProps>
 {
@@ -65,22 +64,66 @@ class Plain extends Component<TextProps>
     }
 }
 
-class Editable extends Component<TextProps, TextState>
-{
+interface EditableState {content: string}
+
+class Editable extends Component<TextProps, EditableState> {
+    elem: RefObject<HTMLDivElement>;
     prevOnChangeValue: string | null;
 
     constructor(props: TextProps) {
         super(props);
+        this.elem = React.createRef();
         this.prevOnChangeValue = null;
         this.state = {
             content: props.model.value.content
         }
     }
 
+    update(value: string) {
+        // Unclear if useful:
+        // Prevent firing of multiple onChange events
+        /*if(value === this.prevOnChangeValue)
+            return;
+        this.prevOnChangeValue = value;*/
+
+        // Unclear if useful
+        //this.setState({content: value});
+
+        // Edit model to match current innerText value
+        this.props.store.textAction.edit(this.props.path, value);
+    }
+
+    onInput(ev: FormEvent<HTMLDivElement>) {
+        if (this.elem === null || this.elem.current === null)
+            return;
+        
+        let value   = this.elem.current.innerText;
+        if (value === null)
+            value = "";
+
+        this.update(value);
+    }
+
+    onPaste(ev: ClipboardEvent<HTMLDivElement>) {
+        ev.preventDefault();
+        var text = ev.clipboardData.getData("text");
+        document.execCommand('insertText', false, text);
+    }
+
+    onKeyDown(ev: KeyboardEvent<HTMLDivElement>) {
+        if (this.elem === null || this.elem.current === null)
+            return;
+
+        console.log("keypress");
+        if(ev.keyCode === 9) {
+            this.insertTextAtCursor("\t");
+            ev.preventDefault();
+        }
+    }
+
     // Author: Martin Wantke
     // https://stackoverflow.com/questions/2920150/insert-text-at-cursor-in-a-content-editable-div
-    insertTextAtCursor(text: string)
-    {
+    insertTextAtCursor(text: string) {
         let selection = window.getSelection();
         if (selection === null)
             return;
@@ -97,118 +140,24 @@ class Editable extends Component<TextProps, TextState>
         selection.addRange(cursorRange)
     }
 
-    onInput(ev: FormEvent<HTMLDivElement>, value: string) {
-        // Prevent firing of multiple onChange events
-        if(value === this.prevOnChangeValue)
-            return;
-        this.prevOnChangeValue = value;
-
-        this.setState({content: value});
-
-        this.props.store.textAction.edit(this.props.path, value);
-    }
-
-    onKeyDown(ev: React.KeyboardEvent<HTMLDivElement>) {
-        /*if(ev.keyCode === 9) {
-            if(this.ref !== null) {
-            if(this.ref.current !== null) {
-                this.insertTextAtCursor("\t");
-            }}
-            ev.preventDefault();
-        }*/
-    }
-
-    render() {
-        return (
-            <ContentEditable
-            contentEditable={"plaintext-only"}
-            html={this.state.content} // innerHTML ofthe editable div
-            onInput={(ev, value) => this.onInput(ev, value)} // handle innerHTML change
-            onKeyPress={() => {}}
-            onPaste={() => {}}
-            {...this.props}
-            />
-        );
-    }
-}
-
-interface ContentEditableProps {
-    html: string,
-    contentEditable: string | boolean,
-    onKeyPress: (ev: KeyboardEvent<HTMLDivElement>, value: string) => void | undefined,
-    onPaste: (ev: ClipboardEvent<HTMLDivElement>) => void | undefined,
-    onInput: (ev: FormEvent<HTMLDivElement>, value: string) => void | undefined
-}
-
-class ContentEditable extends Component<ContentEditableProps> {
-    elem: RefObject<HTMLDivElement>;
-
-    constructor(props: ContentEditableProps) {
-    super(props);
-    this._onInput   = this._onInput.bind(this);
-    this._onPaste    = this._onPaste.bind(this);
-    this._onKeyPress = this._onKeyPress.bind(this);
-    this.elem = React.createRef();
-    }
-
-    _onInput(ev: FormEvent<HTMLDivElement>) {
-        if (this.elem === null || this.elem.current === null)
-            return;
-        
-        const method  = this.getInnerMethod();
-        const value   = this.elem.current[method];
-
-        this.props.onInput(ev, value);
-    }
-
-    _onPaste(ev: ClipboardEvent<HTMLDivElement>) {
-        const { onPaste, contentEditable } = this.props;
-
-        if (contentEditable === 'plaintext-only') {
-            ev.preventDefault();
-            var text = ev.clipboardData.getData("text");
-            document.execCommand('insertText', false, text);
-        }
-
-        if (onPaste) {
-            onPaste(ev);
-        }
-    }
-
-    _onKeyPress(ev: KeyboardEvent<HTMLDivElement>) {
-        if (this.elem === null || this.elem.current === null)
-            return;
-        
-        const method  = this.getInnerMethod();
-        const value   = this.elem.current[method];
-
-        this.props.onKeyPress(ev, value);
-    }
-
-    getInnerMethod () {
-        return this.props.contentEditable === 'plaintext-only' ? 'innerText' : 'innerHTML';
-    }
-
-    shouldComponentUpdate(nextProps: ContentEditableProps, nextState: never) {
+    shouldComponentUpdate(nextProps: never, nextState: EditableState) {
         if (this.elem === null || this.elem.current === null)
             return true;
-        
-        const method = this.getInnerMethod();
-        return nextProps.html !== this.elem.current[method];
+
+        return nextState.content !== this.elem.current.innerText;
     }
 
     render () {
-        const { html, contentEditable, ...props } = this.props;
-
         return (
             <div
-                {...props}
+                {...this.props}
                 ref={this.elem}
-                dangerouslySetInnerHTML={{ __html: html }}
-                contentEditable={ contentEditable === 'false' ? false : true }
-                onInput={ this._onInput }
-                onPaste={ this._onPaste }
-                onKeyPress={ this._onKeyPress }
+                style={{whiteSpace: "pre-wrap"}}
+                dangerouslySetInnerHTML={{ __html: this.state.content }}
+                contentEditable={"plaintext-only" as unknown as undefined}
+                onInput={(ev) => this.onInput(ev)}
+                onPaste={(ev) => this.onPaste(ev)}
+                onKeyDown={(ev) => this.onKeyDown(ev)}
             />
         )
     }

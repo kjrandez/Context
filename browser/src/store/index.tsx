@@ -67,15 +67,18 @@ export class Store
 
     @action
     deselect() {
-        if (this.state.selection != null) {
+        if (this.state.selection !== null) {
             this.lookupNode(this.state.selection).selected = false;
             this.state.selection = null;
         }
     }
 
     @action
-    select(path: number[], ctrlDown: boolean) {
-        // Remove previous selection
+    select(path: number[]) {
+        if (this.state.selection !== null)
+            if (pathsEqual(this.state.selection, path))
+                return;
+
         this.deselect();
         
         this.state.selection = path;
