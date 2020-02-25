@@ -10,11 +10,11 @@ interface DragDropProps {
 
 export function DragDropNode(props: DragDropProps): ReactElement | null {
     return(
-        <DragNode {...props}>
-            <DropNode {...props}>
+        <DropNode {...props}>
+            <DragNode {...props}>
                 {props.children}
-            </DropNode>
-        </DragNode>
+            </DragNode>
+        </DropNode>
     );
 }
 
@@ -25,25 +25,23 @@ export function DragNode(props: DragDropProps): ReactElement | null {
             isDragging: monitor.isDragging(),
         })
     });
-    if (!isDragging)
-        return <div ref={drag}>{props.children}</div>
-    return null;
+    return(
+        <div ref={drag}>
+            { isDragging ? null : props.children }
+        </div>
+    );
 }
 
 export function DropNode(props: DragDropProps): ReactElement {
     const [{isOver}, drop] = useDrop({
         accept: 'node',
         collect: monitor => ({
-            isOver: monitor.isOver({shallow: true}),
-            canDrop: monitor.canDrop(),
+            isOver: monitor.isOver({shallow: true})
         })
     });
     let dropSpaceClass = "drop-space " + (isOver ? "over" : "out");
     return(
-        <div 
-            ref={drop}
-            draggable
-            onDragStart={(ev) => {ev.stopPropagation(); ev.preventDefault()}}>
+        <div ref={drop}>
             <div className={dropSpaceClass} />
             {props.children}
         </div>

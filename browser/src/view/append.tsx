@@ -7,7 +7,7 @@ export default function AppendButton(props: {store: Store, path: number[]}): Rea
         <DropNode {...props}>
             <div className="element"> {/* for consistency only */}
                 <div className="element-content leaf">
-                    <button style={{marginLeft: "5px"}}>+ Insert</button>
+                    <button style={{marginLeft: "0px"}}>+ Insert</button>
                 </div>
             </div>
         </DropNode>

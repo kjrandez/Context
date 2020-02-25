@@ -60,8 +60,6 @@ class PageEntry extends Component<PageEntryProps>
                     className={elementClass}
                     onClick={(ev) => this.onClick(ev)}> 
                     <div 
-                        draggable
-                        onDragStart={(ev) => {ev.stopPropagation(); ev.preventDefault();}}
                         style={{userSelect: "initial"}}
                         className={elementContentClass}>
                         {visual}

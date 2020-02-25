@@ -152,7 +152,7 @@ class Editable extends Component<TextProps, EditableState> {
             <div
                 {...this.props}
                 ref={this.elem}
-                style={{whiteSpace: "pre-wrap"}}
+                style={{whiteSpace: "pre-wrap", overflowY: "hidden"}}
                 dangerouslySetInnerHTML={{ __html: this.state.content }}
                 contentEditable={"plaintext-only" as unknown as undefined}
                 onInput={(ev) => this.onInput(ev)}

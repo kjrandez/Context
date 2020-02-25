@@ -29,13 +29,13 @@ class NestedPage extends Component<PageProps>
             <div>
                 <p>
                     {this.expandLink(node.expanded)}
-                    <span className="title">Page({this.props.model.id})</span>
+                    <span className="title"> Page({this.props.model.id})</span>
                 </p>
                 <div
                     style={{
                         borderLeft: "1px solid",
-                        marginLeft: "14px",
-                        paddingLeft: "9px"}}>
+                        marginLeft: "10px",
+                        paddingLeft: "5px"}}>
                     {(node.expanded) ? <Page {...this.props} /> : null}
                 </div>
             </div>
