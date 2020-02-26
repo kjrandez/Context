@@ -95,7 +95,7 @@ export function traverse(node: ViewNode, path: number[]): ViewNode {
     return traverse(child, path.slice(1));
 }
 
-function pathsEqual(pathA: number[], pathB: number[]) {
+export function pathsEqual(pathA: number[], pathB: number[]) {
     if (pathA.length !== pathB.length)
         return false;
 

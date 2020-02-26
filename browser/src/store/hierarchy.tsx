@@ -1,4 +1,4 @@
-import {ViewNode, ViewState, traverse, viewNode} from '.';
+import {ViewNode, ViewState, traverse, viewNode, pathsEqual} from '.';
 import {NumDict, Model, Value, PageValue} from '../types';
 import {Proxy} from '../client';
 import {action, observable} from 'mobx';
@@ -7,9 +7,11 @@ interface HierarchyChangeset {
     models: NumDict<Model<Value>>,
     children: {
         node: ViewNode,
+        path: number[],
         newChildren: NumDict<ViewNode>,
         presentChildren: string[]
-    }[];
+    }[],
+    deselect: number[] | null;
 }
 
 export default class HierarcyActions
@@ -29,8 +31,8 @@ export default class HierarcyActions
         if (newModel !== null)
             models[newModel.id] = newModel;
         
-        let changeset = {models, children: []};
-        await this.refreshHierarchy(this.state.root, changeset, 0); 
+        let changeset = {models, children: [], deselect: null};
+        await this.refreshHierarchy(this.state.root, [], changeset, 0); 
         this.applyHierarchyChanges(changeset);
     }
 
@@ -56,8 +58,8 @@ export default class HierarcyActions
 
         // Queue up hiearchy refresh for the now greater depth
         setTimeout(() => {
-            let changeset: HierarchyChangeset = {models: {}, children: []};
-            this.refreshHierarchy(node, changeset, 0).then(
+            let changeset: HierarchyChangeset = {models: {}, children: [], deselect: null};
+            this.refreshHierarchy(node, [], changeset, 0).then(
                 () => this.applyHierarchyChanges(changeset)
             );
         }, 0);
@@ -85,15 +87,25 @@ export default class HierarcyActions
         }
 
         // Refresh child entries for each node
-        for (const {node, newChildren, presentChildren} of changeset.children) {
+        for (const {node, path, newChildren, presentChildren} of changeset.children) {
             // Add new keys
             for (const key in newChildren) {
                 node.children[key] = newChildren[key];
             }
             // Remove stale keys
             for (const key in node.children) {
-                if (!presentChildren.includes(key))
+                if (!presentChildren.includes(key)) {
+                    let selectedPath = this.state.selection;
+                    let deletedPath = [...path, parseInt(key)]
+                    if (selectedPath !== null && pathsEqual(selectedPath, deletedPath)) {
+                        this.state.selection = null;
+                        // No need as it is deleted...
+                        //traverse(this.state.root, deletedPath).selected = false;
+                        // Potentially do something to persist the deleted hierarchy ...
+                    }
+
                     delete node.children[key];
+                }
             }
         }
     }
@@ -117,6 +129,7 @@ export default class HierarcyActions
 
     private async refreshHierarchy(
         node: ViewNode,
+        path: number[],
         changeset: HierarchyChangeset,
         collapsedDepth: number
     ) {
@@ -144,11 +157,12 @@ export default class HierarcyActions
             if (collapsedDepth < 1)
                 await this.refreshHierarchy(
                     child,
+                    [...path, key],
                     changeset,
                     collapsedDepth + (node.expanded ? 0 : 1)
                 )
         };
         
-        changeset.children.push({node, newChildren, presentChildren})
+        changeset.children.push({node, path, newChildren, presentChildren})
     }
 }

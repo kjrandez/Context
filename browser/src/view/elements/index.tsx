@@ -6,7 +6,7 @@ import {Store} from '../../store';
 import {Script, Text} from './text';
 import NestedPage from './nestedPage';
 import Unknown from './unknown';
-import {DragDropNode} from '../dragDrop';
+import {DragNode, DropNode} from '../dragDrop';
 
 export {default as Page} from './page';
 
@@ -54,18 +54,27 @@ class PageEntry extends Component<PageEntryProps>
 
         let elementClass = "element" + (selected ? " selected" : "");
         let elementContentClass = "element-content" + (!expanded ? ' leaf' : '');
-        return(
-            <DragDropNode path={path} store={store}>
-                <div
-                    className={elementClass}
-                    onClick={(ev) => this.onClick(ev)}> 
-                    <div 
-                        style={{userSelect: "initial"}}
-                        className={elementContentClass}>
-                        {visual}
-                    </div>
+        let elementComponent = (
+            <div
+                className={elementClass}
+                onClick={(ev) => this.onClick(ev)}> 
+                <div 
+                    style={{userSelect: "initial"}}
+                    className={elementContentClass}>
+                    {visual}
                 </div>
-            </DragDropNode>
+            </div>
+        );
+
+        return (
+            <DropNode path={path} store={store} append={false}> {
+                selected ? (
+                    <DragNode path={path}>
+                        {elementComponent}
+                    </DragNode>
+                ) : elementComponent
+            }
+            </DropNode>
         );
     }
 }

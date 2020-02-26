@@ -114,7 +114,6 @@ class Editable extends Component<TextProps, EditableState> {
         if (this.elem === null || this.elem.current === null)
             return;
 
-        console.log("keypress");
         if(ev.keyCode === 9) {
             this.insertTextAtCursor("\t");
             ev.preventDefault();
