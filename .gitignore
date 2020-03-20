@@ -29,14 +29,10 @@ host/pyphantom/__pycache__/
 host/filesystem/__pycache__/
 node_modules/
 browser/package-lock.json
-*.sln
 .vs/
-*.njsproj
+*.suo
 *.user
-*.vcxproj
-*.filters
-*.pyproj
-*.csproj
+*.ncb
 *.pfx
 Window/obj/
 Window/Properties/
@@ -51,3 +47,7 @@ Kernel/.mypy_cache/
 .idea/
 Kernel/venv/
 .mypy_cache/
+app-windows/bin/
+app-windows/obj/
+browser/obj/
+kernel/obj/
