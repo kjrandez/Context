@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Browser", "browser\browser.njsproj", "{7FA92826-3200-4891-BCF4-324B9BDE2DD3}"
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "browser", "browser\browser.njsproj", "{7FA92826-3200-4891-BCF4-324B9BDE2DD3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kernel", "kernel\Kernel.csproj", "{AFA12370-E6AC-4141-AAFB-74E473B0810B}"
 EndProject
