@@ -5,45 +5,47 @@ import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.json
 import kotlinx.serialization.modules.SerializersModule
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-interface RpcArgument
+@Serializable
+sealed class RpcArgument
 
 @Serializable
 @SerialName("int")
-data class RpcInt(val value: Int) : RpcArgument
+data class RpcInt(val value: Int) : RpcArgument()
 
 @Serializable
 @SerialName("float")
-data class RpcFloat(val value: Double) : RpcArgument
+data class RpcFloat(val value: Double) : RpcArgument()
 
 @Serializable
 @SerialName("string")
-data class RpcString(val value: String) : RpcArgument
+data class RpcString(val value: String) : RpcArgument()
 
 @Serializable
 @SerialName("bool")
-data class RpcBool(val value: Boolean) : RpcArgument
+data class RpcBool(val value: Boolean) : RpcArgument()
 
 @Serializable
 @SerialName("list")
-data class RpcList(val value: List<RpcArgument?>) : RpcArgument
+data class RpcList(val value: List<RpcArgument?>) : RpcArgument()
 
 @Serializable
 @SerialName("map")
-data class RpcMap(val value: Map<String, RpcArgument?>) : RpcArgument
+data class RpcMap(val value: Map<String, RpcArgument?>) : RpcArgument()
 
 @Serializable
 @SerialName("hostObj")
-data class RpcHostObj(val value: Int) : RpcArgument
+data class RpcHostObj(val value: Int) : RpcArgument()
 
 @Serializable
 @SerialName("clientObj")
-data class RpcClientObj(val value: Int) : RpcArgument
+data class RpcClientObj(val value: Int) : RpcArgument()
 
-interface RpcMessage
+sealed class RpcMessage
 
 @Serializable
 @SerialName("send")
@@ -51,7 +53,7 @@ data class RpcSend (
     val target: Int,
     val selector: String,
     val arguments: List<RpcArgument?>
-) : RpcMessage
+) : RpcMessage()
 
 @Serializable
 @SerialName("call")
@@ -60,62 +62,92 @@ data class RpcCall (
     val target: Int,
     val selector: String,
     val arguments: List<RpcArgument?>
-) : RpcMessage
+) : RpcMessage()
 
 @Serializable
 @SerialName("return")
 data class RpcYield (
     val id: Int,
     val result: RpcArgument?
-) : RpcMessage
+) : RpcMessage()
 
 class RpcEncodeException(message: String) : Exception(message)
 
-fun rpcJson(): Json {
-    return Json(context=SerializersModule {
-        polymorphic(RpcArgument::class) {
-            RpcInt::class with RpcInt.serializer()
-            RpcFloat::class with RpcFloat.serializer()
-            RpcString::class with RpcString.serializer()
-            RpcBool::class with RpcBool.serializer()
-            RpcList::class with RpcList.serializer()
-            RpcMap::class with RpcMap.serializer()
-            RpcHostObj::class with RpcHostObj.serializer()
-            RpcClientObj::class with RpcClientObj.serializer()
-        }
-        polymorphic(RpcMessage::class) {
-            RpcCall::class with RpcCall.serializer()
-            RpcSend::class with RpcSend.serializer()
-            RpcYield::class with RpcYield.serializer()
-        }
-    })
-}
+fun rpcJson() = Json(context=SerializersModule {
+    polymorphic(RpcArgument::class) {
+        RpcInt::class with RpcInt.serializer()
+        RpcFloat::class with RpcFloat.serializer()
+        RpcString::class with RpcString.serializer()
+        RpcBool::class with RpcBool.serializer()
+        RpcList::class with RpcList.serializer()
+        RpcMap::class with RpcMap.serializer()
+        RpcHostObj::class with RpcHostObj.serializer()
+        RpcClientObj::class with RpcClientObj.serializer()
+    }
+    polymorphic(RpcMessage::class) {
+        RpcCall::class with RpcCall.serializer()
+        RpcSend::class with RpcSend.serializer()
+        RpcYield::class with RpcYield.serializer()
+    }
+})
 
 class Proxy (
-    val call: (selector: String, args: List<Any?>) -> Any?,
+    val eid: Int,
+    val call: suspend (selector: String, args: List<Any?>) -> Any?,
     val send: (selector: String, args: List<Any?>) -> Unit
 )
 
-class Rpc(private val database: Database, private val send: (String) -> Unit)
+class Rpc(private val database: Database, private val sendMessage: (String) -> Unit)
 {
-    val json = rpcJson()
+    private val json = rpcJson()
 
-    val proxyMap = mutableMapOf<Int, Proxy>()
-    var nextProxyId = 0
+    private val proxyMap = mutableMapOf<Int, Proxy>()
+    private val callMap = mutableMapOf<Int, Continuation<Any?>>()
+    private var nextCallId = 0
 
-    val callMap = mutableMapOf<Int, Proxy>()
-    val nextCallId = 0
+    fun handleMessage(message: String) {
+        val desc = parse(message)
+        return when (desc) {
+            is RpcCall -> dispatchCall(desc)
+            is RpcSend -> dispatchSend(desc)
+            is RpcYield -> dispatchYield(desc)
+        }
+    }
 
-    fun receive(message: String) {
+    private fun dispatchCall(desc: RpcCall) {
+        val entity = resolveEntity(desc.target)
+        val result = entity.call(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
 
+        val yieldDesc = RpcYield(desc.id, wrapRpcArgument(result))
+        sendMessage(stringify(yieldDesc))
+    }
+
+    private fun dispatchSend(desc: RpcSend) {
+        val entity = resolveEntity(desc.target)
+        entity.send(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
+    }
+
+    private fun dispatchYield(desc: RpcYield) {
+        val cont = callMap[desc.id]
+        if (cont != null) {
+            callMap.remove(desc.id)
+            cont.resume(unwrapRpcArgument(desc.result))
+        }
     }
 
     private suspend fun call(target: Int, selector: String, args: List<Any?>): Any? {
-        return suspendCoroutine {  }
+        return suspendCoroutine { cont ->
+            val callId = nextCallId
+            callMap[callId] = cont
+
+            val callDesc = RpcCall(callId, target, selector, args.map { wrapRpcArgument(it) })
+            sendMessage(stringify(callDesc))
+        }
     }
 
     private fun send(target: Int, selector: String, args: List<Any?>) {
-
+        val sendDesc = RpcSend(target, selector, args.map { wrapRpcArgument(it) })
+        sendMessage(stringify(sendDesc))
     }
 
     private fun stringify(message: RpcMessage) = json.stringify(PolymorphicSerializer(RpcMessage::class), message)
@@ -130,7 +162,7 @@ class Rpc(private val database: Database, private val send: (String) -> Unit)
             is String -> RpcString(arg)
             is Boolean -> RpcBool(arg)
             is Entity -> RpcHostObj(arg.eid)
-            is Proxy -> RpcClientObj(arg.id)
+            is Proxy -> RpcClientObj(arg.eid)
             null -> null
             else -> throw RpcEncodeException("No encoding for argument type")
         }
@@ -146,21 +178,19 @@ class Rpc(private val database: Database, private val send: (String) -> Unit)
             is RpcBool -> arg.value
             is RpcHostObj -> resolveEntity(arg.value)
             is RpcClientObj -> resolveProxy(arg.value)
-            else -> null
+            null -> null
         }
     }
 
     private fun resolveProxy(eid: Int): Proxy {
         return proxyMap[eid] ?: Proxy(
+            eid,
             { selector, args -> this.call(eid, selector, args) },
-            { selector, args -> this.call(eid, selector, args) }
+            { selector, args -> this.send(eid, selector, args) }
         ).also { proxyMap[eid] = it }
     }
 
-    private fun resolveEntity(eid: Int) {
-
+    private fun resolveEntity(eid: Int): Entity {
+        return database.lookup(eid)
     }
 }
-
-
-

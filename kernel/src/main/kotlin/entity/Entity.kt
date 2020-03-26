@@ -25,6 +25,8 @@ abstract class EntityBacking
 
 data class DiskFile(val path: String) : EntityBacking()
 
+class DispatchException(message: String) : Exception(message)
+
 class Entity(val eid: Int, val backing: EntityBacking, type: KClass<EntityAgent>) {
     lateinit var agent: EntityAgent
 
@@ -41,11 +43,16 @@ class Entity(val eid: Int, val backing: EntityBacking, type: KClass<EntityAgent>
         )
     }
 
-    fun send(selector: String, args: Array<Any?>) {
+    fun send(selector: String, args: Array<Any?>): Any? {
         for (func in agent::class.memberFunctions) {
             if (func.name == selector) {
-                func.call(agent, *args)
+                return func.call(agent, *args)
             }
         }
+        throw DispatchException("Requested method not found in agent")
+    }
+
+    fun call(selector: String, args: Array<Any?>): Any? {
+        return send(selector, args)
     }
 }
