@@ -4,55 +4,68 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.primaryConstructor
 
-class EntityAgentContext(
-    val backing: EntityBacking,
-    val doBecome: (KClass<EntityAgent>) -> Unit,
-    val doRelocate: () -> Unit
-)
-
-abstract class EntityAgent(private val context: EntityAgentContext)
+abstract class Entity(register: (Entity) -> Int)
 {
-    fun become(type: KClass<EntityAgent>) {
-        context.doBecome(type)
-    }
+    val eid = register(this)
 
-    fun type(): String {
-        return this::class.simpleName!!
+    abstract suspend fun invoke(selector: String, args: Array<Any?>): Any?
+
+    class InvokeException(message: String) : Exception(message)
+
+    fun failed(): Any? {
+        throw InvokeException("Bad invocation")
     }
 }
 
-abstract class EntityBacking
-
-data class DiskFile(val path: String) : EntityBacking()
-
-class DispatchException(message: String) : Exception(message)
-
-class Entity(val eid: Int, val backing: EntityBacking, type: KClass<EntityAgent>) {
-    lateinit var agent: EntityAgent
+class DocumentEntity(register: (Entity) -> Int, val backing: Backing, type: KClass<Agent>) : Entity(register) {
+    lateinit var agent: Agent
 
     init {
         become(type)
     }
 
-    fun become(type: KClass<EntityAgent>) {
+    fun become(type: KClass<Agent>) {
         agent = type.primaryConstructor!!.call(
-            EntityAgentContext(
+            AgentContext(
                 backing,
                 { become(it) },
-                {})
+                {}
+            )
         )
     }
 
-    fun send(selector: String, args: Array<Any?>): Any? {
+    override suspend fun invoke(selector: String, args: Array<Any?>): Any? {
+        return dynamicDispatch(selector, args)
+    }
+
+
+
+    private fun dynamicDispatch(selector: String, args: Array<Any?>): Any? {
         for (func in agent::class.memberFunctions) {
             if (func.name == selector) {
                 return func.call(agent, *args)
             }
         }
-        throw DispatchException("Requested method not found in agent")
+        return failed()
+    }
+}
+
+abstract class Backing
+data class DiskFile(val path: String) : Backing()
+
+class AgentContext(
+    val backing: Backing,
+    val doBecome: (KClass<Agent>) -> Unit,
+    val doRelocate: () -> Unit
+)
+
+abstract class Agent(private val context: AgentContext)
+{
+    fun become(type: KClass<Agent>) {
+        context.doBecome(type)
     }
 
-    fun call(selector: String, args: Array<Any?>): Any? {
-        return send(selector, args)
+    fun type(): String {
+        return this::class.simpleName!!
     }
 }

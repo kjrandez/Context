@@ -34,8 +34,8 @@ data class RpcBool(val value: Boolean) : RpcArgument()
 data class RpcList(val value: List<RpcArgument?>) : RpcArgument()
 
 @Serializable
-@SerialName("map")
-data class RpcMap(val value: Map<String, RpcArgument?>) : RpcArgument()
+@SerialName("dict")
+data class RpcDict(val value: Map<String, RpcArgument?>) : RpcArgument()
 
 @Serializable
 @SerialName("hostObj")
@@ -65,7 +65,7 @@ data class RpcCall (
 ) : RpcMessage()
 
 @Serializable
-@SerialName("return")
+@SerialName("yield")
 data class RpcYield (
     val id: Int,
     val result: RpcArgument?
@@ -80,7 +80,7 @@ fun rpcJson() = Json(context=SerializersModule {
         RpcString::class with RpcString.serializer()
         RpcBool::class with RpcBool.serializer()
         RpcList::class with RpcList.serializer()
-        RpcMap::class with RpcMap.serializer()
+        RpcDict::class with RpcDict.serializer()
         RpcHostObj::class with RpcHostObj.serializer()
         RpcClientObj::class with RpcClientObj.serializer()
     }
@@ -97,7 +97,7 @@ class Proxy (
     val send: (selector: String, args: List<Any?>) -> Unit
 )
 
-class Rpc(private val database: Database, private val sendMessage: (String) -> Unit)
+class Rpc(private val database: Database, private val hostService: HostService, private val sendMessage: (String) -> Unit)
 {
     private val json = rpcJson()
 
@@ -105,7 +105,9 @@ class Rpc(private val database: Database, private val sendMessage: (String) -> U
     private val callMap = mutableMapOf<Int, Continuation<Any?>>()
     private var nextCallId = 0
 
-    fun handleMessage(message: String) {
+    val clientService = resolveProxy(0)
+
+    suspend fun receive(message: String) {
         val desc = parse(message)
         return when (desc) {
             is RpcCall -> dispatchCall(desc)
@@ -114,17 +116,17 @@ class Rpc(private val database: Database, private val sendMessage: (String) -> U
         }
     }
 
-    private fun dispatchCall(desc: RpcCall) {
+    private suspend fun dispatchCall(desc: RpcCall) {
         val entity = resolveEntity(desc.target)
-        val result = entity.call(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
+        val result = entity.invoke(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
 
         val yieldDesc = RpcYield(desc.id, wrapRpcArgument(result))
         sendMessage(stringify(yieldDesc))
     }
 
-    private fun dispatchSend(desc: RpcSend) {
+    private suspend fun dispatchSend(desc: RpcSend) {
         val entity = resolveEntity(desc.target)
-        entity.send(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
+        entity.invoke(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
     }
 
     private fun dispatchYield(desc: RpcYield) {
@@ -156,7 +158,7 @@ class Rpc(private val database: Database, private val sendMessage: (String) -> U
     private fun wrapRpcArgument(arg: Any?): RpcArgument? {
         return when (arg) {
             is List<*> -> RpcList(arg.map { wrapRpcArgument(it) })
-            is Map<*, *> -> RpcMap((arg as Map<String, *>).mapValues { wrapRpcArgument (it.value) })
+            is Map<*, *> -> RpcDict((arg as Map<String, *>).mapValues { wrapRpcArgument (it.value) })
             is Int -> RpcInt(arg)
             is Double -> RpcFloat(arg)
             is String -> RpcString(arg)
@@ -171,7 +173,7 @@ class Rpc(private val database: Database, private val sendMessage: (String) -> U
     private fun unwrapRpcArgument(arg: RpcArgument?): Any? {
         return when (arg) {
             is RpcList -> arg.value.map { unwrapRpcArgument(it) }
-            is RpcMap -> arg.value.mapValues { unwrapRpcArgument(it.value) }
+            is RpcDict -> arg.value.mapValues { unwrapRpcArgument(it.value) }
             is RpcInt -> arg.value
             is RpcFloat -> arg.value
             is RpcString -> arg.value
