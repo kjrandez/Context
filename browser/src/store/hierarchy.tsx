@@ -20,16 +20,16 @@ export default class HierarcyActions
 
     @action
     apply(newModel: Model<Value>) {
-        let model = this.state.db[newModel.id];
+        let model = this.state.db[newModel.eid];
         console.assert(model !== undefined);
-        model.type = newModel.type;
+        model.agent = newModel.agent;
         model.value = newModel.value;
     }
 
     async refresh(newModel: Model<PageValue> | null) {
         let models: NumDict<Model<Value>> = {};
         if (newModel !== null)
-            models[newModel.id] = newModel;
+            models[newModel.eid] = newModel;
         
         let changeset = {models, children: [], deselect: null};
         await this.refreshHierarchy(this.state.root, [], changeset, 0); 
@@ -45,7 +45,7 @@ export default class HierarcyActions
 
         // Refresh database and hierarchy with the new element
         let model = await element.call<Model<Value>>('model', []);
-        if (model.type === "Page")
+        if (model.agent === "Page")
             await this.refresh(model as Model<PageValue>);
         else
             this.apply(model);
@@ -81,7 +81,7 @@ export default class HierarcyActions
             }
             else {
                 let newModel = changeset.models[key];
-                model.type = newModel.type;
+                model.agent = newModel.agent;
                 model.value = newModel.value;
             }
         }
@@ -134,34 +134,34 @@ export default class HierarcyActions
         collapsedDepth: number
     ) {
         // Lookup model, pulling from kernel if not yet present
-        let {type, value} = await this.fetchModel(node.element, changeset) as Model<PageValue>;
+        let {agent, value} = await this.fetchModel(node.element, changeset) as Model<PageValue>;
     
         // No further refresh if this is a leaf node
-        if (type !== "Page")
+        if (agent !== "Page")
             return;
     
         let newChildren: NumDict<ViewNode> = {};
         let presentChildren: string[] = [];
 
-        for (const {key, element} of value.entries) {
-            presentChildren.push(key.toString());
+        for (const {index, entity} of value.entries) {
+            presentChildren.push(index.toString());
 
             // Look up previous or create new nodes for all children in this page model
-            let child = node.children[key];
+            let child = node.children[index];
             if (child === undefined) {
-                child = viewNode(element, false);
-                newChildren[key] = child;
+                child = viewNode(entity, false);
+                newChildren[index] = child;
             }
 
             // Recurse until past safe depth of collapsed pages
             if (collapsedDepth < 1)
                 await this.refreshHierarchy(
                     child,
-                    [...path, key],
+                    [...path, index],
                     changeset,
                     collapsedDepth + (node.expanded ? 0 : 1)
                 )
-        };
+        }
         
         changeset.children.push({node, path, newChildren, presentChildren})
     }

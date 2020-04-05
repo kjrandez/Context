@@ -1,11 +1,14 @@
 package com.kjrandez.context.kernel
 
+import com.kjrandez.context.kernel.entity.*
 import io.javalin.Javalin
 import kotlinx.coroutines.*
+
 
 fun main() {
     val database = Database()
     val hosts = mutableMapOf<String, Host>()
+
 
     Javalin.create().start(8085).ws("/broadcast") {
         it.onConnect { ctx ->

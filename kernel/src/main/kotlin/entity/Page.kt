@@ -1,19 +1,32 @@
 package com.kjrandez.context.kernel.entity
 
-data class PageModel(val entries: MutableList<PageEntry>) : Backing() {
-    data class PageEntry(val index: Int, val entity: Entity)
+import com.kjrandez.context.kernel.RpcDataClass
+import kotlinx.serialization.ContextualSerialization
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable @SerialName("PageEntry")
+data class PageEntry(
+    val index: Int,
+
+    @ContextualSerialization
+    val entity: DocumentEntity
+) : RpcDataClass
+
+@Serializable @SerialName("PageValue")
+data class PageValue(val entries: MutableList<PageEntry>) : RpcDataClass {
     private var nextIndex: Int = {
         var max = 0
         entries.map { if (it.index > max) max = it.index }
         max + 1
     }()
 
-    fun entry(entity: Entity) =
-        PageEntry(nextIndex++, entity)
+    fun entry(entity: DocumentEntity) = PageEntry(nextIndex++, entity)
 }
 
-class Page(context: AgentContext) : Agent(context)
+class Page(val backingValue: PageValue) : Agent<PageValue>()
 {
-    fun other() { print("How are you doing?") }
+    override fun value(): PageValue {
+        return backingValue
+    }
 }

@@ -1,79 +1,79 @@
 package com.kjrandez.context.kernel
 
-import com.kjrandez.context.kernel.entity.Entity
+import com.kjrandez.context.kernel.entity.*
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlin.reflect.KClass
 
-@Serializable
-sealed class RpcArgument
+interface RpcMessage
+interface RpcArgument
+interface RpcDataClass
 
-@Serializable
-@SerialName("int")
-data class RpcInt(val value: Int) : RpcArgument()
+@Serializable @SerialName("int")
+data class RpcInt(val value: Int) : RpcArgument
 
-@Serializable
-@SerialName("float")
-data class RpcFloat(val value: Double) : RpcArgument()
+@Serializable @SerialName("float")
+data class RpcFloat(val value: Double) : RpcArgument
 
-@Serializable
-@SerialName("string")
-data class RpcString(val value: String) : RpcArgument()
+@Serializable @SerialName("string")
+data class RpcString(val value: String) : RpcArgument
 
-@Serializable
-@SerialName("bool")
-data class RpcBool(val value: Boolean) : RpcArgument()
+@Serializable @SerialName("bool")
+data class RpcBool(val value: Boolean) : RpcArgument
 
-@Serializable
-@SerialName("list")
-data class RpcList(val value: List<RpcArgument?>) : RpcArgument()
+@Serializable @SerialName("list")
+data class RpcList(val value: List<RpcArgument?>) : RpcArgument
 
-@Serializable
-@SerialName("dict")
-data class RpcDict(val value: Map<String, RpcArgument?>) : RpcArgument()
+@Serializable @SerialName("dict")
+data class RpcDict(val value: Map<String, RpcArgument?>) : RpcArgument
 
-@Serializable
-@SerialName("hostObj")
-data class RpcHostObj(val value: Int) : RpcArgument()
+@Serializable @SerialName("hostObj")
+data class RpcHostObj(val value: Int) : RpcArgument
 
-@Serializable
-@SerialName("clientObj")
-data class RpcClientObj(val value: Int) : RpcArgument()
+@Serializable @SerialName("clientObj")
+data class RpcClientObj(val value: Int) : RpcArgument
 
-sealed class RpcMessage
+@Serializable @SerialName("data")
+data class RpcData(val value: RpcDataClass) : RpcArgument
 
-@Serializable
-@SerialName("send")
+@Serializable @SerialName("send")
 data class RpcSend (
     val target: Int,
     val selector: String,
     val arguments: List<RpcArgument?>
-) : RpcMessage()
+) : RpcMessage
 
-@Serializable
-@SerialName("call")
+@Serializable @SerialName("call")
 data class RpcCall (
     val id: Int,
     val target: Int,
     val selector: String,
     val arguments: List<RpcArgument?>
-) : RpcMessage()
+) : RpcMessage
 
-@Serializable
-@SerialName("yield")
+@Serializable @SerialName("yield")
 data class RpcYield (
     val id: Int,
     val result: RpcArgument?
-) : RpcMessage()
+) : RpcMessage
+
+@Serializable @SerialName("error")
+data class RpcError (
+    val id : Int?,
+    val message: String
+) : RpcMessage
 
 class RpcEncodeException(message: String) : Exception(message)
 
-fun rpcJson() = Json(context=SerializersModule {
+fun rpcJson(database: Database) = Json(context=SerializersModule {
     polymorphic(RpcArgument::class) {
         RpcInt::class with RpcInt.serializer()
         RpcFloat::class with RpcFloat.serializer()
@@ -83,13 +83,23 @@ fun rpcJson() = Json(context=SerializersModule {
         RpcDict::class with RpcDict.serializer()
         RpcHostObj::class with RpcHostObj.serializer()
         RpcClientObj::class with RpcClientObj.serializer()
+        RpcData::class with RpcData.serializer()
     }
     polymorphic(RpcMessage::class) {
         RpcCall::class with RpcCall.serializer()
         RpcSend::class with RpcSend.serializer()
         RpcYield::class with RpcYield.serializer()
+        RpcError::class with RpcError.serializer()
     }
-})
+    polymorphic(RpcDataClass::class) {
+        Model::class with Model.serializer()
+        TextValue::class with TextValue.serializer()
+        PageValue::class with PageValue.serializer()
+        PageEntry::class with PageEntry.serializer()
+    }
+    contextual(Entity::class, EntitySerializer(database))
+    contextual(DocumentEntity::class, EntitySerializer(database))
+}, configuration = JsonConfiguration(prettyPrint=true))
 
 class Proxy (
     val eid: Int,
@@ -97,9 +107,9 @@ class Proxy (
     val send: (selector: String, args: List<Any?>) -> Unit
 )
 
-class Rpc(private val database: Database, private val hostService: HostService, private val sendMessage: (String) -> Unit)
+class Rpc(private val database: Database, private val hostService: Entity, private val sendMessage: (String) -> Unit)
 {
-    private val json = rpcJson()
+    private val json = rpcJson(database)
 
     private val proxyMap = mutableMapOf<Int, Proxy>()
     private val callMap = mutableMapOf<Int, Continuation<Any?>>()
@@ -109,24 +119,37 @@ class Rpc(private val database: Database, private val hostService: HostService, 
 
     suspend fun receive(message: String) {
         val desc = parse(message)
-        return when (desc) {
+        when (desc) {
             is RpcCall -> dispatchCall(desc)
             is RpcSend -> dispatchSend(desc)
             is RpcYield -> dispatchYield(desc)
+            is RpcError -> dispatchError(desc)
+            else -> Unit
         }
     }
 
     private suspend fun dispatchCall(desc: RpcCall) {
-        val entity = resolveEntity(desc.target)
-        val result = entity.invoke(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
-
-        val yieldDesc = RpcYield(desc.id, wrapRpcArgument(result))
-        sendMessage(stringify(yieldDesc))
+        try {
+            // Throws DatabaseException, EntityException, or RpcEncodingException
+            val entity = resolveEntity(desc.target)
+            val result = entity.invoke(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
+            val yieldDesc = RpcYield(desc.id, wrapRpcArgument(result))
+            sendMessage(stringify(yieldDesc))
+        } catch(ex: Exception) {
+            ex.printStackTrace()
+            sendMessage(stringify(RpcError(desc.id, ex.message ?: "N/A")))
+        }
     }
 
     private suspend fun dispatchSend(desc: RpcSend) {
         val entity = resolveEntity(desc.target)
-        entity.invoke(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
+
+        try {
+            entity.invoke(desc.selector, desc.arguments.map { unwrapRpcArgument(it) }.toTypedArray())
+        } catch(ex: Exception) {
+            ex.printStackTrace()
+            sendMessage(stringify(RpcError(null, ex.message ?: "N/A")))
+        }
     }
 
     private fun dispatchYield(desc: RpcYield) {
@@ -134,6 +157,16 @@ class Rpc(private val database: Database, private val hostService: HostService, 
         if (cont != null) {
             callMap.remove(desc.id)
             cont.resume(unwrapRpcArgument(desc.result))
+        }
+    }
+
+    private fun dispatchError(desc: RpcError) {
+        if (desc.id != null) {
+            val cont = callMap[desc.id]
+            if (cont != null) {
+                callMap.remove(desc.id)
+                cont.resumeWithException(RpcEncodeException("Remote error: ${desc.message}"))
+            }
         }
     }
 
@@ -165,6 +198,7 @@ class Rpc(private val database: Database, private val hostService: HostService, 
             is Boolean -> RpcBool(arg)
             is Entity -> RpcHostObj(arg.eid)
             is Proxy -> RpcClientObj(arg.eid)
+            is RpcDataClass -> RpcData(arg)
             null -> null
             else -> throw RpcEncodeException("No encoding for argument type")
         }
@@ -180,7 +214,9 @@ class Rpc(private val database: Database, private val hostService: HostService, 
             is RpcBool -> arg.value
             is RpcHostObj -> resolveEntity(arg.value)
             is RpcClientObj -> resolveProxy(arg.value)
+            is RpcData -> arg.value
             null -> null
+            else -> Unit
         }
     }
 

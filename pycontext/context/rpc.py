@@ -18,6 +18,11 @@ class Proxy:
         await self.clientSend(self.id, selector, arguments)
 
 
+class RpcException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class Rpc:
     def __init__(self, loop, queue, clientService, send):
         self.loop = loop
@@ -41,7 +46,12 @@ class Rpc:
             'arguments': argDescs
         })
 
-        return await future
+        try:
+            result = await future
+            return result
+        except Exception as ex:
+            print("Exception waiting for call result future")
+            raise ex
 
     async def clientSend(self, targetId, selector, arguments):
         argDescs = [self.wrapArgument(X) for X in arguments]
@@ -60,6 +70,8 @@ class Rpc:
             await self.dispatchCall(msg['id'], msg['target'], msg['selector'], msg['arguments'])
         elif msg['type'] == 'yield':
             self.dispatchYield(msg['id'], msg['result'])
+        elif msg['type'] == 'error':
+            self.dispatchError(msg['id'], msg['message'])
         else:
             print("Unhandled message")
 
@@ -95,9 +107,25 @@ class Rpc:
 
         future.set_result(self.unwrapArgument(resultDesc))
 
-    class RpcEncodeException(Exception):
-        def __init__(self, message):
-            super().__init__(message)
+    def dispatchError(self, localId, message):
+        if localId is not None:
+            future = self.callMap[localId]
+            del self.callMap[localId]
+
+            future.set_exception(RpcException("Remote Exception: " + message))
+
+    def inflateDataObject(self, obj):
+        if isinstance(obj, list):
+            return [self.inflateDataObject(element) for element in obj]
+        elif isinstance(obj, dict):
+            if 'type' in obj and obj['type'] == "hostObj":
+                return self.resolveProxy(obj['value'])
+            elif 'type' in obj and obj['type'] == "clientObj":
+                return self.dataset.lookup(obj['value'])
+            else:
+                return {K: self.inflateDataObject(V) for K, V in obj.items()}
+        else:
+            return obj
 
     def unwrapArgument(self, arg):
         argType, argValue = arg['type'], arg['value']
@@ -109,7 +137,9 @@ class Rpc:
         elif argType == 'list':
             return [self.unwrapArgument(X) for X in argValue]
         elif argType == 'map':
-            return {K: self.unwrapArgument(V) for K, V in argValue}
+            return {K: self.unwrapArgumennt(V) for K, V in argValue.items()}
+        elif argType == 'data':
+            return self.inflateDataObject(arg['value'])
         else: # int, float, string, boolean decoded natively
             return arg['value']
 
@@ -137,7 +167,7 @@ class Rpc:
         elif isinstance(arg, str):
             return {'type': 'string', 'value': arg}
         else:
-            raise self.RpcEncodeException("No encoding for argument type")
+            raise self.RpcException("No encoding for argument type")
 
     def resolveProxy(self, id: int):
         if id in self.proxyMap:

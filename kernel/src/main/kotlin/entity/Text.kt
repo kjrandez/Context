@@ -1,8 +1,38 @@
 package com.kjrandez.context.kernel.entity
 
-data class TextModel(var content: String) : Backing()
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-class Text(context: AgentContext) : Agent(context)
+import com.kjrandez.context.kernel.RpcDataClass
+
+@Serializable @SerialName("TextValue")
+data class TextValue(var content: String) : RpcDataClass
+
+interface TextValueProvider
 {
-    fun test() { print("Hello world!") }
+    fun value(): TextValue
+}
+
+class InternalTextValueProvider(val backingValue: TextValue) : TextValueProvider
+{
+    override fun value(): TextValue {
+        return backingValue
+    }
+}
+
+class FileTextValueProvider(val backing: FileBacking) : TextValueProvider
+{
+    override fun value(): TextValue {
+        return TextValue("file contents")
+    }
+}
+
+class Text(val provider: TextValueProvider) : Agent<TextValue>()
+{
+    constructor(backingValue: TextValue) : this(InternalTextValueProvider(backingValue))
+    constructor(backing: FileBacking) : this(FileTextValueProvider(backing))
+
+    override fun value(): TextValue {
+        return provider.value()
+    }
 }

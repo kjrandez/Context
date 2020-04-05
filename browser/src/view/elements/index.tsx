@@ -40,7 +40,7 @@ class PageEntry extends Component<PageEntryProps>
         let childProps = {store, path, key: path.slice(-1)[0]}
         let {selected, expanded} = store.lookupNode(path);
         let visual = (() => {
-            switch (model.type) {
+            switch (model.agent) {
                 case "Text":
                     return <Text model={model as Model<TextValue>} {...childProps} />;
                 case "Page":

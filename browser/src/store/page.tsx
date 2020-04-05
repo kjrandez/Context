@@ -1,5 +1,4 @@
-import {traverse, ViewState} from '.';
-import page from '../view/elements/page';
+import {traverse, ViewState} from '.'
 
 export default class PageActions
 {

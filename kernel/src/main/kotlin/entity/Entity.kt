@@ -1,71 +1,83 @@
 package com.kjrandez.context.kernel.entity
 
-import kotlin.reflect.KClass
+import com.kjrandez.context.kernel.Database
+import com.kjrandez.context.kernel.RpcDataClass
+import kotlinx.serialization.*
 import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.full.primaryConstructor
 
-abstract class Entity(register: (Entity) -> Int)
+@Serializable @SerialName("Model")
+data class Model(
+    val eid: Int,
+    val agent: String,
+    val value: RpcDataClass
+) : RpcDataClass
+
+class EntityException(message: String) : Exception(message)
+
+abstract class Entity(register: (Entity) -> Int) : RpcDataClass
 {
     val eid = register(this)
 
     abstract suspend fun invoke(selector: String, args: Array<Any?>): Any?
-
-    class InvokeException(message: String) : Exception(message)
-
-    fun failed(): Any? {
-        throw InvokeException("Bad invocation")
-    }
 }
 
-class DocumentEntity(register: (Entity) -> Int, val backing: Backing, type: KClass<Agent>) : Entity(register) {
-    lateinit var agent: Agent
+class DocumentEntity(register: (Entity) -> Int, val backing: Backing, agentType: AgentType) : Entity(register)
+{
+    lateinit var agent: Agent<*>
 
     init {
-        become(type)
+        become(agentType)
     }
 
-    fun become(type: KClass<Agent>) {
-        agent = type.primaryConstructor!!.call(
-            AgentContext(
-                backing,
-                { become(it) },
-                {}
-            )
-        )
+    private fun become(newType: AgentType) {
+        this.agent = buildAgent(backing, newType)
     }
 
     override suspend fun invoke(selector: String, args: Array<Any?>): Any? {
-        return dynamicDispatch(selector, args)
+        return when (selector) {
+            "model" -> model()
+            "become" -> become(AgentType.valueOf(args[0] as String))
+            else -> dynamicDispatch(selector, args)
+        }
     }
 
+    private fun model(): Model {
+        return Model(this.eid, agent::class.simpleName!!, agent.value())
+    }
 
-
-    private fun dynamicDispatch(selector: String, args: Array<Any?>): Any? {
+    private suspend fun dynamicDispatch(selector: String, args: Array<Any?>): Any? {
         for (func in agent::class.memberFunctions) {
             if (func.name == selector) {
                 return func.call(agent, *args)
             }
         }
-        return failed()
+        throw EntityException("Could not find selector ${selector} in this agent")
     }
 }
 
-abstract class Backing
-data class DiskFile(val path: String) : Backing()
-
-class AgentContext(
-    val backing: Backing,
-    val doBecome: (KClass<Agent>) -> Unit,
-    val doRelocate: () -> Unit
-)
-
-abstract class Agent(private val context: AgentContext)
-{
-    fun become(type: KClass<Agent>) {
-        context.doBecome(type)
+class EntitySerializer<T : Entity>(private val database: Database) : KSerializer<T> {
+    @OptIn(kotlinx.serialization.ImplicitReflectionSerializer::class)
+    override val descriptor: SerialDescriptor = SerialDescriptor("hostObj") {
+        element<String>("type") // always index 0
+        element<Int>("value") // always index 1
     }
 
-    fun type(): String {
-        return this::class.simpleName!!
+    override fun serialize(encoder: Encoder, value: T) {
+        val composite = encoder.beginStructure(descriptor)
+        composite.encodeStringElement(descriptor, 0, "hostObj")
+        composite.encodeIntElement(descriptor, 1, value.eid)
+        composite.endStructure(descriptor)
+    }
+
+    override fun deserialize(decoder: Decoder): T {
+        val composite: CompositeDecoder = decoder.beginStructure(descriptor)
+
+        while (true) {
+            val elementIndex = composite.decodeElementIndex(descriptor)
+            if (elementIndex == 1)
+                return database.lookup(composite.decodeIntElement(descriptor, elementIndex)) as T
+            else if (elementIndex == CompositeDecoder.READ_DONE)
+                throw java.lang.Exception()
+        }
     }
 }

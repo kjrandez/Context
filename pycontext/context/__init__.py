@@ -7,6 +7,10 @@ import json
 from .rpc import Rpc
 
 
+def connect():
+    return Client().connect()
+
+
 class Client:
     def __init__(self):
         self.hostService = None
@@ -46,6 +50,7 @@ class Client:
                 message = json.loads(await websocket.recv())
                 await rpc.receive(message)
 
+
 class ClientService:
     def __init__(self, onConnect):
         self.onConnect = onConnect
@@ -61,8 +66,12 @@ class TaskQueue:
     async def spin(self):
         while True:
             task = await self.queue.async_q.get()
-            result = await task.callable()
-            task.resolve(result)
+            try:
+                result = await task.callable()
+                task.resolve(result)
+            except Exception as ex:
+                print("Exception resulted from blocking task")
+                task.exception(ex)
 
     def awaitResult(self, callable):
         task = self.BlockingTask(callable)
@@ -71,16 +80,24 @@ class TaskQueue:
         while not task.completed:
             task.event.wait()
 
+        if task.error is not None:
+            raise task.error
         return task.result
 
     class BlockingTask:
         def __init__(self, callable):
             self.callable = callable
             self.result = None
+            self.error = None
             self.completed = False
             self.event = threading.Event()
 
         def resolve(self, result):
             self.result = result
+            self.completed = True
+            self.event.set()
+
+        def exception(self, error):
+            self.error = error
             self.completed = True
             self.event.set()

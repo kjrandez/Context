@@ -112,8 +112,7 @@ export default class Client
     foreignObjects: ProxyMap;
 
     constructor(
-        private connected: (_: Proxy) => Promise<void>,
-        private disconnected: () => void,
+        connected: (_: Proxy) => Promise<void>,
         broadcast: (_: Proxy) => Promise<void>
     ) {
         this.websocket = null;
@@ -123,19 +122,18 @@ export default class Client
         
         let clientService = {
             proxyableId: null,
+            hello: (hostService: Proxy) => connected(hostService).then(),
             broadcast: (trans: TransactionModel) => broadcast(trans.subject).then()
         };
         this.localObjects = new ProxyableTable(clientService);
     }
 
     connect() {
-        let hostService = this.foreignObjects.getObject(0);
-
         this.websocket = new WebSocket("ws://localhost:8085/broadcast");
 
         this.websocket.onmessage = event => this.handleWebsocketReceive(event);
-        this.websocket.onclose = (_) => this.disconnected();
-        this.websocket.onopen = (_) => this.connected(hostService).then();
+        this.websocket.onclose = (_) => {}
+        this.websocket.onopen = (_) => {}
     }
 
     dispatchWebsocketSend(data: object) {
@@ -144,7 +142,7 @@ export default class Client
     }
 
     dispatchCall(targetId: number, selector: string, args: any[]) {
-        let argDescs: Argument[] = args.map((X: any) => this.encodedArgument(X));
+        let argDescs: Argument[] = args.map((X: any) => this.wrapArgument(X));
         
         return new Promise<any>((resolve, reject) => this.dispatchWebsocketSend({
             type: 'call',
@@ -156,20 +154,23 @@ export default class Client
     }
 
     handleWebsocketReceive(event: MessageEvent) {
-        var msg = JSON.parse(event.data);
+        var msg = JSON.parse(event.data)
 
         switch(msg.type) {
             case 'send':
-                this.handleSend(msg.target, msg.selector, msg.arguments);
-                break;
+                this.handleSend(msg.target, msg.selector, msg.arguments)
+                break
             case 'call':
-                this.handleCall(msg.id, msg.target, msg.selector, msg.arguments);
+                this.handleCall(msg.id, msg.target, msg.selector, msg.arguments)
                 break;
-            case 'return':
-                this.handleReturn(msg.id, msg.result)
-                break;
+            case 'yield':
+                this.handleYield(msg.id, msg.result)
+                break
+            case 'error':
+                this.handleError(msg.id, msg.message)
+                break
             default:
-                console.log("Invalid message received:");
+                console.log("Invalid message received:")
                 console.log(msg);
                 break;
         }
@@ -177,55 +178,79 @@ export default class Client
 
     handleSend(targetId: number, selector: string, argDescs: Argument[]) {
         let target: Proxyable = this.localObjects.getObject(targetId);
-        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
+        let args: any[] = argDescs.map((X: any) => this.unwrapArgument(X));
 
         (target as any)[selector].apply(target, args)
     }
 
     handleCall(foreignId: number, targetId: number, selector: string, argDescs: Argument[]) {
         let target: Proxyable = this.localObjects.getObject(targetId);
-        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
+        let args: any[] = argDescs.map((X: any) => this.unwrapArgument(X));
 
         let result = (target as any)[selector].apply(target, args)
 
         this.dispatchWebsocketSend({
             type: 'return',
             id: foreignId,
-            result: this.encodedArgument(result)
+            result: this.wrapArgument(result)
         });
     }
 
-    handleReturn(localId: number, resultDesc: any) {
-        let result = this.decodedArgument(resultDesc);
+    handleYield(localId: number, resultDesc: any) {
+        let result = this.unwrapArgument(resultDesc);
         let resolve = this.pendingCalls.getObject(localId);
         this.pendingCalls.freeTag(localId);
 
         resolve(result);
     }
 
-    decodedArgument(argDesc: Argument): any {
-        if (argDesc.type === 'hostObject')
+    handleError(localId: number | null, message: string) {
+        // Do something
+    }
+
+    inflateDataObject(obj: any): any {
+        if (obj instanceof Array)
+            return obj.map(X => this.inflateDataObject(X))
+        else if (obj instanceof Object)
+            if (obj.type === "hostObj")
+                return this.foreignObjects.getObject(obj.value)
+            else if (obj.type === "clientObj")
+                return this.localObjects.getObject(obj.value)
+            else
+                return mapObj(obj, X => this.inflateDataObject(X))
+        else
+            return obj
+    }
+
+    unwrapArgument(argDesc: Argument): any {
+        if (argDesc.type === 'hostObj')
             return this.foreignObjects.getObject(argDesc.value)
-        else if (argDesc.type === 'clientObject')
+        else if (argDesc.type === 'clientObj')
             return this.localObjects.getObject(argDesc.value);
         else if (argDesc.type === 'list')
-            return argDesc.value.map((X: any) => this.decodedArgument(X))
-        else if (argDesc.type === 'dictionary')
-            return mapObj(argDesc.value, (X: any) => this.decodedArgument(X))
-        else // primitive
+            return argDesc.value.map((X: any) => this.unwrapArgument(X))
+        else if (argDesc.type === 'dict')
+            return mapObj(argDesc.value, (X: any) => this.unwrapArgument(X))
+        else if (argDesc.type === 'data')
+            return this.inflateDataObject(argDesc.value)
+        else // primitives can be parsed automatically
             return argDesc.value;
     }
 
-    encodedArgument(arg: any): Argument {
+    wrapArgument(arg: any): Argument {
         if (arg instanceof Proxy) 
-            return { type: 'hostObject', value: arg.id };
+            return { type: 'hostObj', value: arg.id };
         else if (Object(arg) === arg && 'proxyableId' in arg) // "instanceof Proxyable"
-            return { type: 'clientObject', value: this.localObjects.getTag(arg) };
+            return { type: 'clientObj', value: this.localObjects.getTag(arg) };
         else if (arg instanceof Array)
-            return { type: 'list', value: arg.map(X => this.encodedArgument(X))}
+            return { type: 'list', value: arg.map(X => this.wrapArgument(X))}
         else if (arg instanceof Object)
-            return { type: 'dictionary', value: mapObj(arg, X => this.encodedArgument(X))}
+            return { type: 'dict', value: mapObj(arg, X => this.wrapArgument(X))}
+        else if (typeof arg === "string")
+            return { type: 'string', value: arg }
+        else if (typeof arg === "boolean")
+            return { type: 'bool', value: arg}
         else
-            return { type: 'primitive', value: arg };
+            return { type: 'int', value: parseInt(arg) }
     }
 }
