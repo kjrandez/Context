@@ -4,14 +4,10 @@ import com.kjrandez.context.kernel.entity.*
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.modules.SerializersModule
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import kotlin.reflect.KClass
 
 interface RpcMessage
 interface RpcArgument
@@ -72,34 +68,6 @@ data class RpcError (
 ) : RpcMessage
 
 class RpcEncodeException(message: String) : Exception(message)
-
-fun rpcJson(database: Database) = Json(context=SerializersModule {
-    polymorphic(RpcArgument::class) {
-        RpcInt::class with RpcInt.serializer()
-        RpcFloat::class with RpcFloat.serializer()
-        RpcString::class with RpcString.serializer()
-        RpcBool::class with RpcBool.serializer()
-        RpcList::class with RpcList.serializer()
-        RpcDict::class with RpcDict.serializer()
-        RpcHostObj::class with RpcHostObj.serializer()
-        RpcClientObj::class with RpcClientObj.serializer()
-        RpcData::class with RpcData.serializer()
-    }
-    polymorphic(RpcMessage::class) {
-        RpcCall::class with RpcCall.serializer()
-        RpcSend::class with RpcSend.serializer()
-        RpcYield::class with RpcYield.serializer()
-        RpcError::class with RpcError.serializer()
-    }
-    polymorphic(RpcDataClass::class) {
-        Model::class with Model.serializer()
-        TextValue::class with TextValue.serializer()
-        PageValue::class with PageValue.serializer()
-        PageEntry::class with PageEntry.serializer()
-    }
-    contextual(Entity::class, EntitySerializer(database))
-    contextual(DocumentEntity::class, EntitySerializer(database))
-}, configuration = JsonConfiguration(prettyPrint=true))
 
 class Proxy (
     val eid: Int,

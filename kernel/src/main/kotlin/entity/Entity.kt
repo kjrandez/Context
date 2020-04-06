@@ -21,7 +21,7 @@ abstract class Entity(register: (Entity) -> Int) : RpcDataClass
     abstract suspend fun invoke(selector: String, args: Array<Any?>): Any?
 }
 
-class DocumentEntity(register: (Entity) -> Int, val backing: Backing, agentType: AgentType) : Entity(register)
+class DocumentEntity(register: (Entity) -> Int, val backing: Backing, val agentType: AgentType) : Entity(register)
 {
     lateinit var agent: Agent<*>
 
@@ -70,14 +70,21 @@ class EntitySerializer<T : Entity>(private val database: Database) : KSerializer
     }
 
     override fun deserialize(decoder: Decoder): T {
-        val composite: CompositeDecoder = decoder.beginStructure(descriptor)
-
-        while (true) {
-            val elementIndex = composite.decodeElementIndex(descriptor)
-            if (elementIndex == 1)
-                return database.lookup(composite.decodeIntElement(descriptor, elementIndex)) as T
-            else if (elementIndex == CompositeDecoder.READ_DONE)
-                throw java.lang.Exception()
+        val dec: CompositeDecoder = decoder.beginStructure(descriptor)
+        var value: Int? = null // need to read nullable non-optional properties
+        loop@ while (true) {
+            when (val i = dec.decodeElementIndex(descriptor)) {
+                CompositeDecoder.READ_DONE -> break@loop
+                0 -> dec.decodeStringElement(descriptor, i)
+                1 -> value = dec.decodeIntElement(descriptor, i)
+                else -> throw SerializationException("Unknown index $i")
+            }
         }
+        dec.endStructure(descriptor)
+
+        if (value == null)
+            throw SerializationException("Missing key: value")
+
+        return database.lookup(value) as T
     }
 }

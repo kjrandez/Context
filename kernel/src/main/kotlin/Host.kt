@@ -5,7 +5,7 @@ import io.javalin.websocket.WsContext
 
 class Host(val ctx: WsContext, private val database: Database)
 {
-    private val hostService = HostService(database::register, database.rootPage)
+    private val hostService = HostService(database::registerEphemeral, database.rootPage)
     private val rpc = Rpc(database, hostService) { ctx.send(it); Unit }
 
     suspend fun receive(message: String) = rpc.receive(message)

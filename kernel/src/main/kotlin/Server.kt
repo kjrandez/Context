@@ -3,12 +3,11 @@ package com.kjrandez.context.kernel
 import com.kjrandez.context.kernel.entity.*
 import io.javalin.Javalin
 import kotlinx.coroutines.*
-
+import java.io.File
 
 fun main() {
-    val database = Database()
+    val database = Database(File(System.getProperty("user.dir"), "database"))
     val hosts = mutableMapOf<String, Host>()
-
 
     Javalin.create().start(8085).ws("/broadcast") {
         it.onConnect { ctx ->
