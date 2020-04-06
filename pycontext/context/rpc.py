@@ -5,6 +5,12 @@ class Proxy:
         self.clientCall = clientCall
         self.clientSend = clientSend
 
+    def __getattr__(self, name):
+        def method(*args):
+            print("Dispatching unknown method: " + name)
+            return self.callBlocking(name, list(args))
+        return method
+
     def callBlocking(self, selector, arguments):
         return self.queue.awaitResult(lambda: self.call(selector, arguments))
 
