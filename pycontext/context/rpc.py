@@ -1,3 +1,6 @@
+import traceback
+
+
 class Proxy:
     def __init__(self, foreignId, clientCall, clientSend, queue):
         self.id = foreignId
@@ -7,7 +10,6 @@ class Proxy:
 
     def __getattr__(self, name):
         def method(*args):
-            print("Dispatching unknown method: " + name)
             return self.callBlocking(name, list(args))
         return method
 
@@ -71,7 +73,7 @@ class Rpc:
 
     async def receive(self, msg):
         if msg['type'] == 'send':
-            self.dispatchSend(msg['target'], msg['selector'], msg['arguments'])
+            await self.dispatchSend(msg['target'], msg['selector'], msg['arguments'])
         elif msg['type'] == 'call':
             await self.dispatchCall(msg['id'], msg['target'], msg['selector'], msg['arguments'])
         elif msg['type'] == 'yield':
@@ -89,15 +91,23 @@ class Rpc:
         method = getattr(target, selector)
         arguments = map(lambda X: self.unwrapArgument(X), argDescs)
 
-        result = method(*arguments)
+        try:
+            result = method(*arguments)
 
-        await self.send({
-            'type': 'return',
-            'id': foreignId,
-            'result': self.wrapArgument(result)
-        })
+            await self.send({
+                'type': 'return',
+                'id': foreignId,
+                'result': self.wrapArgument(result)
+            })
+        except Exception as ex:
+            traceback.print_exc()
+            await self.send({
+                'type': 'error',
+                'id': foreignId,
+                'message': str(ex)
+            })
 
-    def dispatchSend(self, targetId, selector, argDescs):
+    async def dispatchSend(self, targetId, selector, argDescs):
         target = self.clientService
         if targetId != 0:
             target = self.dataset.lookup(targetId)
@@ -105,7 +115,15 @@ class Rpc:
         method = getattr(target, selector)
         arguments = map(lambda X: self.unwrapArgument(X), argDescs)
 
-        method(*arguments)
+        try:
+            method(*arguments)
+        except Exception as ex:
+            traceback.print_exc()
+            await self.send({
+                'type': 'error',
+                'id': None,
+                'message': str(ex)
+            })
 
     def dispatchYield(self, localId, resultDesc):
         future = self.callMap[localId]

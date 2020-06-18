@@ -1,8 +1,10 @@
 package com.kjrandez.context.kernel.entity
 
 import com.kjrandez.context.kernel.Database
+import com.kjrandez.context.kernel.Ledger
 import com.kjrandez.context.kernel.RpcDataClass
 import kotlinx.serialization.*
+import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.memberFunctions
 
 @Serializable @SerialName("Model")
@@ -21,7 +23,12 @@ abstract class Entity(register: (Entity) -> Int) : RpcDataClass
     abstract suspend fun invoke(selector: String, args: Array<Any?>): Any?
 }
 
-class DocumentEntity(register: (Entity) -> Int, val backing: Backing, val agentType: AgentType) : Entity(register)
+class DocumentEntity(
+    register: (Entity) -> Int,
+    private val backing: Backing,
+    var agentType: AgentType,
+    private val ledger: Ledger
+) : Entity(register)
 {
     lateinit var agent: Agent<*>
 
@@ -30,7 +37,8 @@ class DocumentEntity(register: (Entity) -> Int, val backing: Backing, val agentT
     }
 
     private fun become(newType: AgentType) {
-        this.agent = buildAgent(backing, newType)
+        this.agent = buildAgent(backing, newType, ledger)
+        this.agentType = newType
     }
 
     override suspend fun invoke(selector: String, args: Array<Any?>): Any? {
@@ -48,7 +56,7 @@ class DocumentEntity(register: (Entity) -> Int, val backing: Backing, val agentT
     private suspend fun dynamicDispatch(selector: String, args: Array<Any?>): Any? {
         for (func in agent::class.memberFunctions) {
             if (func.name == selector) {
-                return func.call(agent, *args)
+                return func.callSuspend(agent, *args)
             }
         }
         throw EntityException("Could not find selector ${selector} in this agent")

@@ -9,6 +9,7 @@ class Host(val ctx: WsContext, private val database: Database)
     private val rpc = Rpc(database, hostService) { ctx.send(it); Unit }
 
     suspend fun receive(message: String) = rpc.receive(message)
+    suspend fun broadcast(eid: Int) = rpc.clientService.call("broadcast", listOf(eid))
 
     init {
         rpc.clientService.send("hello", listOf(hostService))

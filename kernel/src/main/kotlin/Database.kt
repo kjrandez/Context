@@ -18,12 +18,32 @@ data class EntitySeed(
     val agentType: AgentType
 )
 
-class Database(private var rootDirectory: File) {
+class Transaction(
+    val eid: Int,
+    val description: String,
+    val forward: () -> Unit,
+    val backward: () -> Unit
+)
+
+class Ledger(private val eid: Int, private val log: suspend (Transaction) -> Unit)
+{
+    suspend fun transaction(description: String, forward: () -> Unit, backward: () -> Unit) {
+        log(Transaction(eid, description, forward, backward))
+    }
+}
+
+class Database(
+    private var rootDirectory: File,
+    private val broadcast: suspend (Int) -> Unit
+) {
     private val json = rpcJson(this)
     private val elementMap: MutableMap<Int, Entity> = mutableMapOf()
     private var nextIndex: Int
 
     var rootPage: DocumentEntity private set
+
+    private val past = mutableListOf<Transaction>()
+    private val future = mutableListOf<Transaction>()
 
     init {
         val initializer = loadInitializer()
@@ -48,15 +68,30 @@ class Database(private var rootDirectory: File) {
 
         val seed = loadEntity(eid)
         return if (seed.backing == null) {
-            DocumentEntity({ elementMap[eid] = it; eid }, InternalBacking(seed.backingValue!!), seed.agentType)
+            DocumentEntity(
+                { elementMap[eid] = it; eid },
+                InternalBacking(seed.backingValue!!),
+                seed.agentType,
+                Ledger(eid, this::log)
+            )
         } else {
-            DocumentEntity({ elementMap[eid] = it; eid }, seed.backing, seed.agentType)
+            DocumentEntity(
+                { elementMap[eid] = it; eid },
+                seed.backing,
+                seed.agentType,
+                Ledger(eid, this::log)
+            )
         }
     }
 
     fun buildPersistent(backing: Backing, agentType: AgentType): DocumentEntity {
         val eid = nextIndex++
-        val entity = DocumentEntity({ eid }, backing, agentType)
+        val entity = DocumentEntity(
+            { eid },
+            backing,
+            agentType,
+            Ledger(eid, this::log)
+        )
 
         if (backing is InternalBacking<*>) {
             val backingValue = backing.value
@@ -72,6 +107,34 @@ class Database(private var rootDirectory: File) {
         val eid = nextIndex++
         elementMap[eid] = entity
         return eid
+    }
+
+    suspend fun log(trans: Transaction) {
+        past.add(trans)
+        future.clear()
+
+        trans.forward()
+        broadcast(trans.eid)
+    }
+
+    suspend fun undo() {
+        if (past.size > 0) {
+            val trans = past.removeAt(past.size - 1)
+            future.add(trans)
+
+            trans.backward()
+            broadcast(trans.eid)
+        }
+    }
+
+    suspend fun redo() {
+        if (future.size > 0) {
+            val trans = future.removeAt(future.size - 1)
+            past.add(trans)
+
+            trans.forward()
+            broadcast(trans.eid)
+        }
     }
 
     private fun loadInitializer(): DatabaseInitializer? {

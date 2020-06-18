@@ -1,5 +1,6 @@
 package com.kjrandez.context.kernel.entity
 
+import com.kjrandez.context.kernel.Ledger
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,10 +28,10 @@ class FileTextValueProvider(val backing: FileBacking) : TextValueProvider
     }
 }
 
-class Text(val provider: TextValueProvider) : Agent<TextValue>()
+class Text(val provider: TextValueProvider, ledger: Ledger) : Agent<TextValue>(ledger)
 {
-    constructor(backingValue: TextValue) : this(InternalTextValueProvider(backingValue))
-    constructor(backing: FileBacking) : this(FileTextValueProvider(backing))
+    constructor(backingValue: TextValue, ledger: Ledger) : this(InternalTextValueProvider(backingValue), ledger)
+    constructor(backing: FileBacking, ledger: Ledger) : this(FileTextValueProvider(backing), ledger)
 
     override fun value(): TextValue {
         return provider.value()
