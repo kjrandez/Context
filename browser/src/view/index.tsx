@@ -1,9 +1,12 @@
 import React, {Component, ReactElement} from 'react';
-import Client, {Proxy} from '../client';
+import {Proxy} from 'shared';
+import Client from '../client';
 import {Store} from '../store';
 import {Page} from './elements';
-import {Model, PageValue} from '../types';
+import {Model, PageValue} from 'shared';
 import Toolbar from './toolbar';
+
+import SharedComp from 'shared/SharedComp';
 
 interface IAppProps {}
 interface IAppState {store: Store | null}
@@ -16,11 +19,11 @@ export default class App extends Component<IAppProps, IAppState>
     }
 
     componentDidMount() {
-        new Client(
+        Client.connect(
             this.connected.bind(this),
             this.disconnected.bind(this),
             this.broadcast.bind(this) 
-        ).connect();
+        );
 
         document.addEventListener("keyup", (ev) => this.onKeyPress(ev), false);
     }
@@ -63,10 +66,11 @@ export default class App extends Component<IAppProps, IAppState>
                     onClick={() => this.onClick()}>
                     <Toolbar store={store} />
                     <Page {...{store, model, path: []}} />
+                    
                 </div>
             );
         } else {
-            return <p>Connecting to host...</p>
+            return <SharedComp/>
         }
     }
 

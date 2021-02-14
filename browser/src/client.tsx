@@ -1,231 +1,26 @@
-import {mapObj} from './types';
+import {Proxy, Rpc, TransactionModel} from 'shared';
 
-export class Proxy
+export default class Client extends Rpc
 {
-    id: number;
-    dispatchCall: Function;
-
-    constructor(tag: number, dispatcher: Function) {
-        this.dispatchCall = dispatcher
-        this.id = tag;
-    }
-
-    async call<T>(selector: string, args: any[] = []): Promise<T> {
-        return await this.dispatchCall(this.id, selector, args, true);
-    }
-
-    send(selector: string, args: any[] = []) {
-        this.dispatchCall(this.id, selector, args, false);
-    }
-}
-
-export interface Proxyable {
-    proxyableId: number | null;
-}
-
-export type Argument = {
-    type: string;
-    value: any;
-}
-
-class TagCache<T>
-{
-    refs: T[] = [];
-    nextIndex: number = 0;
-    freeIndexes: number[] = [];
-
-    assignTag(object: T) {
-        let index: number | undefined = this.freeIndexes.pop();
-        if (index !== undefined) {
-            this.refs[index] = object;
-            return index;
-        }
-        else {
-            this.refs.push(object);
-            index = this.nextIndex ++;
-            return index;
-        }
-    }
-
-    getObject(tag: number) {
-        return this.refs[tag];
-    }
-
-    freeTag(tag: number) {
-        this.freeIndexes.push(tag)
-    }
-}
-
-class ProxyableTable
-{
-    refs: Proxyable[];
-    index: number = 0;
-
-    constructor(rootObject: Proxyable) {
-        rootObject.proxyableId = 0;
-        this.refs = [rootObject];
-    }
-
-    getObject(tag: number) {
-        return this.refs[tag];
-    }
-
-    getTag(object: Proxyable) {
-        if (object.proxyableId == null)
-            object.proxyableId = ++ this.index;
-
-        return object.proxyableId;
-    }
-}
-
-class ProxyMap
-{
-    make: Function;
-    refs: { [_: number]: Proxy } = {};
-
-    constructor(makeProxy: Function) {
-        this.make = makeProxy;
-    }
-
-    getObject(tag: number) {
-        if (tag in this.refs)
-            return this.refs[tag];
-
-        let proxy = this.make(tag);
-        this.refs[tag] = proxy;
-        return proxy;
-    }
-}
-
-type TransactionModel = {
-    id: number,
-    subject: Proxy,
-    others: Proxy[],
-    value: any
-}
-
-export default class Client
-{
-    websocket: WebSocket | null;
-    pendingCalls: TagCache<Function> = new TagCache<Function>();
-    localObjects: ProxyableTable;
-    foreignObjects: ProxyMap;
-
-    constructor(
-        private connected: (_: Proxy) => Promise<void>,
-        private disconnected: () => void,
+    static connect(
+        connected: (_: Proxy) => Promise<void>,
+        disconnected: () => void,
         broadcast: (_: Proxy) => Promise<void>
     ) {
-        this.websocket = null;
-
-        let dispatcher = this.dispatchCall.bind(this);
-        this.foreignObjects = new ProxyMap((tag: number) => new Proxy(tag, dispatcher));
-        
         let clientService = {
             proxyableId: null,
             broadcast: (trans: TransactionModel) => broadcast(trans.subject).then()
         };
-        this.localObjects = new ProxyableTable(clientService);
-    }
+        const websocket = new WebSocket("ws://localhost:8085/broadcast");
+        let send = (message: string) => websocket.send(message);
+        let client = new Client(clientService, send)
+        let hostService = client.foreignObjects.getObject(0);
 
-    connect() {
-        let hostService = this.foreignObjects.getObject(0);
-
-        this.websocket = new WebSocket("ws://localhost:8085/broadcast");
-
-        this.websocket.onmessage = event => this.handleWebsocketReceive(event);
-        this.websocket.onclose = (_) => this.disconnected();
-        this.websocket.onopen = (_) => this.connected(hostService).then();
-    }
-
-    dispatchWebsocketSend(data: object) {
-        if (this.websocket !== null)
-            this.websocket.send(JSON.stringify(data));
-    }
-
-    dispatchCall(targetId: number, selector: string, args: any[]) {
-        let argDescs: Argument[] = args.map((X: any) => this.encodedArgument(X));
-        
-        return new Promise<any>((resolve, reject) => this.dispatchWebsocketSend({
-            type: 'call',
-            id: this.pendingCalls.assignTag(resolve),
-            target: targetId,
-            selector: selector,
-            arguments: argDescs
-        }));
-    }
-
-    handleWebsocketReceive(event: MessageEvent) {
-        var msg = JSON.parse(event.data);
-
-        switch(msg.type) {
-            case 'send':
-                this.handleSend(msg.target, msg.selector, msg.arguments);
-                break;
-            case 'call':
-                this.handleCall(msg.id, msg.target, msg.selector, msg.arguments);
-                break;
-            case 'return':
-                this.handleReturn(msg.id, msg.result)
-                break;
-            default:
-                console.log("Invalid message received:");
-                console.log(msg);
-                break;
+        websocket.onmessage = (event) => {
+            let msg = JSON.parse(event.data);
+            client.handleWebsocketReceive(msg);
         }
-    }
-
-    handleSend(targetId: number, selector: string, argDescs: Argument[]) {
-        let target: Proxyable = this.localObjects.getObject(targetId);
-        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
-
-        (target as any)[selector].apply(target, args)
-    }
-
-    handleCall(foreignId: number, targetId: number, selector: string, argDescs: Argument[]) {
-        let target: Proxyable = this.localObjects.getObject(targetId);
-        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
-
-        let result = (target as any)[selector].apply(target, args)
-
-        this.dispatchWebsocketSend({
-            type: 'return',
-            id: foreignId,
-            result: this.encodedArgument(result)
-        });
-    }
-
-    handleReturn(localId: number, resultDesc: any) {
-        let result = this.decodedArgument(resultDesc);
-        let resolve = this.pendingCalls.getObject(localId);
-        this.pendingCalls.freeTag(localId);
-
-        resolve(result);
-    }
-
-    decodedArgument(argDesc: Argument): any {
-        if (argDesc.type === 'hostObject')
-            return this.foreignObjects.getObject(argDesc.value)
-        else if (argDesc.type === 'clientObject')
-            return this.localObjects.getObject(argDesc.value);
-        else if (argDesc.type === 'list')
-            return argDesc.value.map((X: any) => this.decodedArgument(X))
-        else if (argDesc.type === 'dictionary')
-            return mapObj(argDesc.value, (X: any) => this.decodedArgument(X))
-        else // primitive
-            return argDesc.value;
-    }
-
-    encodedArgument(arg: any): Argument {
-        if (arg instanceof Proxy) 
-            return { type: 'hostObject', value: arg.id };
-        else if (Object(arg) === arg && 'proxyableId' in arg) // "instanceof Proxyable"
-            return { type: 'clientObject', value: this.localObjects.getTag(arg) };
-        else if (arg instanceof Array)
-            return { type: 'list', value: arg.map(X => this.encodedArgument(X))}
-        else if (arg instanceof Object)
-            return { type: 'dictionary', value: mapObj(arg, X => this.encodedArgument(X))}
-        else
-            return { type: 'primitive', value: arg };
+        websocket.onclose = (_) => disconnected();
+        websocket.onopen = (_) => connected(hostService).then();
     }
 }

@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react';
 import React, {Component, ReactElement, MouseEvent} from 'react';
-import {Model, Value, TextValue, PageValue} from '../../types';
+import {Model, Value, TextValue, PageValue} from 'shared';
 import {Store} from '../../store';
 
 import {Script, Text} from './text';

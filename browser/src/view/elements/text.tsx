@@ -1,6 +1,6 @@
 import React, {RefObject, Component, ReactElement, KeyboardEvent, ClipboardEvent, FormEvent} from 'react';
 import {ElementProps} from '.';
-import {Model, TextValue} from '../../types';
+import {Model, TextValue} from 'shared';
 import marked from 'marked';
 import {observer} from 'mobx-react';
 

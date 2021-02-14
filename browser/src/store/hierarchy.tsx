@@ -1,6 +1,6 @@
 import {ViewNode, ViewState, traverse, viewNode, pathsEqual} from '.';
-import {NumDict, Model, Value, PageValue} from '../types';
-import {Proxy} from '../client';
+import {NumDict, Model, Value, PageValue} from 'shared';
+import {Proxy} from 'shared';
 import {action, observable} from 'mobx';
 
 interface HierarchyChangeset {

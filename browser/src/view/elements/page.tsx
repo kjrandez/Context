@@ -1,6 +1,6 @@
 import React, {Component, ReactElement} from 'react';
 import PageEntry, {ElementProps} from '.';
-import {Model, PageValue} from '../../types';
+import {Model, PageValue} from 'shared';
 import AppendButton from '../append';
 import {observer} from 'mobx-react';
 

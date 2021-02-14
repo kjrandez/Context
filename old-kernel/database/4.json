@@ -1,0 +1,24 @@
+{
+    "backing": null,
+    "backingValue": {
+        "type": "PageValue",
+        "entries": [
+            {
+                "index": 0,
+                "entity": {
+                    "type": "hostObj",
+                    "value": 2
+                }
+            },
+            {
+                "index": 1,
+                "entity": {
+                    "type": "hostObj",
+                    "value": 3
+                }
+            }
+        ],
+        "nextIndex": 2
+    },
+    "agentType": "Page"
+}

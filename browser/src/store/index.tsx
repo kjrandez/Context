@@ -1,7 +1,7 @@
 import {Component} from 'react';
 import {observable, action} from 'mobx';
-import {Proxy} from '../client';
-import {NumDict, Model, Value} from '../types';
+import {Proxy} from 'shared';
+import {NumDict, Model, Value} from 'shared';
 import PageActions from './page';
 import TextActions from './text';
 import HierarchyActions from './hierarchy';
