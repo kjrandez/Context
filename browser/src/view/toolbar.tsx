@@ -11,7 +11,7 @@ class Toolbar extends Component<{store: Store}>
         let model = store.lookupModel(element.id);
 
         return <>
-            {model.agent + "(" + model.eid.toString() + ")"}&nbsp;
+            {model.type + "(" + model.id.toString() + ")"}&nbsp;
             <button onClick={() => store.pageAction.delete(selection)}>Delete</button>
         </>
     }

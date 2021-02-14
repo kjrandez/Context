@@ -18,6 +18,7 @@ export default class App extends Component<IAppProps, IAppState>
     componentDidMount() {
         new Client(
             this.connected.bind(this),
+            this.disconnected.bind(this),
             this.broadcast.bind(this) 
         ).connect();
 

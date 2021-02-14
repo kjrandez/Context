@@ -12,12 +12,12 @@ class Page extends Component<PageProps>
         const {store, model: {value}, path} = this.props;
 
         let elements = value.entries.map(
-            ({index, entity}) =>
+            ({key, element}) =>
                 <PageEntry
                     store={store}
-                    path={[...path, index]}
-                    eid={entity.id}
-                    key={index}/>
+                    path={[...path, key]}
+                    eid={element.id}
+                    key={key}/>
         );
 
         return <>{elements}<AppendButton {...{store, path}}/></>
