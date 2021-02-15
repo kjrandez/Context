@@ -9,10 +9,7 @@ export default class Host {
     constructor(private dataset: DataSet, send: (_: string) => void) {
         let hostService = {
             proxyableId: null,
-            rootPage: () => {
-                console.log(`root id: ${dataset.root.id}`);
-                return dataset.root;
-            },
+            rootPage: () => dataset.root,
         };
         let table = new DatasetProxyableTable(hostService, dataset);
         this.rpc = new Rpc(table, send);
@@ -24,8 +21,6 @@ export default class Host {
     }
 
     broadcast(trans: Transaction) {
-        console.log("Broadcast:");
-        console.log(trans);
         this.clientService.call("broadcast", [trans.model()]);
     }
 }

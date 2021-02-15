@@ -12,7 +12,6 @@ export default class TextActions {
         let { start, stop, addition } = spliceFromDiff(content, newContent);
 
         // Send the computed splice
-        //console.log("Splice from " + start + " to " + stop + "[" + addition + "]");
         element.call("splice", [start, stop, addition]);
 
         // Perform the computed splice locally.. necessary ?

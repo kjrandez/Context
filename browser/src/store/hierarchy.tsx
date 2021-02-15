@@ -26,33 +26,23 @@ export default class HierarcyActions {
     }
 
     async refresh(newModel: Model<PageValue> | null) {
-        console.log("Refreshing page at root:");
-        console.log(this.state.root.element.id);
         let models: NumDict<Model<Value>> = {};
         if (newModel !== null) {
             models[newModel.id] = newModel;
-            console.log("adding new model to changeset");
         }
 
         let changeset = { models, children: [], deselect: null };
-        console.log(changeset);
         await this.refreshHierarchy(this.state.root, [], changeset, 0);
-        console.log("Changeset:");
-        console.log(changeset);
         this.applyHierarchyChanges(changeset);
     }
 
     async broadcast(element: Proxy) {
-        console.log("Broadcast");
         if (this.state.db[element.id] === undefined) {
-            console.log("Broadcast for element not in database");
             return;
         }
 
         // Refresh database and hierarchy with the new element
         let model = await element.call<Model<Value>>("model", []);
-        console.log("New model:");
-        console.log(model);
         if (model.type === "Page") {
             await this.refresh(model as Model<PageValue>);
         } else {
@@ -136,15 +126,11 @@ export default class HierarcyActions {
 
         // Then look in existing dictionary
         if (model === undefined) {
-            console.log("not in changeset");
             model = this.state.db[element.id] as Model<Value>;
-        } else {
-            console.log("FOUND in changeset");
         }
 
         // Then lookup from host
         if (model === undefined) {
-            console.log("not in db, lookup");
             model = await element.call<Model<Value>>("model", []);
             changeset.models[element.id] = observable(model);
         }
@@ -159,8 +145,6 @@ export default class HierarcyActions {
         collapsedDepth: number
     ) {
         // Lookup model, pulling from kernel if not yet present
-        console.log("Looking up value for:");
-        console.log(node.element);
         let { type, value } = (await this.fetchModel(
             node.element,
             changeset
@@ -172,10 +156,6 @@ export default class HierarcyActions {
         let newChildren: NumDict<ViewNode> = {};
         let presentChildren: string[] = [];
 
-        console.log("refreshing at path");
-        console.log(path);
-        console.log(type);
-        console.log(value);
         for (const { key, element } of value.entries) {
             presentChildren.push(key.toString());
 

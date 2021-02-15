@@ -37,8 +37,6 @@ export default class App extends Component<IAppProps, IAppState> {
 
     async connected(host: Proxy) {
         let rootPage = (await host.call("rootPage", [])) as Proxy;
-        console.log("Received root");
-        console.log(rootPage);
         let store = new Store(rootPage);
         await store.hierarchyAction.refresh(null);
 

@@ -179,21 +179,10 @@ export class Rpc {
                 this.handleException(msgObj.id, msgObj.message);
                 break;
             default:
-                console.log("Invalid message.");
-                break;
+                throw new Error("Invalid message received");
         }
     }
 
-    handleSend(targetId: number, selector: string, argDescs: Argument[]) {
-        let target: Proxyable = this.localObjects.getObject(targetId);
-        let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
-
-        try {
-            (target as any)[selector].apply(target, args);
-        } catch (err) {
-            console.log(err);
-        }
-    }
     handleCall(
         callId: number,
         targetId: number,
@@ -215,7 +204,6 @@ export class Rpc {
                 result: this.encodedArgument(result),
             });
         } catch (err) {
-            console.log(err);
             this.dispatchWebsocketSend({
                 type: "exception",
                 id: callId,
@@ -255,7 +243,6 @@ export class Rpc {
     encodedArgument(arg: any): Argument {
         if (arg instanceof Proxy) return { type: "remote", value: arg.id };
         else if (Object(arg) === arg && "proxyableId" in arg) {
-            console.log("encoding a proxyable");
             return {
                 type: "local",
                 value: this.localObjects.getTag(arg),
