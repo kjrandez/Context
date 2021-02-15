@@ -19,7 +19,7 @@ class DataVoid implements Observer {
 }
 
 export class Entity implements Proxyable {
-    proxyableId = null;
+    proxyableId: number | null = null;
 
     private static observer: Observer = new DataVoid();
 

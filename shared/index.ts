@@ -75,28 +75,22 @@ class TagCache<T> {
     }
 }
 
-class ProxyableTable {
-    // Refs are stored globally, but numbers start from 1 since tag 0 always
-    // gets routed to the specific host service instance.
-    private static refs: Proxyable[] = [];
-    private static nextTag: number = 1;
-
+export abstract class ProxyableTable {
     constructor(private service: Proxyable) {}
+
+    abstract lookup(tag: number): Proxyable;
 
     getObject(tag: number) {
         if (tag == 0) {
             return this.service;
         } else {
-            const index = tag - 1;
-            if (index in ProxyableTable.refs) return ProxyableTable.refs[index];
-            else throw new Error("Rpc Error: Tagged object not in refs");
+            return this.lookup(tag);
         }
     }
 
     getTag(object: Proxyable) {
         if (object.proxyableId == null) {
-            object.proxyableId = ProxyableTable.nextTag++;
-            ProxyableTable.refs.push(object);
+            throw new Error("Rpc Error: Proxyable is not tagged");
         }
         return object.proxyableId;
     }
@@ -133,16 +127,16 @@ interface CallResolver {
 
 export class Rpc {
     pendingCalls: TagCache<CallResolver> = new TagCache<CallResolver>();
-    localObjects: ProxyableTable;
     foreignObjects: ProxyMap;
 
-    constructor(service: Proxyable, private send: (_: string) => void) {
+    constructor(
+        private localObjects: ProxyableTable,
+        private send: (_: string) => void
+    ) {
         let dispatcher = this.dispatchCall.bind(this);
         this.foreignObjects = new ProxyMap(
             (tag: number) => new Proxy(tag, dispatcher)
         );
-
-        this.localObjects = new ProxyableTable(service);
     }
 
     dispatchCall(targetId: number, selector: string, args: any[]) {

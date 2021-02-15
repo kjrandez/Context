@@ -1,6 +1,6 @@
 import DataSet from "./dataset";
-import { Transaction } from "./entity";
-import { Proxy, Rpc } from "shared";
+import { Entity, Transaction } from "./entity";
+import { Proxy, Proxyable, ProxyableTable, Rpc } from "shared";
 
 export default class Host {
     private clientService: Proxy;
@@ -9,9 +9,13 @@ export default class Host {
     constructor(private dataset: DataSet, send: (_: string) => void) {
         let hostService = {
             proxyableId: null,
-            rootPage: () => dataset.root,
+            rootPage: () => {
+                console.log(`root id: ${dataset.root.id}`);
+                return dataset.root;
+            },
         };
-        this.rpc = new Rpc(hostService, send);
+        let table = new DatasetProxyableTable(hostService, dataset);
+        this.rpc = new Rpc(table, send);
         this.clientService = this.rpc.foreignObjects.getObject(0);
     }
 
@@ -23,5 +27,22 @@ export default class Host {
         console.log("Broadcast:");
         console.log(trans);
         this.clientService.call("broadcast", [trans.model()]);
+    }
+}
+
+export class DatasetProxyableTable extends ProxyableTable {
+    constructor(service: Proxyable, private dataset: DataSet) {
+        super(service);
+    }
+
+    lookup(tag: number): Proxyable {
+        return this.dataset.lookup(tag);
+    }
+
+    getTag(object: Proxyable) {
+        if (object.proxyableId == null && object instanceof Entity) {
+            object.proxyableId = object.id;
+        }
+        return super.getTag(object);
     }
 }

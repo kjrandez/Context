@@ -1,4 +1,5 @@
 import Async from "async";
+import { Proxyable, ProxyableTable } from "shared";
 import { Entity, Observer, Page, Text, Transaction } from "./entity";
 
 const lorem1 =
@@ -17,7 +18,7 @@ export default class DataSet implements Observer {
 
     constructor(private queue: Async.QueueObject<Transaction>) {
         this.objMap = {};
-        this.nextIndex = 0;
+        this.nextIndex = 1;
         this.nextTransaction = 0;
 
         // Cheat using global state, so we can avoid passing
@@ -32,6 +33,11 @@ export default class DataSet implements Observer {
         ]);
 
         this.clipboard = new Page([]);
+    }
+
+    lookup(id: number) {
+        if (id in this.objMap) return this.objMap[id];
+        else throw new Error("entity not found in dataset");
     }
 
     entityCreated(inst: Entity): number {
