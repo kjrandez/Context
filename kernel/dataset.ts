@@ -1,6 +1,14 @@
 import Async from "async";
 import { Proxyable, ProxyableTable } from "shared";
-import { Entity, Observer, Page, Text, Transaction } from "./entity";
+import {
+    Entity,
+    Observer,
+    Page,
+    Text,
+    Script,
+    Image,
+    Transaction,
+} from "./entity";
 
 const lorem1 =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vestibulum at erat eget suscipit. Nulla rhoncus libero sapien, id molestie nibh luctus in. Pellentesque tristique nulla sit amet eros sodales, quis luctus enim congue. Integer placerat viverra sollicitudin. In libero ligula, interdum nec pellentesque non, elementum vel dolor. Aenean ut nisl vulputate, interdum urna eget, placerat enim. Vestibulum felis turpis, elementum ac malesuada id, lacinia at justo. In laoreet mauris et nibh ullamcorper convallis. Maecenas faucibus ipsum at congue scelerisque. Aliquam sem purus, pharetra suscipit condimentum quis, imperdiet at ex. Vestibulum maximus mattis odio, sed elementum dolor feugiat eget. Aliquam consectetur, neque vitae porta dictum, ante dui posuere libero, id euismod nisi dolor at ipsum.";
@@ -29,7 +37,26 @@ export default class DataSet implements Observer {
         this.root = new Page([
             new Text("Hello world"),
             new Text("How are you doing **today**?"),
+            new Text("I'm doing just fine thank you very much."),
+            new Script("def something():\n\tprint('Hello world!')"),
             new Page([new Text("Introduction"), new Text(lorem1)]),
+            new Page([
+                new Page([new Text("Mas informacion"), new Text(lorem2)]),
+                new Page([
+                    new Text("[Scope_0]"),
+                    new Image("lol2.png", "Funny joke"),
+                ]),
+            ]),
+            new Page([new Text(lorem3)]),
+            new Image("sw.png", "Switching characteristics"),
+            new Page([
+                new Text(
+                    "This is pretty funy if you actually think about it for a second."
+                ),
+                new Text("I really can't agree with that statement"),
+            ]),
+            new Text("Just to finish it off right here."),
+            new Text("Actually I'll go ahead and add a bit more to be sure..."),
         ]);
 
         this.clipboard = new Page([]);

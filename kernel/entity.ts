@@ -18,7 +18,7 @@ class DataVoid implements Observer {
     transactionCompleted(trans: Transaction): void {}
 }
 
-export class Entity implements Proxyable {
+export abstract class Entity implements Proxyable {
     proxyableId: number | null = null;
 
     private static observer: Observer = new DataVoid();
@@ -33,9 +33,7 @@ export class Entity implements Proxyable {
         this.id = Entity.observer.entityCreated(this);
     }
 
-    value(): any | null {
-        return null;
-    }
+    abstract value(): any;
 
     type(): string {
         return this.constructor.name;
@@ -185,5 +183,35 @@ export class Text extends Entity {
 
     value() {
         return { content: this.content };
+    }
+
+    splice(start: number, stop: number, addition: string) {
+        const trans = this.newTransaction();
+
+        if (start < 0 || start > this.content.length)
+            throw new Error("Splice starts out of range");
+        if (stop < 0 || stop > this.content.length)
+            throw new Error("Splice stops out of range");
+        if (start > stop) throw new Error("Splice start and stop reversed");
+
+        this.content =
+            this.content.slice(0, start) + addition + this.content.slice(stop);
+
+        this.completeTransaction(trans);
+    }
+}
+
+export class Script extends Text {}
+
+export class Image extends Entity {
+    constructor(public src: string, public alt: string) {
+        super();
+    }
+
+    value() {
+        return {
+            src: this.src,
+            alt: this.alt,
+        };
     }
 }
