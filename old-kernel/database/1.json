@@ -1,8 +1,0 @@
-{
-    "backing": null,
-    "backingValue": {
-        "type": "TextValue",
-        "content": "How are you today?"
-    },
-    "agentType": "Text"
-}
