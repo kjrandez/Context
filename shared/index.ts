@@ -110,7 +110,7 @@ class ProxyMap {
         this.make = makeProxy;
     }
 
-    getObject(tag: number) {
+    getObject(tag: number): Proxy {
         if (tag in this.refs) return this.refs[tag];
 
         let proxy = this.make(tag);
@@ -165,26 +165,27 @@ export class Rpc {
         this.send(JSON.stringify(data));
     }
 
-    handleWebsocketReceive(msg: any) {
-        console.log(msg);
-        switch (msg.type) {
+    handleWebsocketReceive(message: string) {
+        const msgObj = JSON.parse(message);
+        console.log(msgObj);
+
+        switch (msgObj.type) {
             case "call":
                 this.handleCall(
-                    msg.id,
-                    msg.target,
-                    msg.selector,
-                    msg.arguments
+                    msgObj.id,
+                    msgObj.target,
+                    msgObj.selector,
+                    msgObj.arguments
                 );
                 break;
             case "return":
-                this.handleReturn(msg.id, msg.result);
+                this.handleReturn(msgObj.id, msgObj.result);
                 break;
             case "exception":
-                this.handleException(msg.id, msg.message);
+                this.handleException(msgObj.id, msgObj.message);
                 break;
             default:
-                console.log("Invalid message received:");
-                console.log(msg);
+                console.log("Invalid message.");
                 break;
         }
     }

@@ -1,7 +1,6 @@
-import {Proxy, Rpc, TransactionModel} from 'shared';
+import { Proxy, Rpc, TransactionModel } from "shared";
 
-export default class Client extends Rpc
-{
+export default class Client extends Rpc {
     static connect(
         connected: (_: Proxy) => Promise<void>,
         disconnected: () => void,
@@ -9,17 +8,17 @@ export default class Client extends Rpc
     ) {
         let clientService = {
             proxyableId: null,
-            broadcast: (trans: TransactionModel) => broadcast(trans.subject).then()
+            broadcast: (trans: TransactionModel) =>
+                broadcast(trans.subject).then(),
         };
         const websocket = new WebSocket("ws://localhost:8085/broadcast");
         let send = (message: string) => websocket.send(message);
-        let client = new Client(clientService, send)
+        let client = new Client(clientService, send);
         let hostService = client.foreignObjects.getObject(0);
 
         websocket.onmessage = (event) => {
-            let msg = JSON.parse(event.data);
-            client.handleWebsocketReceive(msg);
-        }
+            client.handleWebsocketReceive(event.data);
+        };
         websocket.onclose = (_) => disconnected();
         websocket.onopen = (_) => connected(hostService).then();
     }
