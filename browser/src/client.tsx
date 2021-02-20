@@ -3,7 +3,7 @@ import {
     ProxyableTable,
     Proxyable,
     Rpc,
-    TransactionModel,
+    TransactionModel
 } from "shared";
 
 export default class Client extends Rpc {
@@ -12,14 +12,9 @@ export default class Client extends Rpc {
         disconnected: () => void,
         broadcast: (_: Proxy) => Promise<void>
     ) {
-        let clientService = {
-            proxyableId: null,
-            broadcast: (trans: TransactionModel) =>
-                broadcast(trans.subject).then(),
-        };
         const websocket = new WebSocket("ws://localhost:8085/broadcast");
         let send = (message: string) => websocket.send(message);
-        let table = new GenericProxyableTable(clientService);
+        let table = new GenericProxyableTable(new ClientService(broadcast));
         let client = new Client(table, send);
         let hostService = client.foreignObjects.getObject(0);
 
@@ -28,6 +23,16 @@ export default class Client extends Rpc {
         };
         websocket.onclose = (_) => disconnected();
         websocket.onopen = (_) => connected(hostService).then();
+    }
+}
+
+class ClientService extends Proxyable {
+    constructor(private broadcastCallback: (_: Proxy) => Promise<void>) {
+        super();
+    }
+
+    broadcast(trans: TransactionModel) {
+        return this.broadcastCallback(trans.subject).then();
     }
 }
 

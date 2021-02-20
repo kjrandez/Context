@@ -3,11 +3,11 @@ import { Proxyable, ProxyableTable } from "shared";
 import {
     Entity,
     Observer,
-    Page,
-    Text,
-    Script,
-    Image,
+    PageValue,
+    TextValue,
+    Presentation,
     Transaction,
+    DiskFile
 } from "./entity";
 
 const lorem1 =
@@ -17,9 +17,33 @@ const lorem2 =
 const lorem3 =
     "Donec imperdiet id lectus eu hendrerit. Curabitur sodales libero sit amet eros venenatis, nec venenatis lacus bibendum. Ut aliquam convallis diam vitae interdum. Maecenas laoreet tempus pretium. Suspendisse ac dui tortor. Nulla rutrum fermentum dui ut gravida. Curabitur egestas erat ut ligula fermentum convallis. Nulla maximus, eros non semper mollis, lacus nulla ullamcorper risus, eu condimentum risus tellus eu est. In ut urna pulvinar, aliquet ligula pharetra, interdum nunc. Praesent dignissim vehicula arcu, et semper dolor porta vel. Maecenas semper porta gravida. Proin tortor augue, mattis ut luctus in, semper vitae nisi. Vivamus egestas, mi mollis elementum egestas, nibh sapien euismod justo, ac cursus metus risus id ante. Nam placerat velit ac orci ullamcorper, id dapibus odio bibendum.";
 
+function page(entries: Entity[]) {
+    return new Entity(
+        Presentation.Page,
+        new PageValue(
+            entries.map((entry, index) => ({
+                key: index,
+                element: entry
+            }))
+        )
+    );
+}
+
+function text(content: string) {
+    return new Entity(Presentation.Text, new TextValue(content));
+}
+
+function script(content: string) {
+    return new Entity(Presentation.Script, new TextValue(content));
+}
+
+function image(filename: string) {
+    return new Entity(Presentation.Image, new DiskFile(filename));
+}
+
 export default class DataSet implements Observer {
-    root: Page;
-    clipboard: Page;
+    root: Entity;
+    clipboard: Entity;
     private objMap: { [_: number]: Entity };
     private nextIndex: number;
     private nextTransaction: number;
@@ -34,32 +58,29 @@ export default class DataSet implements Observer {
         Entity.setObserver(this);
         Transaction.setObserver(this);
 
-        this.root = new Page([
-            new Text("Hello world"),
-            new Text("How are you doing **today**?"),
-            new Text("I'm doing just fine thank you very much."),
-            new Script("def something():\n\tprint('Hello world!')"),
-            new Page([new Text("Introduction"), new Text(lorem1)]),
-            new Page([
-                new Page([new Text("Mas informacion"), new Text(lorem2)]),
-                new Page([
-                    new Text("[Scope_0]"),
-                    new Image("lol2.png", "Funny joke"),
-                ]),
+        this.root = page([
+            text("Hello world"),
+            text("How are you doing **today**?"),
+            text("I'm doing just fine thank you very much."),
+            script("def something():\n\tprint('Hello world!')"),
+            page([text("Introduction"), text(lorem1)]),
+            page([
+                page([text("Mas informacion"), text(lorem2)]),
+                page([text("[Scope_0]"), image("lol2.png")])
             ]),
-            new Page([new Text(lorem3)]),
-            new Image("sw.png", "Switching characteristics"),
-            new Page([
-                new Text(
+            page([text(lorem3)]),
+            image("sw.png"),
+            page([
+                text(
                     "This is pretty funy if you actually think about it for a second."
                 ),
-                new Text("I really can't agree with that statement"),
+                text("I really can't agree with that statement")
             ]),
-            new Text("Just to finish it off right here."),
-            new Text("Actually I'll go ahead and add a bit more to be sure..."),
+            text("Just to finish it off right here."),
+            text("Actually I'll go ahead and add a bit more to be sure...")
         ]);
 
-        this.clipboard = new Page([]);
+        this.clipboard = page([]);
     }
 
     lookup(id: number) {

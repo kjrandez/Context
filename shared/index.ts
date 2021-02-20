@@ -1,5 +1,3 @@
-import { Resolver } from "dns";
-
 export function mapObj<T, R>(
     obj: { [_: string]: T },
     valueMapping: (_: T) => R,
@@ -8,7 +6,7 @@ export function mapObj<T, R>(
     return Object.assign(
         {},
         ...Object.entries(obj).map(([K, V]: [string, T]) => ({
-            [keyMapping(K)]: valueMapping(V),
+            [keyMapping(K)]: valueMapping(V)
         }))
     );
 }
@@ -27,9 +25,14 @@ export type PageEntry = { key: number; element: Proxy };
 export type PageValue = { entries: PageEntry[] };
 export type TextValue = { content: string };
 
-export interface Proxyable {
-    proxyableId: number | null;
+export abstract class Proxyable {
+    proxyableId: number | null = null;
+
+    resolveTarget(selector: string): any {
+        return this;
+    }
 }
+
 export class Proxy {
     id: number;
     dispatchCall: Function;
@@ -150,7 +153,7 @@ export class Rpc {
                 id: this.pendingCalls.assignTag({ resolve, reject }),
                 target: targetId,
                 selector: selector,
-                arguments: argDescs,
+                arguments: argDescs
             })
         );
     }
@@ -192,23 +195,25 @@ export class Rpc {
         let target: Proxyable = this.localObjects.getObject(targetId);
         let args: any[] = argDescs.map((X: any) => this.decodedArgument(X));
         try {
-            let func = (target as any)[selector];
+            let resolved = target.resolveTarget(selector);
+            let func = resolved[selector];
             if (typeof func !== "function")
                 throw new Error(`${selector} is undefined or not a function`);
 
-            let result = func.apply(target, args);
+            let result = func.apply(resolved, args);
 
             this.dispatchWebsocketSend({
                 type: "return",
                 id: callId,
-                result: this.encodedArgument(result),
+                result: this.encodedArgument(result)
             });
         } catch (err) {
             this.dispatchWebsocketSend({
                 type: "exception",
                 id: callId,
-                message: err.toString(),
+                message: err.toString()
             });
+            throw err;
         }
     }
 
@@ -245,17 +250,17 @@ export class Rpc {
         else if (Object(arg) === arg && "proxyableId" in arg) {
             return {
                 type: "local",
-                value: this.localObjects.getTag(arg),
+                value: this.localObjects.getTag(arg)
             };
         } else if (arg instanceof Array)
             return {
                 type: "list",
-                value: arg.map((X) => this.encodedArgument(X)),
+                value: arg.map((X) => this.encodedArgument(X))
             };
         else if (arg instanceof Object)
             return {
                 type: "dict",
-                value: mapObj(arg, (X) => this.encodedArgument(X)),
+                value: mapObj(arg, (X) => this.encodedArgument(X))
             };
         else return { type: "primitive", value: arg };
     }

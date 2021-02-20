@@ -6,12 +6,8 @@ export default class Host {
     private clientService: Proxy;
     private rpc: Rpc;
 
-    constructor(private dataset: DataSet, send: (_: string) => void) {
-        let hostService = {
-            proxyableId: null,
-            rootPage: () => dataset.root,
-        };
-        let table = new DatasetProxyableTable(hostService, dataset);
+    constructor(private ds: DataSet, send: (_: string) => void) {
+        let table = new DatasetProxyableTable(new HostService(ds), ds);
         this.rpc = new Rpc(table, send);
         this.clientService = this.rpc.foreignObjects.getObject(0);
     }
@@ -22,6 +18,19 @@ export default class Host {
 
     broadcast(trans: Transaction) {
         this.clientService.call("broadcast", [trans.model()]);
+    }
+}
+
+class HostService extends Proxyable {
+    private root: Entity;
+
+    constructor(ds: DataSet) {
+        super();
+        this.root = ds.root;
+    }
+
+    rootPage() {
+        return this.root;
     }
 }
 
@@ -36,7 +45,7 @@ export class DatasetProxyableTable extends ProxyableTable {
 
     getTag(object: Proxyable) {
         if (object.proxyableId == null && object instanceof Entity) {
-            object.proxyableId = object.id;
+            object.proxyableId = object.id();
         }
         return super.getTag(object);
     }
