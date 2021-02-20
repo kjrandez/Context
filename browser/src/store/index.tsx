@@ -1,23 +1,24 @@
-import {Component} from 'react';
-import {observable, action} from 'mobx';
-import {Proxy} from 'shared';
-import {NumDict, Model, Value} from 'shared';
-import PageActions from './page';
-import TextActions from './text';
-import HierarchyActions from './hierarchy';
+import { Component } from "react";
+import { observable, action } from "mobx";
+import { Proxy } from "shared";
+import { NumDict, Model, Value } from "shared";
+import HostActions from "./host";
+import PageActions from "./page";
+import TextActions from "./text";
+import HierarchyActions from "./hierarchy";
 
 export interface ViewNode {
-    element: Proxy,
-    expanded: boolean,
-    selected: boolean,
-    children: NumDict<ViewNode>,
-    component: Component | null
+    element: Proxy;
+    expanded: boolean;
+    selected: boolean;
+    children: NumDict<ViewNode>;
+    component: Component | null;
 }
 
 export interface ViewState {
-    root: ViewNode,
-    db: NumDict<Model<Value>>,
-    selection: number[] | null
+    root: ViewNode;
+    db: NumDict<Model<Value>>;
+    selection: number[] | null;
 }
 
 export function viewNode(element: Proxy, expanded: boolean) {
@@ -35,19 +36,20 @@ export function viewState(rootPage: Proxy) {
         root: viewNode(rootPage, true),
         db: {},
         selection: null
-    })
+    });
 }
 
-export class Store
-{
+export class Store {
     private state: ViewState;
 
+    public hostAction: HostActions;
     public pageAction: PageActions;
     public textAction: TextActions;
     public hierarchyAction: HierarchyActions;
 
-    constructor(rootPage: Proxy) {
+    constructor(host: Proxy, rootPage: Proxy) {
         this.state = viewState(rootPage);
+        this.hostAction = new HostActions(host);
         this.pageAction = new PageActions(this.state);
         this.textAction = new TextActions(this.state);
         this.hierarchyAction = new HierarchyActions(this.state);
@@ -76,19 +78,17 @@ export class Store
     @action
     select(path: number[]) {
         if (this.state.selection !== null)
-            if (pathsEqual(this.state.selection, path))
-                return;
+            if (pathsEqual(this.state.selection, path)) return;
 
         this.deselect();
-        
+
         this.state.selection = path;
         this.lookupNode(path).selected = true;
     }
 }
 
 export function traverse(node: ViewNode, path: number[]): ViewNode {
-    if (path.length === 0)
-        return node;
+    if (path.length === 0) return node;
 
     let child = node.children[path[0]];
     console.assert(child !== undefined);
@@ -96,12 +96,10 @@ export function traverse(node: ViewNode, path: number[]): ViewNode {
 }
 
 export function pathsEqual(pathA: number[], pathB: number[]) {
-    if (pathA.length !== pathB.length)
-        return false;
+    if (pathA.length !== pathB.length) return false;
 
     while (pathA.length > 0) {
-        if (pathA[0] !== pathB[0])
-            return false;
+        if (pathA[0] !== pathB[0]) return false;
         pathA = pathA.slice(1);
         pathB = pathB.slice(1);
     }

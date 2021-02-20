@@ -1,14 +1,5 @@
 import Async from "async";
-import { Proxyable, ProxyableTable } from "shared";
-import {
-    Entity,
-    Observer,
-    PageValue,
-    TextValue,
-    Presentation,
-    Transaction,
-    DiskFile
-} from "./entity";
+import { Entity, Presentation, Backing, Transaction } from "./entity";
 
 const lorem1 =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vestibulum at erat eget suscipit. Nulla rhoncus libero sapien, id molestie nibh luctus in. Pellentesque tristique nulla sit amet eros sodales, quis luctus enim congue. Integer placerat viverra sollicitudin. In libero ligula, interdum nec pellentesque non, elementum vel dolor. Aenean ut nisl vulputate, interdum urna eget, placerat enim. Vestibulum felis turpis, elementum ac malesuada id, lacinia at justo. In laoreet mauris et nibh ullamcorper convallis. Maecenas faucibus ipsum at congue scelerisque. Aliquam sem purus, pharetra suscipit condimentum quis, imperdiet at ex. Vestibulum maximus mattis odio, sed elementum dolor feugiat eget. Aliquam consectetur, neque vitae porta dictum, ante dui posuere libero, id euismod nisi dolor at ipsum.";
@@ -17,31 +8,25 @@ const lorem2 =
 const lorem3 =
     "Donec imperdiet id lectus eu hendrerit. Curabitur sodales libero sit amet eros venenatis, nec venenatis lacus bibendum. Ut aliquam convallis diam vitae interdum. Maecenas laoreet tempus pretium. Suspendisse ac dui tortor. Nulla rutrum fermentum dui ut gravida. Curabitur egestas erat ut ligula fermentum convallis. Nulla maximus, eros non semper mollis, lacus nulla ullamcorper risus, eu condimentum risus tellus eu est. In ut urna pulvinar, aliquet ligula pharetra, interdum nunc. Praesent dignissim vehicula arcu, et semper dolor porta vel. Maecenas semper porta gravida. Proin tortor augue, mattis ut luctus in, semper vitae nisi. Vivamus egestas, mi mollis elementum egestas, nibh sapien euismod justo, ac cursus metus risus id ante. Nam placerat velit ac orci ullamcorper, id dapibus odio bibendum.";
 
-function page(entries: Entity[]) {
-    return new Entity(
-        Presentation.Page,
-        new PageValue(
-            entries.map((entry, index) => ({
-                key: index,
-                element: entry
-            }))
-        )
-    );
+function builders(ds: DataSet) {
+    return {
+        page: (entries: Entity[]) =>
+            new Entity(ds, Presentation.Page, Backing.Internal, {
+                entries: entries.map((entry, index) => ({
+                    key: index,
+                    element: entry
+                }))
+            }),
+        text: (content: string) =>
+            new Entity(ds, Presentation.Text, Backing.Internal, { content }),
+        script: (content: string) =>
+            new Entity(ds, Presentation.Script, Backing.Internal, { content }),
+        image: (filename: string) =>
+            new Entity(ds, Presentation.Image, Backing.Disk, { filename })
+    };
 }
 
-function text(content: string) {
-    return new Entity(Presentation.Text, new TextValue(content));
-}
-
-function script(content: string) {
-    return new Entity(Presentation.Script, new TextValue(content));
-}
-
-function image(filename: string) {
-    return new Entity(Presentation.Image, new DiskFile(filename));
-}
-
-export default class DataSet implements Observer {
+export default class DataSet {
     root: Entity;
     clipboard: Entity;
     private objMap: { [_: number]: Entity };
@@ -53,10 +38,7 @@ export default class DataSet implements Observer {
         this.nextIndex = 1;
         this.nextTransaction = 0;
 
-        // Cheat using global state, so we can avoid passing
-        // the DataSet singleton to Entity constructors
-        Entity.setObserver(this);
-        Transaction.setObserver(this);
+        const { page, text, script, image } = builders(this);
 
         this.root = page([
             text("Hello world"),

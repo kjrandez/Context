@@ -1,5 +1,5 @@
+import { Proxy } from "shared";
 import { traverse, ViewState } from ".";
-import page from "../view/elements/page";
 
 export default class PageActions {
     constructor(private state: ViewState) {}
@@ -12,13 +12,10 @@ export default class PageActions {
         let srcEntryKey = srcEntryPath.slice(-1)[0];
         let srcPagePath = srcEntryPath.slice(0, -1);
         let srcPage = traverse(this.state.root, srcPagePath).element;
-        let srcElement = traverse(this.state.root, srcEntryPath).element;
-
-        let destPage = traverse(this.state.root, destPagePath).element;
+        let inst = traverse(this.state.root, srcEntryPath).element;
 
         srcPage.call("remove", [srcEntryKey]);
-        if (beforeEntryKey === null) destPage.call("append", [srcElement]);
-        else destPage.call("insertBefore", [srcElement, beforeEntryKey]);
+        this.insert(inst, destPagePath, beforeEntryKey);
     }
 
     delete(path: number[]) {
@@ -27,5 +24,15 @@ export default class PageActions {
 
         let page = traverse(this.state.root, pagePath).element;
         page.call("remove", [entryKey]);
+    }
+
+    insert(inst: Proxy, destPagePath: number[], beforeEntryKey: number | null) {
+        let destPage = traverse(this.state.root, destPagePath).element;
+
+        if (beforeEntryKey === null) {
+            destPage.call("append", [inst]);
+        } else {
+            destPage.call("insertBefore", [inst, beforeEntryKey]);
+        }
     }
 }

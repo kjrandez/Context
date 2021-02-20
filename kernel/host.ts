@@ -1,5 +1,5 @@
 import DataSet from "./dataset";
-import { Entity, Transaction } from "./entity";
+import { Entity, Presentation, Backing, Transaction } from "./entity";
 import { Proxy, Proxyable, ProxyableTable, Rpc } from "shared";
 
 export default class Host {
@@ -22,15 +22,22 @@ export default class Host {
 }
 
 class HostService extends Proxyable {
-    private root: Entity;
+    rootPage: () => Entity;
+    instantiate: (
+        presentation: Presentation,
+        backing: Backing,
+        backingValue: object
+    ) => Entity;
 
-    constructor(ds: DataSet) {
+    constructor(private ds: DataSet) {
         super();
-        this.root = ds.root;
-    }
 
-    rootPage() {
-        return this.root;
+        this.rootPage = (() => ds.root).bind(this);
+        this.instantiate = ((
+            presentation: Presentation,
+            backing: Backing,
+            backingValue: object
+        ) => new Entity(ds, presentation, backing, backingValue)).bind(this);
     }
 }
 

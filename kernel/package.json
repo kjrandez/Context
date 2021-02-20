@@ -3,7 +3,6 @@
     "version": "0.0.1",
     "main": "app.js",
     "scripts": {
-        "startmac": "nodemon --watch . --watch $(realpath node_modules/shared) index.ts",
         "start": "nodemon --watch . --watch ../shared index.ts"
     },
     "type": "commonjs",
