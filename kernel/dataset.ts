@@ -22,7 +22,8 @@ function builders(ds: DataSet) {
         script: (content: string) =>
             new Entity(ds, Presentation.Script, Backing.Internal, { content }),
         image: (filename: string) =>
-            new Entity(ds, Presentation.Image, Backing.Disk, { filename })
+            new Entity(ds, Presentation.Image, Backing.Disk, { filename }),
+        ink: () => new Entity(ds, Presentation.Ink, Backing.Internal, {})
     };
 }
 
@@ -38,7 +39,7 @@ export default class DataSet {
         this.nextIndex = 1;
         this.nextTransaction = 0;
 
-        const { page, text, script, image } = builders(this);
+        const { page, text, script, image, ink } = builders(this);
 
         this.root = page([
             text("Hello world"),
@@ -50,6 +51,7 @@ export default class DataSet {
                 page([text("Mas informacion"), text(lorem2)]),
                 page([text("[Scope_0]"), image("lol2.png")])
             ]),
+            ink(),
             page([text(lorem3)]),
             image("sw.png"),
             page([

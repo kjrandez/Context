@@ -47,7 +47,11 @@ export class Store {
     public textAction: TextActions;
     public hierarchyAction: HierarchyActions;
 
-    constructor(host: Proxy, rootPage: Proxy) {
+    constructor(
+        host: Proxy,
+        rootPage: Proxy,
+        public setInkRef: (_: React.RefObject<HTMLDivElement>) => void
+    ) {
         this.state = viewState(rootPage);
         this.hostAction = new HostActions(host);
         this.pageAction = new PageActions(this.state);

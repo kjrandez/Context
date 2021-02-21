@@ -90,6 +90,10 @@ export class Entity extends Proxyable {
                         this.backingValue as DiskFile
                     );
                 break;
+            case Presentation.Ink:
+                if (this.backing === Backing.Internal)
+                    return new NopAgent(this.callbacks, null);
+                break;
         }
 
         throw new Error("No suitable agent.");
@@ -101,7 +105,8 @@ export enum Presentation {
     Script = "Script",
     Page = "Page",
     File = "File",
-    Image = "Image"
+    Image = "Image",
+    Ink = "Ink"
 }
 
 export enum Backing {
@@ -123,6 +128,8 @@ interface TextValue extends ModelValue {
     content: string;
 }
 
+interface InkValue extends ModelValue {}
+
 interface FileValue {
     filename: string;
 }
@@ -140,6 +147,16 @@ abstract class Agent {
 export interface PageEntry {
     key: number;
     element: Entity;
+}
+
+class NopAgent extends Agent {
+    constructor(cb: AgentCallbacks, private backing: null) {
+        super(cb);
+    }
+
+    value() {
+        return {};
+    }
 }
 
 class PageInternalAgent extends Agent {

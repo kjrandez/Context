@@ -7,11 +7,17 @@ import Backend from "react-dnd-html5-backend";
 
 window.shellRelay = {
     receive: null, // "App" should reassign
-    send: (msg) => window.external.notify(msg)
+    send: (msg) => {
+        if ("notify" in window.external) window.external.notify(msg);
+    }
 };
 
 window.shellMessage = function (msg) {
     window.shellRelay.receive(msg);
+};
+
+window.onscroll = () => {
+    window.shellRelay.send("scrolling ");
 };
 
 ReactDOM.render(

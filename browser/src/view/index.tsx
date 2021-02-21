@@ -19,8 +19,11 @@ interface IAppState {
 }
 
 export default class App extends Component<IAppProps, IAppState> {
+    inkRef: React.RefObject<HTMLDivElement> | null;
+
     constructor(props: never) {
         super(props);
+        this.inkRef = null;
         this.state = { store: null };
     }
 
@@ -48,11 +51,39 @@ export default class App extends Component<IAppProps, IAppState> {
     }
 
     async connected(host: Proxy) {
+        window.onscroll = () => {
+            this.translateInkCanvas(this.inkRef);
+        };
         let rootPage = (await host.call("rootPage", [])) as Proxy;
-        let store = new Store(host, rootPage);
+        let store = new Store(host, rootPage, (ref) => {
+            if (ref != this.inkRef) {
+                this.translateInkCanvas(ref);
+            }
+            this.inkRef = ref;
+        });
         await store.hierarchyAction.refresh(null);
 
         this.setState({ store });
+    }
+
+    private translateInkCanvas(ref: React.RefObject<HTMLDivElement> | null) {
+        if (ref == null || ref.current == null) {
+            // remove the canvas
+            this.props.relay.send("deleteCanvas");
+        } else {
+            // place the canvas
+            let viewportOffset = ref.current.getBoundingClientRect();
+            // these are relative to the viewport, i.e. the window
+            const { top, left, width, height } = viewportOffset;
+            /*const top = viewportOffset.top;
+            const left = viewportOffset.left;
+            const width = viewportOffset.width;
+            const height = viewportOffset.height;*/
+
+            this.props.relay.send(
+                `moveCanvas ${top} ${left} ${width} ${height}`
+            );
+        }
     }
 
     onKeyPress(ev: KeyboardEvent) {

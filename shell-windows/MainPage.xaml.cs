@@ -40,8 +40,41 @@ namespace shell_windows
             if (e.Value == "hello")
             {
                 Debug.WriteLine("browser connected");
-                this.webView.InvokeScriptAsync("shellMessage", new string[] { "message" });
+                //this.webView.InvokeScriptAsync("shellMessage", new string[] { "message" });
             }
+            else
+            {
+                var parts = e.Value.Split(' ');
+                if (parts.Length > 0 && parts[0] == "deleteCanvas")
+                {
+
+                }
+                else if (parts.Length > 0 && parts[0] == "moveCanvas")
+                {
+                    double top = Convert.ToDouble(parts[1]);
+                    double left = Convert.ToDouble(parts[2]);
+                    double width = Convert.ToDouble(parts[3]);
+                    double height = Convert.ToDouble(parts[4]);
+                    this.InkCanvas.Width = width;
+                    this.InkCanvas.Height = height;
+                    this.InkCanvas.Margin = new Thickness(left, top, left + width, top + height);
+                }
+            }
+        }
+
+        private void InkCanvas_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void scrollViewer_ViewChanging(object sender, ScrollViewerViewChangingEventArgs e)
+        {
+            Debug.WriteLine("scroll changing");
+        }
+
+        private void scrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        {
+            Debug.WriteLine("scroll changed");
         }
     }
 }
