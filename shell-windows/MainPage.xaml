@@ -9,7 +9,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <WebView x:Name="webView" Source="http://localhost:3000"/>
+        <WebView x:Name="webView" Source="http://localhost:3000" ScriptNotify="webView_ScriptNotify" NavigationCompleted="webView_NavigationCompleted"/>
         <InkCanvas/>
 
     </Grid>

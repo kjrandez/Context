@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -25,6 +26,22 @@ namespace shell_windows
         public MainPage()
         {
             this.InitializeComponent();
+            Debug.WriteLine("Testing...");
+        }
+
+        private async void webView_NavigationCompleted(WebView sender, WebViewNavigationCompletedEventArgs args)
+        {
+            //await this.webView.InvokeScriptAsync("testFun", new string[] {"haha"});
+        }
+
+        private void webView_ScriptNotify(object sender, NotifyEventArgs e)
+        {
+            Debug.WriteLine(e.Value);
+            if (e.Value == "hello")
+            {
+                Debug.WriteLine("browser connected");
+                this.webView.InvokeScriptAsync("shellMessage", new string[] { "message" });
+            }
         }
     }
 }

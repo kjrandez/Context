@@ -1,4 +1,4 @@
-import React, { Component, ReactElement } from "react";
+import React, { Component, ReactComponentElement, ReactElement } from "react";
 import { Proxy } from "shared";
 import Client from "../client";
 import { Store } from "../store";
@@ -8,7 +8,12 @@ import Toolbar from "./toolbar";
 
 import SharedComp from "shared/SharedComp";
 
-interface IAppProps {}
+interface IAppProps {
+    relay: {
+        send: (msg: string) => void;
+        receive: (msg: string) => void;
+    };
+}
 interface IAppState {
     store: Store | null;
 }
@@ -20,6 +25,9 @@ export default class App extends Component<IAppProps, IAppState> {
     }
 
     componentDidMount() {
+        this.props.relay.receive = this.receive.bind(this);
+        this.props.relay.send("hello");
+
         Client.connect(
             this.connected.bind(this),
             this.disconnected.bind(this),
@@ -27,6 +35,10 @@ export default class App extends Component<IAppProps, IAppState> {
         );
 
         document.addEventListener("keyup", (ev) => this.onKeyPress(ev), false);
+    }
+
+    receive(msg: string) {
+        this.props.relay.send(`I got "${msg}"`);
     }
 
     async broadcast(element: Proxy) {
