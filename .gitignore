@@ -1,2 +1,3 @@
 shell-windows/bin/
 shell-windows/obj/
+*.suo
