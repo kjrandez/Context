@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="0c09d517-f523-43cc-983f-99feb9f8da74"
+    Name="d3522342-d380-4985-98d6-6f4adb1b4601"
     Publisher="CN=kjher"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="0c09d517-f523-43cc-983f-99feb9f8da74" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="d3522342-d380-4985-98d6-6f4adb1b4601" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>shell-windows</DisplayName>

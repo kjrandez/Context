@@ -1,0 +1,4 @@
+
+{
+    "eslint.options": { "configFile": "${workspaceRoot}/.vscode/.eslintrc.json" }
+}

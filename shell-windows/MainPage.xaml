@@ -9,6 +9,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <WebView x:Name="webView" Source="http://localhost:3000"/>
 
     </Grid>
 </Page>
