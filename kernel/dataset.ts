@@ -44,6 +44,7 @@ export default class DataSet {
         this.root = page([
             text("Hello world"),
             text("How are you doing **today**?"),
+            ink(),
             text("I'm doing just fine thank you very much."),
             script("def something():\n\tprint('Hello world!')"),
             page([text("Introduction"), text(lorem1)]),
@@ -51,13 +52,13 @@ export default class DataSet {
                 page([text("Mas informacion"), text(lorem2)]),
                 page([text("[Scope_0]"), image("lol2.png")])
             ]),
-            ink(),
             page([text(lorem3)]),
             image("sw.png"),
             page([
                 text(
                     "This is pretty funy if you actually think about it for a second."
                 ),
+                ink(),
                 text("I really can't agree with that statement")
             ]),
             text("Just to finish it off right here."),

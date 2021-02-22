@@ -6,6 +6,8 @@ import HostActions from "./host";
 import PageActions from "./page";
 import TextActions from "./text";
 import HierarchyActions from "./hierarchy";
+import ShellActions from "./shell";
+import { ShellRelay } from "../types";
 
 export interface ViewNode {
     element: Proxy;
@@ -42,17 +44,15 @@ export function viewState(rootPage: Proxy) {
 export class Store {
     private state: ViewState;
 
+    public shellAction: ShellActions;
     public hostAction: HostActions;
     public pageAction: PageActions;
     public textAction: TextActions;
     public hierarchyAction: HierarchyActions;
 
-    constructor(
-        host: Proxy,
-        rootPage: Proxy,
-        public setInkRef: (_: React.RefObject<HTMLDivElement>) => void
-    ) {
+    constructor(host: Proxy, rootPage: Proxy, relay: ShellRelay) {
         this.state = viewState(rootPage);
+        this.shellAction = new ShellActions(this, this.state, relay);
         this.hostAction = new HostActions(host);
         this.pageAction = new PageActions(this.state);
         this.textAction = new TextActions(this.state);
@@ -76,6 +76,8 @@ export class Store {
         if (this.state.selection !== null) {
             this.lookupNode(this.state.selection).selected = false;
             this.state.selection = null;
+
+            this.shellAction.selectionChanged();
         }
     }
 
@@ -88,6 +90,8 @@ export class Store {
 
         this.state.selection = path;
         this.lookupNode(path).selected = true;
+
+        this.shellAction.selectionChanged();
     }
 }
 

@@ -89,7 +89,9 @@ class PageEntry extends Component<PageEntryProps> {
             <DropNode path={path} store={store} append={false}>
                 {" "}
                 {selected ? (
-                    <DragNode path={path}>{elementComponent}</DragNode>
+                    <DragNode path={path} store={store}>
+                        {elementComponent}
+                    </DragNode>
                 ) : (
                     elementComponent
                 )}

@@ -24,18 +24,26 @@ export class Ink extends Component<InkProps> {
     }
 
     componentDidMount() {
-        this.props.store.setInkRef(this.ref);
+        this.notifyInkRef();
     }
 
     componentDidUpdate() {
-        this.props.store.setInkRef(this.ref);
+        this.notifyInkRef();
+    }
+
+    private notifyInkRef() {
+        const { store, path } = this.props;
+        if (store.lookupNode(path).selected) {
+            // If I am being edited, give app my ref & path
+            this.props.store.shellAction.inkRefChanged(this.ref);
+        }
     }
 
     render(): ReactElement {
         let { store, path } = this.props;
-        let selected = store.lookupNode(path).selected;
+        let editing = store.lookupNode(path).selected;
 
-        if (selected) {
+        if (editing) {
             return (
                 <div
                     ref={this.ref}

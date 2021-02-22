@@ -7,12 +7,10 @@ import { Model, PageValue } from "shared";
 import Toolbar from "./toolbar";
 
 import SharedComp from "shared/SharedComp";
+import { ShellRelay } from "../types";
 
 interface IAppProps {
-    relay: {
-        send: (msg: string) => void;
-        receive: (msg: string) => void;
-    };
+    relay: ShellRelay;
 }
 interface IAppState {
     store: Store | null;
@@ -51,39 +49,11 @@ export default class App extends Component<IAppProps, IAppState> {
     }
 
     async connected(host: Proxy) {
-        window.onscroll = () => {
-            this.translateInkCanvas(this.inkRef);
-        };
         let rootPage = (await host.call("rootPage", [])) as Proxy;
-        let store = new Store(host, rootPage, (ref) => {
-            if (ref != this.inkRef) {
-                this.translateInkCanvas(ref);
-            }
-            this.inkRef = ref;
-        });
+        let store = new Store(host, rootPage, this.props.relay);
         await store.hierarchyAction.refresh(null);
 
         this.setState({ store });
-    }
-
-    private translateInkCanvas(ref: React.RefObject<HTMLDivElement> | null) {
-        if (ref == null || ref.current == null) {
-            // remove the canvas
-            this.props.relay.send("deleteCanvas");
-        } else {
-            // place the canvas
-            let viewportOffset = ref.current.getBoundingClientRect();
-            // these are relative to the viewport, i.e. the window
-            const { top, left, width, height } = viewportOffset;
-            /*const top = viewportOffset.top;
-            const left = viewportOffset.left;
-            const width = viewportOffset.width;
-            const height = viewportOffset.height;*/
-
-            this.props.relay.send(
-                `moveCanvas ${top} ${left} ${width} ${height}`
-            );
-        }
     }
 
     onKeyPress(ev: KeyboardEvent) {

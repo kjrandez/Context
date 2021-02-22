@@ -27,6 +27,10 @@ namespace shell_windows
         {
             this.InitializeComponent();
             Debug.WriteLine("Testing...");
+
+            this.InkCanvas.InkPresenter.InputDeviceTypes =
+                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+                Windows.UI.Core.CoreInputDeviceTypes.Pen;
         }
 
         private async void webView_NavigationCompleted(WebView sender, WebViewNavigationCompletedEventArgs args)
@@ -47,10 +51,12 @@ namespace shell_windows
                 var parts = e.Value.Split(' ');
                 if (parts.Length > 0 && parts[0] == "deleteCanvas")
                 {
-
+                    this.InkCanvas.Visibility = Visibility.Collapsed;
                 }
                 else if (parts.Length > 0 && parts[0] == "moveCanvas")
                 {
+                    this.InkCanvas.Visibility = Visibility.Visible;
+
                     double top = Convert.ToDouble(parts[1]);
                     double left = Convert.ToDouble(parts[2]);
                     double width = Convert.ToDouble(parts[3]);
