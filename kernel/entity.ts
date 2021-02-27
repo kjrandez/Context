@@ -1,5 +1,6 @@
 import { Proxyable, Model } from "shared";
 import DataSet from "./dataset";
+import path from "path";
 
 interface AgentCallbacks {
     startTrans: () => Transaction;
@@ -92,7 +93,10 @@ export class Entity extends Proxyable {
                 break;
             case Presentation.Ink:
                 if (this.backing === Backing.Internal)
-                    return new NopAgent(this.callbacks, null);
+                    return new InkAgent(
+                        this.callbacks,
+                        this.backingValue as InkValue
+                    );
                 break;
         }
 
@@ -128,10 +132,19 @@ interface TextValue extends ModelValue {
     content: string;
 }
 
-interface InkValue extends ModelValue {}
+interface Stroke {
+    width: number;
+    color: { r: number; g: number; b: number };
+    points: string;
+}
+
+interface InkValue extends ModelValue {
+    strokes: Stroke[];
+}
 
 interface FileValue {
-    filename: string;
+    path: string;
+    name: string;
 }
 
 abstract class Agent {
@@ -264,11 +277,32 @@ class FileAgent extends Agent {
     constructor(cb: AgentCallbacks, backing: DiskFile) {
         super(cb);
 
-        this.cachedValue = { filename: backing.path };
+        this.cachedValue = {
+            path: backing.path,
+            name: path.basename(backing.path, path.extname(backing.path))
+        };
     }
 
     value() {
         return this.cachedValue;
+    }
+}
+
+class InkAgent extends Agent {
+    constructor(cb: AgentCallbacks, private backing: InkValue) {
+        super(cb);
+    }
+
+    value() {
+        return this.backing;
+    }
+
+    splice(start: number, stop: number, addition: Stroke[]) {
+        const trans = this.cb.startTrans();
+
+        this.backing.strokes.splice(start, stop - start, ...addition);
+
+        this.cb.completeTrans(trans);
     }
 }
 

@@ -1,10 +1,18 @@
 import { observer } from "mobx-react";
 import React, { Component, ReactElement, MouseEvent } from "react";
-import { Model, Value, TextValue, PageValue } from "shared";
+import {
+    Model,
+    Value,
+    TextValue,
+    PageValue,
+    FileValue,
+    InkValue
+} from "shared";
 import { Store } from "../../store";
 
 import { Script, Text } from "./text";
 import { Ink } from "./ink";
+import { Image } from "./image";
 import NestedPage from "./nestedPage";
 import Unknown from "./unknown";
 import { DragNode, DropNode } from "../dragDrop";
@@ -64,7 +72,15 @@ class PageEntry extends Component<PageEntryProps> {
                     );
                 case "Ink":
                     return (
-                        <Ink model={model as Model<never>} {...childProps} />
+                        <Ink model={model as Model<InkValue>} {...childProps} />
+                    );
+
+                case "Image":
+                    return (
+                        <Image
+                            model={model as Model<FileValue>}
+                            {...childProps}
+                        />
                     );
                 default:
                     return <Unknown model={model} {...childProps} />;

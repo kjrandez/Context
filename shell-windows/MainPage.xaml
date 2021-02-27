@@ -15,6 +15,9 @@
         <WebView x:Name="webView" Source="http://localhost:3000" ScriptNotify="webView_ScriptNotify" NavigationCompleted="webView_NavigationCompleted"/>
         <Canvas x:Name="canvas">
             <InkCanvas x:Name="InkCanvas" Loaded="InkCanvas_Loaded"  Height="100" Margin="0,548,0,0" Width="100"/>
+            <InkToolbar x:Name="inkToolbar"
+          VerticalAlignment="Top"
+          TargetInkCanvas="{x:Bind InkCanvas}" />
         </Canvas>
     </Grid>
     

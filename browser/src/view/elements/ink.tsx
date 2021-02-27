@@ -1,18 +1,9 @@
-import React, {
-    RefObject,
-    Component,
-    ReactElement,
-    KeyboardEvent,
-    ClipboardEvent,
-    FormEvent
-} from "react";
+import React, { Component, ReactElement } from "react";
 import { ElementProps } from ".";
-import { Model, TextValue } from "shared";
-import marked from "marked";
-import { observer } from "mobx-react";
+import { InkValue, Model } from "shared";
 
 interface InkProps extends ElementProps {
-    model: Model<never>;
+    model: Model<InkValue>;
 }
 
 export class Ink extends Component<InkProps> {
@@ -53,16 +44,12 @@ export class Ink extends Component<InkProps> {
                         color: "black",
                         minHeight: "300px"
                     }}
-                >
-                    Drawing Region
-                </div>
+                ></div>
             );
         } else {
-            return (
-                <div className="ff" style={{ minHeight: "300px" }}>
-                    Static Region
-                </div>
-            );
+            const base = "http://localhost:8086/";
+
+            return <p>Pre-rendered ink will go here</p>;
         }
     }
 }

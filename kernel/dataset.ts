@@ -21,9 +21,10 @@ function builders(ds: DataSet) {
             new Entity(ds, Presentation.Text, Backing.Internal, { content }),
         script: (content: string) =>
             new Entity(ds, Presentation.Script, Backing.Internal, { content }),
-        image: (filename: string) =>
-            new Entity(ds, Presentation.Image, Backing.Disk, { filename }),
-        ink: () => new Entity(ds, Presentation.Ink, Backing.Internal, {})
+        image: (path: string) =>
+            new Entity(ds, Presentation.Image, Backing.Disk, { path }),
+        ink: () =>
+            new Entity(ds, Presentation.Ink, Backing.Internal, { strokes: [] })
     };
 }
 
@@ -50,10 +51,13 @@ export default class DataSet {
             page([text("Introduction"), text(lorem1)]),
             page([
                 page([text("Mas informacion"), text(lorem2)]),
-                page([text("[Scope_0]"), image("lol2.png")])
+                page([
+                    text("[Scope_0]"),
+                    image("C:/Users/kjher/Projects/Context/data/lol2.png")
+                ])
             ]),
             page([text(lorem3)]),
-            image("sw.png"),
+            image("C:/Users/kjher/Projects/Context/data/sw.png"),
             page([
                 text(
                     "This is pretty funy if you actually think about it for a second."
