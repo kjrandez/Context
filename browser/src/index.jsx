@@ -16,10 +16,6 @@ window.shellMessage = function (msg) {
     window.shellRelay.receive(msg);
 };
 
-window.onscroll = () => {
-    window.shellRelay.send("scrolling ");
-};
-
 ReactDOM.render(
     <DndProvider backend={Backend}>
         <App relay={window.shellRelay} />

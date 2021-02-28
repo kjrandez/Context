@@ -14,6 +14,13 @@
             "type": "pwa-node"
         },
         {
+            "name": "Attach to Edge",
+            "port": 9222,
+            "request": "attach",
+            "type": "pwa-msedge",
+            "webRoot": "${workspaceFolder}/browser/src"
+        },
+        {
             "name": "browser",
             "type": "chrome",
             "request": "launch",

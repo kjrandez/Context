@@ -1,6 +1,8 @@
 import DataSet from "./dataset";
 import Host from "./host";
 import WebSocket from "ws";
+import fs from "fs";
+import http from "http";
 import Async from "async";
 import { Transaction } from "./entity";
 
@@ -33,3 +35,20 @@ server.on("connection", (ws) => {
         console.log("Disconnected");
     });
 });
+
+http.createServer(function (req, res) {
+    if (req.url != null) {
+        const path = req.url.slice(1);
+        console.log("Request");
+        console.log(path);
+        fs.readFile(path, function (err, data) {
+            if (err) {
+                res.writeHead(404);
+                res.end(JSON.stringify(err));
+                return;
+            }
+            res.writeHead(200);
+            res.end(data);
+        });
+    }
+}).listen(8086);

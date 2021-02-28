@@ -21,9 +21,17 @@ export interface Model<T extends Value> {
     value: T;
 }
 
+export type Stroke = {
+    width: number;
+    color: { r: number; g: number; b: number };
+    points: string;
+};
+
 export type PageEntry = { key: number; element: Proxy };
 export type PageValue = { entries: PageEntry[] };
 export type TextValue = { content: string };
+export type FileValue = { path: string; name: string };
+export type InkValue = { strokes: Stroke[] };
 
 export abstract class Proxyable {
     proxyableId: number | null = null;
