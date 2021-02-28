@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "electron",
+            "cwd": "${workspaceFolder}/shell-electron",
+            "request": "launch",
+            "runtimeArgs": ["start"],
+            "runtimeExecutable": "npm",
+            "skipFiles": ["<node_internals>/**"],
+            "type": "pwa-node"
+        },
+        {
             "name": "browser",
             "type": "chrome",
             "request": "launch",
