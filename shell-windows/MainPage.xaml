@@ -1,27 +1,31 @@
 ﻿<Page
-    x:Class="shell_windows.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:shell_windows"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Custom="using:Microsoft.UI.Xaml.Controls"
+    x:Class="shell_windows.MainPage"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    
-        
-        
-        <Grid>
-        <WebView x:Name="webView" Source="http://localhost:3000" ScriptNotify="webView_ScriptNotify" NavigationCompleted="webView_NavigationCompleted"/>
-        <Canvas x:Name="canvas">
+
+
+
+    <Grid>
+        <WebView  AllowDrop="True"
+          DragOver="grid_DragOver"
+        Drop="grid_Drop"   x:Name="webView" Source="http://localhost:3000" ScriptNotify="webView_ScriptNotify" NavigationCompleted="webView_NavigationCompleted"/>
+        <Canvas   x:Name="canvas" >
+            
             <InkCanvas x:Name="InkCanvas" Loaded="InkCanvas_Loaded"  Height="100" Margin="0,548,0,0" Width="100"/>
-            <InkToolbar x:Name="inkToolbar"
-          VerticalAlignment="Top"
-          TargetInkCanvas="{x:Bind InkCanvas}" />
+            <Rectangle AllowDrop="True"
+          DragOver="grid_DragOver"
+        Drop="grid_Drop"  Fill="Transparent" HorizontalAlignment="Left" Height="100" Margin="609,642,0,0" Stroke="Black" VerticalAlignment="Top" Width="100"/>
         </Canvas>
     </Grid>
-    
-        
 
-    
+
+
+
 </Page>

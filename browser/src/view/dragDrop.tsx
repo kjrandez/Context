@@ -1,5 +1,6 @@
 import React, { ReactElement, Component } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { NativeTypes } from "react-dnd-html5-backend";
 import { Store } from "../store";
 
 interface DragProps {
@@ -63,7 +64,7 @@ function DragNodeHook(props: DragNodeHookProps): ReactElement {
 
 export function DropNode(props: DropProps): ReactElement {
     const [{ isOver }, drop] = useDrop({
-        accept: "node",
+        accept: ["node", NativeTypes.FILE, NativeTypes.URL, NativeTypes.TEXT],
         collect: (monitor) => ({
             isOver: monitor.isOver({ shallow: true })
         }),

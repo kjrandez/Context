@@ -1,3 +1,4 @@
 shell-windows/bin/
 shell-windows/obj/
 *.suo
+shell-electron/node_modules/

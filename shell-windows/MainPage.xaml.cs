@@ -15,6 +15,9 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.ApplicationModel.DataTransfer.DragDrop;
+using Windows.ApplicationModel.DataTransfer.DragDrop.Core;
+using Windows.ApplicationModel.DataTransfer;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -35,6 +38,8 @@ namespace shell_windows
         public StrokeColor color;
         public string points;
     }
+
+    
 
     public sealed partial class MainPage : Page
     {
@@ -132,7 +137,6 @@ namespace shell_windows
 
         private async void webView_NavigationCompleted(WebView sender, WebViewNavigationCompletedEventArgs args)
         {
-            //await this.webView.InvokeScriptAsync("testFun", new string[] {"haha"});
         }
 
         private void populate(string message)
@@ -167,15 +171,15 @@ namespace shell_windows
                 }
                 else if (parts.Length > 0 && parts[0] == "moveCanvas")
                 {
-                    this.InkCanvas.Visibility = Visibility.Visible;
+                   this.InkCanvas.Visibility = Visibility.Visible;
 
                     double top = Convert.ToDouble(parts[1]);
                     double left = Convert.ToDouble(parts[2]);
                     double width = Convert.ToDouble(parts[3]);
                     double height = Convert.ToDouble(parts[4]);
-                    this.InkCanvas.Width = width;
-                    this.InkCanvas.Height = height;
-                    this.InkCanvas.Margin = new Thickness(left, top, left + width, top + height);
+                  this.InkCanvas.Width = width;
+                  this.InkCanvas.Height = height;
+                   this.InkCanvas.Margin = new Thickness(left, top, left + width, top + height);
                 }
             }
         }
@@ -183,6 +187,17 @@ namespace shell_windows
         private void InkCanvas_Loaded(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void grid_Drop(object sender, DragEventArgs e)
+        {
+            Debug.WriteLine("dropped " + e.ToString());
+        }
+
+        private void grid_DragOver(object sender, DragEventArgs e)
+        {
+            Debug.WriteLine("over");
+            e.AcceptedOperation = DataPackageOperation.Copy;
         }
     }
 }
