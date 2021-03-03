@@ -60,6 +60,20 @@ namespace shell_windows
 
             this.InkCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
             this.InkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
+
+            //  DispatcherTimer setup
+            var dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += dispatcherTimer_Tick;
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            dispatcherTimer.Start();
+        }
+
+        private void dispatcherTimer_Tick(object sender, object e)
+        {
+            if (this.Rect.Visibility == Visibility.Visible)
+                this.Rect.Visibility = Visibility.Collapsed;
+            else
+                this.Rect.Visibility = Visibility.Visible;
         }
 
         private string encodedStroke(InkStroke stroke)

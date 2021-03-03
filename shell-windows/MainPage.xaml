@@ -13,13 +13,11 @@
 
 
     <Grid>
-        <WebView  AllowDrop="True"
-          DragOver="grid_DragOver"
-        Drop="grid_Drop"   x:Name="webView" Source="http://localhost:3000" ScriptNotify="webView_ScriptNotify" NavigationCompleted="webView_NavigationCompleted"/>
+        <WebView x:Name="webView" Source="http://localhost:3000" ScriptNotify="webView_ScriptNotify" NavigationCompleted="webView_NavigationCompleted"/>
         <Canvas   x:Name="canvas" >
             
             <InkCanvas x:Name="InkCanvas" Loaded="InkCanvas_Loaded"  Height="100" Margin="0,548,0,0" Width="100"/>
-            <Rectangle AllowDrop="True"
+            <Rectangle x:Name="Rect" AllowDrop="True"
           DragOver="grid_DragOver"
         Drop="grid_Drop"  Fill="Transparent" HorizontalAlignment="Left" Height="100" Margin="609,642,0,0" Stroke="Black" VerticalAlignment="Top" Width="100"/>
         </Canvas>
